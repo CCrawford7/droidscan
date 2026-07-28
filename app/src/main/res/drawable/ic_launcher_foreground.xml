@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Radar circle -->
+    <path
+        android:fillColor="#FF4CAF50"
+        android:pathData="M54,28c-14.36,0-26,11.64-26,26s11.64,26,26,26s26-11.64,26-26S68.36,28,54,28zM54,74c-11.05,0-20-8.95-20-20s8.95-20,20-20s20,8.95,20,20S65.05,74,54,74z"/>
+    <!-- Inner circle -->
+    <path
+        android:fillColor="#FF0D1117"
+        android:pathData="M54,38c-8.84,0-16,7.16-16,16s7.16,16,16,16s16-7.16,16-16S62.84,38,54,38z"/>
+    <!-- Center dot -->
+    <path
+        android:fillColor="#FF4CAF50"
+        android:pathData="M54,48c-3.31,0-6,2.69-6,6s2.69,6,6,6s6-2.69,6-6S57.31,48,54,48z"/>
+</vector>

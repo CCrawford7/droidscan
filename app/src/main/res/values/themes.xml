@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Droidscan" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">#FF0D1117</item>
+        <item name="android:navigationBarColor">#FF0D1117</item>
+        <item name="android:windowBackground">#FF0D1117</item>
+    </style>
+    <color name="background">#FF0D1117</color>
+    <color name="textPrimary">#FFC9D1D9</color>
+    <color name="textSecondary">#FF8B949E</color>
+    <color name="accentGreen">#FF4CAF50</color>
+    <color name="accentYellow">#FFFFC107</color>
+    <color name="accentRed">#FFF44336</color>
+    <color name="accentBlue">#FF58A6FF</color>
+</resources>

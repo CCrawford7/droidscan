@@ -1,0 +1,238 @@
+{
+  "metrics": [
+    {
+      "id": "rsrp",
+      "label": "RSRP",
+      "section": "radio",
+      "whatItMeasures": "Reference Signal Received Power — the strength of the cellular signal from the tower to your phone.",
+      "currentValueContext": "Measured in dBm (decibel-milliwatts). Higher (less negative) = stronger signal.",
+      "healthyRange": "-80 dBm to -100 dBm is good. Below -120 dBm is very weak.",
+      "commonCauses": "Thick walls, basement, distance from tower, building materials, network congestion."
+    },
+    {
+      "id": "rsrq",
+      "label": "RSRQ",
+      "section": "radio",
+      "whatItMeasures": "Reference Signal Received Quality — the quality of the received signal, factoring in interference and noise.",
+      "currentValueContext": "Measured in dB. Higher (less negative) = better quality.",
+      "healthyRange": "-5 dB to -10 dB is good. Below -15 dB indicates significant interference.",
+      "commonCauses": "Network congestion, interference from other cell towers, physical obstructions causing signal reflections."
+    },
+    {
+      "id": "sinr",
+      "label": "SINR",
+      "section": "radio",
+      "whatItMeasures": "Signal to Interference plus Noise Ratio — how clean your signal is versus background noise and interference.",
+      "currentValueContext": "Measured in dB. Higher = cleaner signal. This is the best indicator of actual data performance.",
+      "healthyRange": "13 dB+ is excellent. 5-13 dB is good. Below 5 dB means poor conditions.",
+      "commonCauses": "Edge of cell coverage, interference from other towers, building materials, many users on the same tower."
+    },
+    {
+      "id": "activeBands",
+      "label": "Active Band",
+      "section": "radio",
+      "whatItMeasures": "The specific frequency band your phone is currently connected to for cellular service.",
+      "currentValueContext": "Bands are numbered — n71 is low-band 5G (better range), n78 is mid-band 5G (faster speeds), B41 is mid-band 4G LTE.",
+      "healthyRange": "Any connected band is normal. Some bands are faster but shorter range.",
+      "commonCauses": "Your carrier determines which bands are available in your area. Phone switches bands automatically based on signal and congestion."
+    },
+    {
+      "id": "imsRegistered",
+      "label": "IMS Registration",
+      "section": "radio",
+      "whatItMeasures": "IP Multimedia Subsystem registration — whether your phone can use VoLTE (voice over 4G/5G) and WiFi Calling.",
+      "currentValueContext": "When registered, calls use data networks. When not registered, calls fall back to older 2G/3G networks.",
+      "healthyRange": "Registered = good. Not registered = calls may drop or fail.",
+      "commonCauses": "Carrier provisioning issue, incorrect APN settings, roaming on a network that doesn't support your IMS profile, software bug."
+    },
+    {
+      "id": "dataNetworkType",
+      "label": "Network Type",
+      "section": "radio",
+      "whatItMeasures": "The generation and type of cellular network your phone is currently using for data.",
+      "currentValueContext": "NR = 5G, LTE = 4G, HSPA = 3G, EDGE/GPRS = 2G. Faster generations deliver better speeds.",
+      "healthyRange": "NR or LTE is normal for modern smartphones.",
+      "commonCauses": "Network coverage area, carrier settings, phone capabilities, network congestion, data saver mode."
+    },
+    {
+      "id": "isRoaming",
+      "label": "Roaming",
+      "section": "radio",
+      "whatItMeasures": "Whether your phone is connected to a network other than your primary carrier's home network.",
+      "currentValueContext": "On = you're using another carrier's network. May incur extra charges depending on your plan.",
+      "healthyRange": "Off is normal when not travelling. On is expected when abroad or in areas without your carrier's coverage.",
+      "commonCauses": "International travel, remote area with no home carrier coverage, network outage on your carrier."
+    },
+    {
+      "id": "ecid",
+      "label": "Cell ID (eCID)",
+      "section": "radio",
+      "whatItMeasures": "A unique identifier for the specific cell tower sector your phone is connected to.",
+      "currentValueContext": "This number identifies which physical tower you're connected to. Useful for tracking coverage patterns.",
+      "healthyRange": "Any value is normal. Frequent changes mean you're moving or the network is handing you off between towers.",
+      "commonCauses": "Walking or driving between cell coverage areas, network load balancing."
+    },
+    {
+      "id": "batteryLevel",
+      "label": "Battery Level",
+      "section": "power",
+      "whatItMeasures": "The current charge level of your phone's battery as a percentage of its capacity.",
+      "currentValueContext": "0% = empty, 100% = full charge. Below 20% most phones enter low-power mode.",
+      "healthyRange": "20-100% is normal operating range.",
+      "commonCauses": "Usage patterns, screen brightness, background processes, cellular signal strength (weak signal drains more), battery age."
+    },
+    {
+      "id": "batteryHealth",
+      "label": "Battery Health",
+      "section": "power",
+      "whatItMeasures": "The physical condition of your battery as reported by the built-in fuel gauge chip.",
+      "currentValueContext": "Good = normal. Overheat = too hot, may limit charging. Dead = needs replacement. Cold = below operating temperature.",
+      "healthyRange": "Good is the only normal reading for a healthy battery.",
+      "commonCauses": "Battery age (lithium batteries degrade after 2-3 years), physical damage, extreme temperatures, manufacturing defect."
+    },
+    {
+      "id": "chargeRate",
+      "label": "Charge Rate",
+      "section": "power",
+      "whatItMeasures": "How fast your battery is currently charging or discharging, in microamps.",
+      "currentValueContext": "Positive = charging. Negative = discharging. Zero = not connected to power and not draining.",
+      "healthyRange": "Charging: 1,000,000-3,000,000 µA is typical. Discharging: -100,000 to -500,000 µA is normal screen-on drain.",
+      "commonCauses": "Charger speed, cable quality, battery temperature (charging slows when hot), background activity."
+    },
+    {
+      "id": "perProcessPower",
+      "label": "Power Consumption by App",
+      "section": "power",
+      "whatItMeasures": "Estimated power draw attributed to each running app and system process.",
+      "currentValueContext": "Higher values mean that app is draining more battery. Based on estimated power profiles, not direct measurement.",
+      "healthyRange": "Screen usually consumes 30-50% of total. Background apps should be under 5% each.",
+      "commonCauses": "App actively doing work, background sync, location services, poor network causing retries, buggy app keeping CPU awake."
+    },
+    {
+      "id": "cpuLoad",
+      "label": "CPU Load",
+      "section": "processes",
+      "whatItMeasures": "How busy each CPU core is, as a percentage of its maximum capacity.",
+      "currentValueContext": "0.0 = idle. 1.0 = completely busy. Most phones have 8 cores (4 efficiency + 4 performance).",
+      "healthyRange": "Idle: under 0.1 per core. Normal usage: 0.2-0.5. Heavy gaming/editing: 0.8-1.0.",
+      "commonCauses": "Running apps, background processes, system updates, malware, thermal throttling reducing max speed."
+    },
+    {
+      "id": "memoryPressure",
+      "label": "Memory Pressure",
+      "section": "processes",
+      "whatItMeasures": "How constrained the system is by available RAM. High pressure means apps will be killed to free memory.",
+      "currentValueContext": "Normal = plenty of RAM. Moderate = system is starting to reclaim memory. Critical = apps are being killed.",
+      "healthyRange": "Normal is best. Brief Moderate is OK. Critical means you should close some apps.",
+      "commonCauses": "Too many apps running, memory leak in an app, very large app (game or editor), outdated phone with limited RAM."
+    },
+    {
+      "id": "storageUsed",
+      "label": "Storage Used",
+      "section": "storage",
+      "whatItMeasures": "How much of your internal storage is occupied by apps, media, system files, and cached data.",
+      "currentValueContext": "Shown as used vs total. Also broken down by system vs user data for clarity.",
+      "healthyRange": "Under 80% full is comfortable. Above 90% the system may slow down. Above 95% you'll get warnings.",
+      "commonCauses": "Photos and videos, large games, cached streaming data, downloaded content, system updates."
+    },
+    {
+      "id": "simProvisioning",
+      "label": "SIM Provisioning",
+      "section": "sim",
+      "whatItMeasures": "Whether your SIM or eSIM is activated and ready for service on your carrier's network.",
+      "currentValueContext": "Provisioned = ready to use. Not provisioned = SIM may not be activated with your carrier.",
+      "healthyRange": "Provisioned is the only normal state for active service.",
+      "commonCauses": "New SIM not yet activated, eSIM download incomplete, carrier provisioning delay, SIM card failure."
+    },
+    {
+      "id": "esimProfiles",
+      "label": "eSIM Profiles",
+      "section": "sim",
+      "whatItMeasures": "The number of eSIM profiles installed on your device. Each profile represents a carrier subscription.",
+      "currentValueContext": "One profile per active eSIM line. Multiple profiles can be installed but only two (usually) active at once.",
+      "healthyRange": "1-2 profiles is typical. Power users may have 3-5 for travel.",
+      "commonCauses": "Adding travel eSIMs, switching carriers, work/personal dual-SIM setup, left old profiles installed."
+    },
+    {
+      "id": "ipAddress",
+      "label": "IP Address",
+      "section": "network",
+      "whatItMeasures": "Your device's current IP address on the network — unique identifier for sending and receiving data.",
+      "currentValueContext": "IPv4 shown as four numbers separated by dots. IPv6 shown as hexadecimal. Multiple addresses means multiple network interfaces.",
+      "healthyRange": "Any valid IP address is normal. If no IP is shown, you're not connected to any network.",
+      "commonCauses": "DHCP assignment from router, carrier-assigned IP for mobile data, VPN assigning a new IP, IP address conflict."
+    },
+    {
+      "id": "activeNetwork",
+      "label": "Active Network",
+      "section": "network",
+      "whatItMeasures": "Which network interface your phone is currently using for internet traffic.",
+      "currentValueContext": "WiFi = connected to a wireless network. Mobile = using cellular data. VPN = all traffic going through VPN tunnel.",
+      "healthyRange": "Any is normal. WiFi is usually faster and uses less battery than mobile data.",
+      "commonCauses": "WiFi range, mobile data enabled, VPN app active, airplane mode, hotspot/tethering active."
+    },
+    {
+      "id": "temperature",
+      "label": "Temperature",
+      "section": "thermal",
+      "whatItMeasures": "The temperature of various components inside your phone — CPU, battery, modem, and others.",
+      "currentValueContext": "Multiple zones monitored independently. The hottest zone typically determines whether the phone throttles.",
+      "healthyRange": "Under 40°C is cool. 40-55°C is warm. Above 55°C may trigger throttling to protect components.",
+      "commonCauses": "Heavy gaming or video, direct sunlight, fast charging, poor case ventilation, faulty battery."
+    },
+    {
+      "id": "throttling",
+      "label": "Throttling",
+      "section": "thermal",
+      "whatItMeasures": "Whether the system is intentionally reducing performance to lower temperature and protect components.",
+      "currentValueContext": "Active = phone is hot and performance is being reduced. Inactive = everything is normal.",
+      "healthyRange": "Inactive is ideal. Brief throttling during heavy use is normal. Constant throttling suggests a problem.",
+      "commonCauses": "High ambient temperature, sustained heavy load (gaming, video recording), blocked ventilation, case trapping heat."
+    },
+    {
+      "id": "kernelVersion",
+      "label": "Kernel Version",
+      "section": "system",
+      "whatItMeasures": "The version of the Linux kernel your Android OS is running on — the core bridge between software and hardware.",
+      "currentValueContext": "This is the version string reported by the OS. Newer kernels have better security and hardware support.",
+      "healthyRange": "Any officially supported version from your device manufacturer is normal.",
+      "commonCauses": "Android OS updates, custom ROM installation, carrier-mandated kernel versions."
+    },
+    {
+      "id": "selinuxStatus",
+      "label": "SELinux Status",
+      "section": "system",
+      "whatItMeasures": "Security-Enhanced Linux — Android's mandatory access control system. Enforced means security policies are active.",
+      "currentValueContext": "Enforced = security policies active. Permissive = policies log but don't block (less secure).",
+      "healthyRange": "Enforced is normal for production devices.",
+      "commonCauses": "Custom ROMs may set permissive for compatibility. Some rooting methods disable SELinux enforcement."
+    },
+    {
+      "id": "uptime",
+      "label": "Uptime",
+      "section": "system",
+      "whatItMeasures": "How long it's been since your phone was last restarted or powered on.",
+      "currentValueContext": "Longer uptime means the phone hasn't had a fresh start recently. Good for stability, but occasional reboots help clear accumulated state.",
+      "healthyRange": "Days to weeks is normal. Months without reboot may indicate OS updates are being skipped.",
+      "commonCauses": "No recent restart, OS update pending, good stability, or significant uptime (user habit)."
+    },
+    {
+      "id": "wakelocks",
+      "label": "Kernel Wakelocks",
+      "section": "processes",
+      "whatItMeasures": "System-level locks that prevent the phone from entering deep sleep. Each wakelock keeps some part of the hardware awake.",
+      "currentValueContext": "Power Mode only. Each entry shows what's holding the phone awake and for how long. More wakelocks = more battery drain.",
+      "healthyRange": "A few seconds per minute is normal. Multiple minutes of wake time means something is preventing sleep.",
+      "commonCauses": "Apps with background services, push notifications, music playback, navigation, buggy apps not releasing wakelocks."
+    },
+    {
+      "id": "hotspotOverhead",
+      "label": "Hotspot Power Overhead",
+      "section": "power",
+      "whatItMeasures": "The additional power drain caused by using your phone as a WiFi hotspot or mobile tethering.",
+      "currentValueContext": "Shown as estimated additional draw compared to normal usage without hotspot active.",
+      "healthyRange": "Minimal when idle. Adds significant drain when actively passing data to connected devices.",
+      "commonCauses": "Connected devices actively using internet, background sync on connected devices, poor cellular signal (hotspot uses more power to maintain connection)."
+    }
+  ]
+}
