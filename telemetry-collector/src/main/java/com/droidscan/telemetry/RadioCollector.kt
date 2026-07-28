@@ -20,7 +20,13 @@ class RadioCollector {
     fun read(): RadioSnapshot {
         val manager = tm ?: return RadioSnapshot()
 
-        val cellInfoList = manager.allCellInfo
+        val cellInfoList = try {
+            manager.allCellInfo
+        } catch (e: SecurityException) {
+            null
+        } catch (e: Exception) {
+            null
+        }
         val activeCell = cellInfoList?.firstOrNull { it.isRegistered }
 
         val rsrp: Int? = activeCell?.let { cell ->
@@ -98,9 +104,9 @@ class RadioCollector {
             cellId = cellId,
             tac = tac,
             imsRegistered = imsRegistered,
-            dataNetworkType = manager.dataNetworkType.toString(),
-            isRoaming = manager.isNetworkRoaming,
-            operatorName = manager.networkOperatorName?.takeIf { it.isNotEmpty() },
+            dataNetworkType = try { manager.dataNetworkType.toString() } catch (_: Exception) { null },
+            isRoaming = try { manager.isNetworkRoaming } catch (_: Exception) { null },
+            operatorName = try { manager.networkOperatorName?.takeIf { it.isNotEmpty() } } catch (_: Exception) { null },
             epdgTunnelActive = null // requires deeper dumpsys access
         )
     }

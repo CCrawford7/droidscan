@@ -21,28 +21,19 @@ class ShizukuDetector {
 
     fun initialize() {
         available = try {
-            val shizukuClass = Class.forName("moe.shizuku.api.Shizuku")
-            val pingMethod = shizukuClass.getMethod("ping")
-            val result = pingMethod.invoke(null) as? Int ?: -1
-            val isAvail = result >= 0
-
-            if (isAvail) {
-                Log.i("ShizukuDetector", "Shizuku API detected — Power Mode available (ping=$result)")
-            } else {
-                Log.i("ShizukuDetector", "Shizuku ping returned $result")
-            }
-            isAvail
+            // Check if Shizuku runtime classes are present on the classpath.
+            // The actual service connection happens asynchronously; we just
+            // verify the infrastructure exists. Collectors that need Shizuku
+            // will fall back gracefully if the service isn't connected.
+            Class.forName("rikka.shizuku.Shizuku")
+            Class.forName("rikka.shizuku.ShizukuProvider")
+            Log.i("ShizukuDetector", "Shizuku API 13+ runtime detected — Power Mode may be available")
+            true
         } catch (e: ClassNotFoundException) {
             Log.i("ShizukuDetector", "Shizuku not installed — Standard Mode")
             false
-        } catch (e: NoSuchMethodException) {
-            Log.w("ShizukuDetector", "Shizuku API version mismatch: ${e.message}")
-            false
-        } catch (e: SecurityException) {
-            Log.w("ShizukuDetector", "Shizuku permission denied: ${e.message}")
-            false
         } catch (e: Exception) {
-            Log.w("ShizukuDetector", "Shizuku check failed: ${e.message}")
+            Log.w("ShizukuDetector", "Shizuku check error: ${e.message ?: e.javaClass.simpleName}")
             false
         }
         checked = true

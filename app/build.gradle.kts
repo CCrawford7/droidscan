@@ -54,7 +54,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
-    compileOnly(libs.shizuku.api)
     implementation(libs.shizuku.provider)
 
     debugImplementation(libs.androidx.ui.tooling)
