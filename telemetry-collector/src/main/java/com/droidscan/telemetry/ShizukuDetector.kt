@@ -1,38 +1,53 @@
 package com.droidscan.telemetry
 
-// ──────────────────────────────────────────────
-// Shizuku availability detector.
-// In v1.0, this wraps the Shizuku API check.
-// When Shizuku is not installed, returns false
-// and all collectors fall back to Standard Mode.
-// ──────────────────────────────────────────────
+import android.util.Log
 
+/**
+ * Shizuku availability detector.
+ *
+ * Uses reflection to check whether Shizuku API 13+ is available.
+ * This avoids compile-time linkage issues — Shizuku is purely optional.
+ * When not installed (or permission denied), [isAvailable] returns false
+ * and all collectors fall back to Standard Mode.
+ *
+ * Power Mode (Shizuku) adds:
+ *   - Kernel-level thermal zone readings (via sysfs)
+ *   - Wakeup source / wakelock data from debugfs
+ *   - Future: RIL-level telephony detail via dumpsys
+ */
 class ShizukuDetector {
     private var available = false
     private var checked = false
 
-    /**
-     * Call once at app startup to detect Shizuku.
-     * In production this calls ShizukuProvider.ping().
-     * Returns true if Shizuku API 13+ is available and permission granted.
-     */
     fun initialize() {
-        // This will use ShizukuProvider.ping() when the dependency is linked.
-        // For now, detection is a compile-time constant — real integration
-        // happens when dev.rikka.shizuku:api is available at runtime.
         available = try {
-            // ShizukuProvider.ping() would go here
+            val shizukuClass = Class.forName("moe.shizuku.api.Shizuku")
+            val pingMethod = shizukuClass.getMethod("ping")
+            val result = pingMethod.invoke(null) as? Int ?: -1
+            val isAvail = result >= 0
+
+            if (isAvail) {
+                Log.i("ShizukuDetector", "Shizuku API detected — Power Mode available (ping=$result)")
+            } else {
+                Log.i("ShizukuDetector", "Shizuku ping returned $result")
+            }
+            isAvail
+        } catch (e: ClassNotFoundException) {
+            Log.i("ShizukuDetector", "Shizuku not installed — Standard Mode")
             false
-        } catch (_: NoClassDefFoundError) {
+        } catch (e: NoSuchMethodException) {
+            Log.w("ShizukuDetector", "Shizuku API version mismatch: ${e.message}")
+            false
+        } catch (e: SecurityException) {
+            Log.w("ShizukuDetector", "Shizuku permission denied: ${e.message}")
+            false
+        } catch (e: Exception) {
+            Log.w("ShizukuDetector", "Shizuku check failed: ${e.message}")
             false
         }
         checked = true
     }
 
-    /**
-     * Force-set availability (useful for testing or when Shizuku is
-     * detected through alternative means like Wireless ADB check).
-     */
     fun setAvailable(available: Boolean) {
         this.available = available
         this.checked = true
