@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.droidscan.DroidscanApp
 import com.droidscan.shared.core.MetricSnapshot
+import com.droidscan.ui.theme.DroidscanTheme
 import kotlinx.coroutines.flow.Flow
 
 class MainActivity : ComponentActivity() {
@@ -21,33 +22,30 @@ class MainActivity : ComponentActivity() {
     private val requestPermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { _ ->
-        // Permission results handled — re-run telemetry
         telemetryFlow = DroidscanApp.instance.telemetryCollector.observeAll()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         requestRequiredPermissions()
-
         telemetryFlow = DroidscanApp.instance.telemetryCollector.observeAll()
 
         setContent {
-            Surface(modifier = Modifier.fillMaxSize()) {
-                DashboardScreen(telemetryFlow = telemetryFlow)
+            DroidscanTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    DashboardScreen(telemetryFlow = telemetryFlow)
+                }
             }
         }
     }
 
     private fun requestRequiredPermissions() {
         val permissions = mutableListOf<String>()
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
             != PackageManager.PERMISSION_GRANTED
         ) {
             permissions.add(Manifest.permission.READ_PHONE_STATE)
         }
-
         if (permissions.isNotEmpty()) {
             requestPermissionsLauncher.launch(permissions.toTypedArray())
         }
