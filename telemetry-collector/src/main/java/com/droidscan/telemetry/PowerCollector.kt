@@ -1,10 +1,14 @@
 package com.droidscan.telemetry
 
+import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.PowerManager
+import android.telephony.SubscriptionManager
+import android.util.Log
 import com.droidscan.shared.core.PowerSnapshot
 
 class PowerCollector {
@@ -24,13 +28,35 @@ class PowerCollector {
         val level = manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         val chargeRate = manager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW).toInt()
 
-        // Health, temperature, and charging status from sticky intent
         val (health, tempC, isCharging) = ctx?.let { readBatteryIntent(it) }
             ?: Triple(null, null, false)
 
         val timeRemaining = if (isCharging) {
-            manager.computeChargeTimeRemaining()
+            try { manager.computeChargeTimeRemaining() } catch (_: Exception) { null }
         } else null
+
+        // Detect eSIM presence via subscription manager
+        val esimActive = ctx?.let {
+            try {
+                val subMgr = it.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as? SubscriptionManager
+                subMgr?.activeSubscriptionInfoList?.any { sub -> sub.isEmbedded } ?: false
+            } catch (_: Exception) { false }
+        } ?: false
+
+        // Detect Bluetooth active
+        val btActive = try {
+            val bt = BluetoothAdapter.getDefaultAdapter()
+            bt?.isEnabled ?: false
+        } catch (_: Exception) { false }
+
+        // Detect hotspot active
+        val hotspotActive = ctx?.let {
+            try {
+                val wm = it.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+                val method = wm?.javaClass?.getMethod("isWifiApEnabled")
+                method?.invoke(wm) as? Boolean ?: false
+            } catch (_: Exception) { false }
+        } ?: false
 
         return PowerSnapshot(
             batteryLevel = if (level in 0..100) level else null,
@@ -39,10 +65,10 @@ class PowerCollector {
             chargeRateMicroamps = chargeRate,
             estimatedTimeRemainingMs = timeRemaining,
             currentDrainMicroamps = if (!isCharging && chargeRate < 0) -chargeRate else null,
-            perProcessPower = emptyMap(), // requires PowerProfile access
-            esimActive = false,           // determined by sim status
-            bluetoothActive = false,      // determined by BT adapter state
-            hotspotActive = false          // determined by network config
+            perProcessPower = emptyMap(),
+            esimActive = esimActive,
+            bluetoothActive = btActive,
+            hotspotActive = hotspotActive
         )
     }
 
@@ -55,7 +81,8 @@ class PowerCollector {
             val charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                     status == BatteryManager.BATTERY_STATUS_FULL
             Triple(health, temp, charging)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w("PowerCollector", "Failed to read battery intent: ${e.message}")
             Triple(null, null, false)
         }
     }

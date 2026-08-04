@@ -40,20 +40,38 @@ object MemoryThresholds {
     val pressure = ThresholdRange(greenUpper = 0.5, yellowUpper = 0.8) // 0..1 scale
 }
 
-fun evaluateStatus(value: Double, range: ThresholdRange): StatusTier =
-    when {
-        value <= range.greenUpper -> StatusTier.GREEN
-        value <= range.yellowUpper -> StatusTier.YELLOW
-        else -> StatusTier.RED
+/**
+ * Evaluates a metric value against a [ThresholdRange].
+ *
+ * Two directional semantics exist, because a "green zone" is defined by the
+ * threshold boundaries but the metric may be better when HIGHER *or* LOWER.
+ *
+ * Default ([inverted] = false): **lower values are better** (e.g. temperature,
+ * memory pressure). A value is GREEN when it is *at or below* [ThresholdRange.greenUpper],
+ * YELLOW when *at or below* [ThresholdRange.yellowUpper], otherwise RED.
+ *
+ * Inverted ([inverted] = true): **higher values are better** (e.g. RSRP, SINR,
+ * battery level). A value is GREEN when it is *at or above* [ThresholdRange.greenUpper],
+ * YELLOW when *at or above* [ThresholdRange.yellowUpper], otherwise RED.
+ */
+fun evaluateStatus(value: Double, range: ThresholdRange, inverted: Boolean = false): StatusTier =
+    if (inverted) {
+        when {
+            value >= range.greenUpper -> StatusTier.GREEN
+            value >= range.yellowUpper -> StatusTier.YELLOW
+            else -> StatusTier.RED
+        }
+    } else {
+        when {
+            value <= range.greenUpper -> StatusTier.GREEN
+            value <= range.yellowUpper -> StatusTier.YELLOW
+            else -> StatusTier.RED
+        }
     }
 
-// Inverted: higher values are worse (e.g. temperature)
+/** Alias for [evaluateStatus] with [inverted] = true — kept for call-site clarity. */
 fun evaluateStatusInverted(value: Double, range: ThresholdRange): StatusTier =
-    when {
-        value <= range.greenUpper -> StatusTier.GREEN
-        value <= range.yellowUpper -> StatusTier.YELLOW
-        else -> StatusTier.RED
-    }
+    evaluateStatus(value, range, inverted = true)
 
 fun StatusTier.toHexColor(): Long = when (this) {
     StatusTier.GREEN -> 0xFF4CAF50

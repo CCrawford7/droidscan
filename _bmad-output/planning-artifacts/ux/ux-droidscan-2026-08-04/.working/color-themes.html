@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>droidscan — Color Theme Board</title>
+<!--
+  droidscan v1 — color theme exploration board
+  Five palette registers for the metrics dashboard. Pick a palette, not a product.
+  Every variation documents its hexes inline so a chosen theme can be lifted directly.
+  All variants are dark-only (v1 scope). System font stack, no JS, no network.
+-->
+<style>
+  :root { --bg:#090B10; --panel:#10131B; --panel-2:#161A24; --rule:#232938; --ink:#E8EDF5; --ink-2:#8A94A8; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--ink); font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding:32px 20px 64px; }
+  .page { max-width:1280px; margin:0 auto; }
+  h1 { font-size:22px; font-weight:700; letter-spacing:-0.01em; }
+  .lede { color:var(--ink-2); font-size:14px; margin-top:6px; line-height:1.5; }
+  .rule { border:0; border-top:1px solid var(--rule); margin:20px 0 28px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(360px,1fr)); gap:20px; }
+  .panel { background:var(--panel); border:1px solid var(--rule); border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:16px; }
+  .panel h2 { font-size:16px; font-weight:700; }
+  .panel .register { font-size:12.5px; color:var(--ink-2); line-height:1.45; margin-top:2px; }
+  .panel .direction { display:inline-block; font-size:11px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-2); border:1px solid var(--rule); border-radius:99px; padding:3px 10px; margin-top:8px; }
+  .tokens { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { display:flex; align-items:center; gap:6px; font-family:ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size:10.5px; background:var(--panel-2); border:1px solid var(--rule); border-radius:8px; padding:4px 8px; }
+  .chip .swatch { width:12px; height:12px; border-radius:3px; border:1px solid rgba(255,255,255,0.12); }
+  .chip .role { color:var(--ink-2); }
+  .chip .hex { color:var(--ink); }
+  .snippet { border-radius:12px; padding:14px; border:1px solid var(--rule); }
+  .snippet .sn-header { display:flex; justify-content:space-between; align-items:center; font-size:11px; }
+  .snippet .sn-title { font-weight:600; letter-spacing:0.03em; text-transform:uppercase; }
+  .snippet .sn-live { font-family:ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size:11px; }
+  .snippet .sn-section { margin-top:12px; }
+  .snippet .sn-sec-label { font-family:ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; }
+  .snippet .sn-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid; }
+  .snippet .sn-row:last-child { border-bottom:0; }
+  .snippet .sn-label { font-size:12.5px; }
+  .snippet .sn-val { font-family:ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size:12.5px; font-weight:600; }
+  .snippet .sn-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; }
+  .snippet .sn-meter { margin-top:10px; }
+  .snippet .sn-meter .m-label { display:flex; justify-content:space-between; font-size:11px; }
+  .snippet .sn-meter .m-track { height:6px; border-radius:3px; margin-top:4px; overflow:hidden; }
+  .snippet .sn-meter .m-fill { height:100%; border-radius:3px; }
+  .foot { color:var(--ink-2); font-size:12.5px; margin-top:24px; line-height:1.6; }
+  .foot code { font-family:ui-monospace, "SF Mono", Menlo, Consolas, monospace; background:var(--panel-2); border:1px solid var(--rule); border-radius:5px; padding:1px 6px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>droidscan — color theme board</h1>
+  <p class="lede">Five palette registers, all dark-only (v1 scope). Each maps to one of the three candidate directions. The snippets below are the Overview hero — pick a register, not a product.</p>
+  <hr class="rule">
+
+  <div class="grid">
+
+    <!-- ═══════════════ THEME 1 · TERMINAL PURIST ═══════════════ -->
+    <!--
+      bg #0D1117 · surface #161B22 · raised #21262D · border #30363D
+      ink #E6EDF3 · ink2 #8B949E · accent #58A6FF · live #39D2C0
+      ok #3FB950 · warn #D29922 · crit #F85149
+      Register: the device screen IS a terminal. GitHub-dark, blue primary.
+    -->
+    <div class="panel">
+      <div>
+        <h2>Terminal Purist</h2>
+        <p class="register">The phone screen is a terminal emulator. Zero chrome, section rules, mono everything. Engineer comfort food.</p>
+        <span class="direction">Direction A · Terminal Purist</span>
+      </div>
+      <div class="tokens">
+        <span class="chip"><span class="swatch" style="background:#0D1117"></span><span class="role">bg</span><span class="hex">#0D1117</span></span>
+        <span class="chip"><span class="swatch" style="background:#161B22"></span><span class="role">surface</span><span class="hex">#161B22</span></span>
+        <span class="chip"><span class="swatch" style="background:#21262D"></span><span class="role">raised</span><span class="hex">#21262D</span></span>
+        <span class="chip"><span class="swatch" style="background:#30363D"></span><span class="role">border</span><span class="hex">#30363D</span></span>
+        <span class="chip"><span class="swatch" style="background:#E6EDF3"></span><span class="role">ink</span><span class="hex">#E6EDF3</span></span>
+        <span class="chip"><span class="swatch" style="background:#8B949E"></span><span class="role">ink2</span><span class="hex">#8B949E</span></span>
+        <span class="chip"><span class="swatch" style="background:#58A6FF"></span><span class="role">accent</span><span class="hex">#58A6FF</span></span>
+        <span class="chip"><span class="swatch" style="background:#3FB950"></span><span class="role">ok</span><span class="hex">#3FB950</span></span>
+        <span class="chip"><span class="swatch" style="background:#D29922"></span><span class="role">warn</span><span class="hex">#D29922</span></span>
+        <span class="chip"><span class="swatch" style="background:#F85149"></span><span class="role">crit</span><span class="hex">#F85149</span></span>
+        <span class="chip"><span class="swatch" style="background:#39D2C0"></span><span class="role">live</span><span class="hex">#39D2C0</span></span>
+      </div>
+      <div class="snippet" style="background:#0D1117;color:#E6EDF3">
+        <div class="sn-header">
+          <span class="sn-title" style="color:#58A6FF">── SIGNAL</span>
+          <span class="sn-live" style="color:#39D2C0">● live</span>
+        </div>
+        <div class="sn-section">
+          <div class="sn-row" style="border-color:#21262D">
+            <span class="sn-label" style="color:#8B949E">RSRP</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#D29922"></span><span style="color:#E6EDF3">−112 dBm</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#21262D">
+            <span class="sn-label" style="color:#8B949E">RSRQ</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#D29922"></span><span style="color:#E6EDF3">−14 dB</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#21262D">
+            <span class="sn-label" style="color:#8B949E">SINR</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#D29922"></span><span style="color:#E6EDF3">2 dB</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#21262D">
+            <span class="sn-label" style="color:#8B949E">IMS</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#F85149"></span><span style="color:#E6EDF3">NOT_REGISTERED</span></span>
+          </div>
+        </div>
+        <div class="sn-meter">
+          <div class="m-label"><span style="color:#8B949E">BATTERY</span><span style="color:#E6EDF3;font-family:ui-monospace,monospace">67%</span></div>
+          <div class="m-track" style="background:#21262D"><div class="m-fill" style="width:67%;background:#3FB950"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ THEME 2 · TERMINAL AMBER ═══════════════ -->
+    <!--
+      bg #0E0E0C · surface #171715 · raised #1F1F1C · border #2A2A26
+      ink #E8E4D8 · ink2 #9C968A · accent #FFB000 · live #C9B57C
+      ok #7FB069 · warn #E5A83D · crit #E4572E
+      Register: network hardware gear. CRT amber, industrial, mono soul.
+    -->
+    <div class="panel">
+      <div>
+        <h2>Terminal Amber</h2>
+        <p class="register">Network-hardware register — CRT amber phosphor warmth. Reads like the console of a real base station, not a phone app.</p>
+        <span class="direction">Direction A · Terminal Purist (variant)</span>
+      </div>
+      <div class="tokens">
+        <span class="chip"><span class="swatch" style="background:#0E0E0C"></span><span class="role">bg</span><span class="hex">#0E0E0C</span></span>
+        <span class="chip"><span class="swatch" style="background:#171715"></span><span class="role">surface</span><span class="hex">#171715</span></span>
+        <span class="chip"><span class="swatch" style="background:#1F1F1C"></span><span class="role">raised</span><span class="hex">#1F1F1C</span></span>
+        <span class="chip"><span class="swatch" style="background:#2A2A26"></span><span class="role">border</span><span class="hex">#2A2A26</span></span>
+        <span class="chip"><span class="swatch" style="background:#E8E4D8"></span><span class="role">ink</span><span class="hex">#E8E4D8</span></span>
+        <span class="chip"><span class="swatch" style="background:#9C968A"></span><span class="role">ink2</span><span class="hex">#9C968A</span></span>
+        <span class="chip"><span class="swatch" style="background:#FFB000"></span><span class="role">accent</span><span class="hex">#FFB000</span></span>
+        <span class="chip"><span class="swatch" style="background:#7FB069"></span><span class="role">ok</span><span class="hex">#7FB069</span></span>
+        <span class="chip"><span class="swatch" style="background:#E5A83D"></span><span class="role">warn</span><span class="hex">#E5A83D</span></span>
+        <span class="chip"><span class="swatch" style="background:#E4572E"></span><span class="role">crit</span><span class="hex">#E4572E</span></span>
+        <span class="chip"><span class="swatch" style="background:#C9B57C"></span><span class="role">live</span><span class="hex">#C9B57C</span></span>
+      </div>
+      <div class="snippet" style="background:#0E0E0C;color:#E8E4D8">
+        <div class="sn-header">
+          <span class="sn-title" style="color:#FFB000">── SIGNAL</span>
+          <span class="sn-live" style="color:#C9B57C">● live</span>
+        </div>
+        <div class="sn-section">
+          <div class="sn-row" style="border-color:#1F1F1C">
+            <span class="sn-label" style="color:#9C968A">RSRP</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#E5A83D"></span><span style="color:#E8E4D8">−112 dBm</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#1F1F1C">
+            <span class="sn-label" style="color:#9C968A">RSRQ</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#E5A83D"></span><span style="color:#E8E4D8">−14 dB</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#1F1F1C">
+            <span class="sn-label" style="color:#9C968A">SINR</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#E5A83D"></span><span style="color:#E8E4D8">2 dB</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#1F1F1C">
+            <span class="sn-label" style="color:#9C968A">IMS</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#E4572E"></span><span style="color:#E8E4D8">NOT_REGISTERED</span></span>
+          </div>
+        </div>
+        <div class="sn-meter">
+          <div class="m-label"><span style="color:#9C968A">BATTERY</span><span style="color:#E8E4D8;font-family:ui-monospace,monospace">67%</span></div>
+          <div class="m-track" style="background:#1F1F1C"><div class="m-fill" style="width:67%;background:#7FB069"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ THEME 3 · DIAGNOSTIC COCKPIT ═══════════════ -->
+    <!--
+      bg #0A0E16 · surface #111827 · raised #182236 · border #24304A
+      ink #E5EAF3 · ink2 #8B98B8 · accent #2993F3 · live #0FB5BA
+      ok #73BF69 · warn #E5A83E · crit #E24D42
+      Register: operations console. Grafana slate, tonal separation, amber on critical.
+    -->
+    <div class="panel">
+      <div>
+        <h2>Diagnostic Cockpit</h2>
+        <p class="register">Operations console — Grafana slate with real tonal depth. Surfaces lift by tone, status accents anchor card edges.</p>
+        <span class="direction">Direction B · Diagnostic Cockpit</span>
+      </div>
+      <div class="tokens">
+        <span class="chip"><span class="swatch" style="background:#0A0E16"></span><span class="role">bg</span><span class="hex">#0A0E16</span></span>
+        <span class="chip"><span class="swatch" style="background:#111827"></span><span class="role">surface</span><span class="hex">#111827</span></span>
+        <span class="chip"><span class="swatch" style="background:#182236"></span><span class="role">raised</span><span class="hex">#182236</span></span>
+        <span class="chip"><span class="swatch" style="background:#24304A"></span><span class="role">border</span><span class="hex">#24304A</span></span>
+        <span class="chip"><span class="swatch" style="background:#E5EAF3"></span><span class="role">ink</span><span class="hex">#E5EAF3</span></span>
+        <span class="chip"><span class="swatch" style="background:#8B98B8"></span><span class="role">ink2</span><span class="hex">#8B98B8</span></span>
+        <span class="chip"><span class="swatch" style="background:#2993F3"></span><span class="role">accent</span><span class="hex">#2993F3</span></span>
+        <span class="chip"><span class="swatch" style="background:#73BF69"></span><span class="role">ok</span><span class="hex">#73BF69</span></span>
+        <span class="chip"><span class="swatch" style="background:#E5A83E"></span><span class="role">warn</span><span class="hex">#E5A83E</span></span>
+        <span class="chip"><span class="swatch" style="background:#E24D42"></span><span class="role">crit</span><span class="hex">#E24D42</span></span>
+        <span class="chip"><span class="swatch" style="background:#0FB5BA"></span><span class="role">live</span><span class="hex">#0FB5BA</span></span>
+      </div>
+      <div class="snippet" style="background:#111827;color:#E5EAF3">
+        <div class="sn-header">
+          <span class="sn-title" style="color:#2993F3">SIGNAL</span>
+          <span class="sn-live" style="color:#0FB5BA">● live</span>
+        </div>
+        <div class="sn-section">
+          <div class="sn-row" style="border-color:#24304A">
+            <span class="sn-label" style="color:#8B98B8">RSRP</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#E5A83E"></span><span style="color:#E5EAF3">−112 dBm</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#24304A">
+            <span class="sn-label" style="color:#8B98B8">RSRQ</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#E5A83E"></span><span style="color:#E5EAF3">−14 dB</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#24304A">
+            <span class="sn-label" style="color:#8B98B8">SINR</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#E5A83E"></span><span style="color:#E5EAF3">2 dB</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#24304A">
+            <span class="sn-label" style="color:#8B98B8">IMS</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#E24D42"></span><span style="color:#E5EAF3">NOT_REGISTERED</span></span>
+          </div>
+        </div>
+        <div class="sn-meter">
+          <div class="m-label"><span style="color:#8B98B8">BATTERY</span><span style="color:#E5EAF3;font-family:ui-monospace,monospace">67%</span></div>
+          <div class="m-track" style="background:#24304A"><div class="m-fill" style="width:67%;background:#73BF69"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ THEME 4 · SIGNAL CLARITY ═══════════════ -->
+    <!--
+      bg #0B1220 · surface #101A2E · raised #16233C · border #1E2D4A
+      ink #EAF1FA · ink2 #8CA0BE · accent #22D3EE · live #60A5FA
+      ok #34D399 · warn #FBBF24 · crit #F87171
+      Register: telecom precision instrument. Deep navy, cyan primary, airy confidence.
+    -->
+    <div class="panel">
+      <div>
+        <h2>Signal Clarity</h2>
+        <p class="register">Precision instrument, calm confidence. Deep telecom navy with a cyan primary — signal data leads, chrome recedes.</p>
+        <span class="direction">Direction C · Signal Clarity</span>
+      </div>
+      <div class="tokens">
+        <span class="chip"><span class="swatch" style="background:#0B1220"></span><span class="role">bg</span><span class="hex">#0B1220</span></span>
+        <span class="chip"><span class="swatch" style="background:#101A2E"></span><span class="role">surface</span><span class="hex">#101A2E</span></span>
+        <span class="chip"><span class="swatch" style="background:#16233C"></span><span class="role">raised</span><span class="hex">#16233C</span></span>
+        <span class="chip"><span class="swatch" style="background:#1E2D4A"></span><span class="role">border</span><span class="hex">#1E2D4A</span></span>
+        <span class="chip"><span class="swatch" style="background:#EAF1FA"></span><span class="role">ink</span><span class="hex">#EAF1FA</span></span>
+        <span class="chip"><span class="swatch" style="background:#8CA0BE"></span><span class="role">ink2</span><span class="hex">#8CA0BE</span></span>
+        <span class="chip"><span class="swatch" style="background:#22D3EE"></span><span class="role">accent</span><span class="hex">#22D3EE</span></span>
+        <span class="chip"><span class="swatch" style="background:#34D399"></span><span class="role">ok</span><span class="hex">#34D399</span></span>
+        <span class="chip"><span class="swatch" style="background:#FBBF24"></span><span class="role">warn</span><span class="hex">#FBBF24</span></span>
+        <span class="chip"><span class="swatch" style="background:#F87171"></span><span class="role">crit</span><span class="hex">#F87171</span></span>
+        <span class="chip"><span class="swatch" style="background:#60A5FA"></span><span class="role">live</span><span class="hex">#60A5FA</span></span>
+      </div>
+      <div class="snippet" style="background:#101A2E;color:#EAF1FA">
+        <div class="sn-header">
+          <span class="sn-title" style="color:#22D3EE">SIGNAL</span>
+          <span class="sn-live" style="color:#60A5FA">● live</span>
+        </div>
+        <div class="sn-section">
+          <div class="sn-row" style="border-color:#1E2D4A">
+            <span class="sn-label" style="color:#8CA0BE">RSRP</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#FBBF24"></span><span style="color:#EAF1FA">−112 dBm</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#1E2D4A">
+            <span class="sn-label" style="color:#8CA0BE">RSRQ</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#FBBF24"></span><span style="color:#EAF1FA">−14 dB</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#1E2D4A">
+            <span class="sn-label" style="color:#8CA0BE">SINR</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#FBBF24"></span><span style="color:#EAF1FA">2 dB</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#1E2D4A">
+            <span class="sn-label" style="color:#8CA0BE">IMS</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#F87171"></span><span style="color:#EAF1FA">NOT_REGISTERED</span></span>
+          </div>
+        </div>
+        <div class="sn-meter">
+          <div class="m-label"><span style="color:#8CA0BE">BATTERY</span><span style="color:#EAF1FA;font-family:ui-monospace,monospace">67%</span></div>
+          <div class="m-track" style="background:#1E2D4A"><div class="m-fill" style="width:67%;background:#34D399"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ THEME 5 · OLED INK ═══════════════ -->
+    <!--
+      bg #000000 · surface #0B0B0C · raised #141416 · border #1E1E21
+      ink #E8E8EA · ink2 #8A8A90 · accent #00E0A4 · live #00B8D9
+      ok #34D399 · warn #F5A623 · crit #FF5D5D
+      Register: premium hardware. True black OLED, single mint accent, minimal chrome.
+    -->
+    <div class="panel">
+      <div>
+        <h2>OLED Ink</h2>
+        <p class="register">Premium hardware register. True-black OLED, one mint accent, maximum restraint — the diagnostic tool as a precision object.</p>
+        <span class="direction">Challenger · lean B or C</span>
+      </div>
+      <div class="tokens">
+        <span class="chip"><span class="swatch" style="background:#000000"></span><span class="role">bg</span><span class="hex">#000000</span></span>
+        <span class="chip"><span class="swatch" style="background:#0B0B0C"></span><span class="role">surface</span><span class="hex">#0B0B0C</span></span>
+        <span class="chip"><span class="swatch" style="background:#141416"></span><span class="role">raised</span><span class="hex">#141416</span></span>
+        <span class="chip"><span class="swatch" style="background:#1E1E21"></span><span class="role">border</span><span class="hex">#1E1E21</span></span>
+        <span class="chip"><span class="swatch" style="background:#E8E8EA"></span><span class="role">ink</span><span class="hex">#E8E8EA</span></span>
+        <span class="chip"><span class="swatch" style="background:#8A8A90"></span><span class="role">ink2</span><span class="hex">#8A8A90</span></span>
+        <span class="chip"><span class="swatch" style="background:#00E0A4"></span><span class="role">accent</span><span class="hex">#00E0A4</span></span>
+        <span class="chip"><span class="swatch" style="background:#34D399"></span><span class="role">ok</span><span class="hex">#34D399</span></span>
+        <span class="chip"><span class="swatch" style="background:#F5A623"></span><span class="role">warn</span><span class="hex">#F5A623</span></span>
+        <span class="chip"><span class="swatch" style="background:#FF5D5D"></span><span class="role">crit</span><span class="hex">#FF5D5D</span></span>
+        <span class="chip"><span class="swatch" style="background:#00B8D9"></span><span class="role">live</span><span class="hex">#00B8D9</span></span>
+      </div>
+      <div class="snippet" style="background:#000000;color:#E8E8EA">
+        <div class="sn-header">
+          <span class="sn-title" style="color:#00E0A4">SIGNAL</span>
+          <span class="sn-live" style="color:#00B8D9">● live</span>
+        </div>
+        <div class="sn-section">
+          <div class="sn-row" style="border-color:#141416">
+            <span class="sn-label" style="color:#8A8A90">RSRP</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#F5A623"></span><span style="color:#E8E8EA">−112 dBm</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#141416">
+            <span class="sn-label" style="color:#8A8A90">RSRQ</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#F5A623"></span><span style="color:#E8E8EA">−14 dB</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#141416">
+            <span class="sn-label" style="color:#8A8A90">SINR</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#F5A623"></span><span style="color:#E8E8EA">2 dB</span></span>
+          </div>
+          <div class="sn-row" style="border-color:#141416">
+            <span class="sn-label" style="color:#8A8A90">IMS</span>
+            <span class="sn-val"><span class="sn-dot" style="background:#FF5D5D"></span><span style="color:#E8E8EA">NOT_REGISTERED</span></span>
+          </div>
+        </div>
+        <div class="sn-meter">
+          <div class="m-label"><span style="color:#8A8A90">BATTERY</span><span style="color:#E8E8EA;font-family:ui-monospace,monospace">67%</span></div>
+          <div class="m-track" style="background:#141416"><div class="m-fill" style="width:67%;background:#34D399"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="foot">
+    Notes — all themes are dark-only per v1 scope. Status semantics are shared: <code>ok</code> / <code>warn</code> / <code>crit</code>
+    map to the app's threshold tiers (green/yellow/red) and must hold contrast against both <code>bg</code> and <code>surface</code>.
+    <code>live</code> is reserved for the "streaming" affordance. Next decision is the <b>direction</b> (board: <code>.working/directions.html</code>),
+    then the chosen theme gets promoted into <code>DESIGN.md</code> color tokens.
+  </p>
+</div>
+</body>
+</html>

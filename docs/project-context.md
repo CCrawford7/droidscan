@@ -4,6 +4,13 @@ status: active
 created: 2026-07-25
 ---
 
+> **ⓘ Currency note (2026-08-04):** This file describes the original *scraper-era*
+> project vision (EE forum corpus, Python scrapers). The codebase has since evolved
+> into an Android telemetry app. For the current picture see **[README.md](../README.md)**
+> (build, modules, permissions) and **[docs/ARCHITECTURE.md](./ARCHITECTURE.md)**.
+> This page is retained as the product-vision historical context and the EE-dataset
+> documentation.
+
 # droidscan *(working title)* — Android Network Diagnostic Assistant
 
 ## What We Have

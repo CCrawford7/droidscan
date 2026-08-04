@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>droidscan — Key Screen Mocks · Signal Clarity tiered list</title>
+<!--
+  droidscan v1 — key-screen mocks, all five tabs, in the chosen blend:
+  Direction C (Signal Clarity) visual language × tiered-list structure.
+
+  Chosen tokens (C):
+    bg #0B1220 · surface #101A2E · raised #16233C · border #1E2D4A
+    ink #EAF1FA · ink2 #8CA0BE · accent #22D3EE · ok #34D399 · warn #FBBF24 · crit #F87171 · live #60A5FA
+  Typography: sans uppercase labels (11-12px, letter-spaced) + mono values (13px, 600).
+  Shape: tier cards 14px radius, 16px horizontal padding, 9px row rhythm.
+  Status: small dot before mono value · ok / warn / crit map to threshold tiers.
+  Motion register: calm, no flourish.
+
+  Content grounded in current DashboardScreen.kt tab implementations + journeys
+  (Alex: RSRP −112, IMS NOT_REGISTERED, band n78, cell 12345678 · Sam: 67%, 42°C, throttling).
+  All strings voice-checked: no lorem, no marketing.
+
+  Governing spine sections (when finalized): DESIGN.md Colors/Typography/Layout/Components ·
+  EXPERIENCE.md IA / Component Patterns / State Patterns (empty + crisis states).
+-->
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#090B10; color:#E8EDF5; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding:32px 20px 64px; }
+  .page { max-width:1600px; margin:0 auto; }
+  h1 { font-size:22px; font-weight:700; letter-spacing:-0.01em; }
+  .lede { color:#8A94A8; font-size:14px; margin-top:6px; line-height:1.5; max-width:1000px; }
+  .rule { border:0; border-top:1px solid #232938; margin:20px 0 28px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(330px,1fr)); gap:24px; align-items:start; }
+
+  .card { background:#10131B; border:1px solid #232938; border-radius:16px; padding:20px 18px; }
+  .card h2 { font-size:16px; font-weight:700; }
+  .card .cap { font-size:12px; color:#A8B0C0; line-height:1.5; margin-top:4px; }
+  .card .content-tag { display:inline-block; font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:#22D3EE; border:1px solid #22D3EE44; border-radius:99px; padding:3px 10px; margin:8px 0 14px; }
+
+  .phone { width:300px; margin:0 auto; border-radius:30px; border:6px solid #232B38; background:#000; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,.45); }
+  .screen { height:640px; position:relative; display:flex; flex-direction:column; overflow:hidden; }
+
+  /* status bar + header */
+  .statusbar { display:flex; justify-content:space-between; align-items:center; padding:8px 16px 4px; font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:10px; color:#8CA0BE; }
+  .apphead { display:flex; justify-content:space-between; align-items:center; padding:4px 16px 10px; }
+  .brand { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-weight:700; font-size:17px; color:#22D3EE; }
+  .badge { font-size:9.5px; font-weight:600; letter-spacing:.03em; border-radius:6px; padding:3px 8px; }
+
+  /* scroll region with bottom fade */
+  .scroll { flex:1; overflow:hidden; position:relative; padding:6px 14px 0; }
+  .scroll::after { content:""; position:absolute; bottom:0; left:0; right:0; height:46px; background:linear-gradient(transparent, #0B1220); pointer-events:none; }
+
+  /* tier card (the load-bearing list container) */
+  .tier { background:#101A2E; border:1px solid #1E2D4A; border-radius:14px; padding:12px 14px 14px; margin-bottom:12px; }
+  .tier-hd { display:flex; justify-content:space-between; align-items:center; }
+  .tier-label { font-size:11px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:#22D3EE; }
+  .tier-live { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:10px; color:#60A5FA; }
+  .tier-sub { font-size:10px; color:#8CA0BE; letter-spacing:.05em; text-transform:uppercase; margin-top:10px; }
+
+  /* rows */
+  .row { display:flex; justify-content:space-between; align-items:center; margin-top:9px; }
+  .row:first-of-type { margin-top:10px; }
+  .lab { font-size:12px; color:#8CA0BE; }
+  .val { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:13px; font-weight:600; color:#EAF1FA; white-space:nowrap; }
+  .dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+
+  /* dual columns */
+  .dual { display:grid; grid-template-columns:1fr 1fr; gap:9px 14px; margin-top:9px; }
+  .dual .cell { min-width:0; }
+  .dual .lab { display:block; font-size:11px; }
+  .dual .val { display:block; font-size:12.5px; margin-top:1px; overflow:hidden; text-overflow:ellipsis; }
+
+  /* gauges */
+  .gauge { margin-top:10px; }
+  .g-track { height:6px; background:#1E2D4A; border-radius:3px; overflow:hidden; }
+  .g-fill { height:6px; border-radius:3px; }
+
+  /* signal bars */
+  .bars { display:inline-flex; align-items:flex-end; gap:2px; vertical-align:middle; }
+  .bar { width:4px; border-radius:1px; }
+
+  /* banners + chips */
+  .banner { display:flex; gap:9px; align-items:flex-start; background:rgba(248,113,113,.10); border:1px solid rgba(248,113,113,.32); border-radius:12px; padding:10px 14px; margin-bottom:12px; }
+  .banner .b-t { font-size:12.5px; font-weight:600; color:#FBC5C5; }
+  .banner .b-s { font-size:10.5px; color:#8CA0BE; margin-top:2px; }
+  .chip-throttle { background:rgba(248,113,113,.14); color:#F87171; }
+  .chip-powermode { background:rgba(96,165,250,.12); color:#60A5FA; }
+  .chip-ok { background:rgba(52,211,153,.12); color:#34D399; }
+
+  /* expand affordance */
+  .expand { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:10px; color:#22D3EE; margin-top:8px; }
+
+  /* tab bar */
+  .tabbar { display:flex; border-top:1px solid #1E2D4A; background:#0D1626; padding:9px 4px 11px; }
+  .tab { flex:1; text-align:center; font-size:10px; font-weight:600; color:#8CA0BE; }
+  .tab.active { color:#22D3EE; }
+
+  .foot { color:#8A94A8; font-size:12.5px; margin-top:24px; line-height:1.7; max-width:1000px; }
+  .foot b { color:#C6CFDE; }
+  .foot code { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; background:#161A24; border:1px solid #232938; border-radius:5px; padding:1px 6px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>droidscan — key-screen mocks · Signal Clarity tiered list</h1>
+  <p class="lede">The chosen blend, applied to all five tabs: <b>Direction C</b> visual language (deep navy, cyan accent, sans labels + mono values, rounded tier cards) over the <b>tiered-list</b> structure — SIGNAL / POWER / SYSTEM as status-tiered metric lists. Same device, same moment across all tabs: RSRP −112, IMS NOT_REGISTERED, band n78, 67% battery, thermal throttling active. The radio tab shows Alex's failure state; the power tab shows Sam's crisis state.</p>
+  <hr class="rule">
+  <div class="grid">
+
+  <!-- ═══════════════ OVERVIEW ═══════════════ -->
+  <div class="card">
+    <h2>Overview</h2>
+    <p class="cap">Three tier cards — SIGNAL, POWER, SYSTEM — each a status-tiered list. Crisis chip rides inside POWER.</p>
+    <span class="content-tag">Direction C · tiered list</span>
+    <div class="phone">
+      <div class="screen" style="background:#0B1220;color:#EAF1FA">
+        <div class="statusbar"><span>14:32</span><span>5G ▲</span></div>
+        <div class="apphead">
+          <span class="brand">droidscan</span>
+          <span class="badge chip-powermode">Power Mode</span>
+        </div>
+        <div class="scroll">
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Signal</span><span class="tier-live">● live</span></div>
+            <div class="row"><span class="lab">RSRP</span><span class="val"><span class="dot" style="background:#FBBF24"></span>−112 dBm</span></div>
+            <div class="row"><span class="lab">RSRQ</span><span class="val"><span class="dot" style="background:#FBBF24"></span>−14 dB</span></div>
+            <div class="row"><span class="lab">SINR</span><span class="val"><span class="dot" style="background:#FBBF24"></span>2 dB</span></div>
+            <div class="row">
+              <span class="lab">Strength</span>
+              <span class="val" style="font-size:12px">
+                <span class="bars" style="height:12px">
+                  <span class="bar" style="height:5px;background:#FBBF24"></span>
+                  <span class="bar" style="height:7px;background:#FBBF24"></span>
+                  <span class="bar" style="height:9px;background:#FBBF24"></span>
+                  <span class="bar" style="height:11px;background:#1E2D4A"></span>
+                  <span class="bar" style="height:13px;background:#1E2D4A"></span>
+                </span>
+                <span style="color:#8CA0BE;font-size:10px;margin-left:6px">NR</span>
+              </span>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Network</span><span class="val">NR</span></div>
+              <div class="cell"><span class="lab">Band</span><span class="val">n78</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">IMS</span><span class="val"><span class="dot" style="background:#F87171"></span>NOT REG</span></div>
+              <div class="cell"><span class="lab">Roaming</span><span class="val">NO</span></div>
+            </div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Power</span><span class="tier-live">42°C</span></div>
+            <div class="row">
+              <span class="lab">Battery</span>
+              <span class="val"><span class="dot" style="background:#34D399"></span>67%</span>
+            </div>
+            <div class="gauge"><div class="g-track"><div class="g-fill" style="width:67%;background:#34D399"></div></div></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Health</span><span class="val">Good</span></div>
+              <div class="cell"><span class="lab">Temp</span><span class="val"><span class="dot" style="background:#FBBF24"></span>42°C</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Charge</span><span class="val">850 mA</span></div>
+              <div class="cell"><span class="lab">CPU avg</span><span class="val"><span class="dot" style="background:#FBBF24"></span>78%</span></div>
+            </div>
+            <div class="row" style="margin-top:11px">
+              <span class="lab">Thermal</span>
+              <span class="val" style="font-size:11.5px"><span class="dot" style="background:#F87171"></span>48.2°C <span class="chip-throttle" style="font-family:inherit;font-size:9px;border-radius:5px;padding:2px 6px;margin-left:4px">THROTTLING</span></span>
+            </div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">System</span><span class="tier-live">Pixel 8</span></div>
+            <div class="row"><span class="lab">Model</span><span class="val">Pixel 8</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Android</span><span class="val">14</span></div>
+              <div class="cell"><span class="lab">SELinux</span><span class="val">Enforced</span></div>
+            </div>
+            <div class="row"><span class="lab">Kernel</span><span class="val" style="font-size:11px">5.15.123-android13-8-…</span></div>
+            <div class="tier-sub">Memory</div>
+            <div class="gauge"><div class="g-track"><div class="g-fill" style="width:78%;background:#FBBF24"></div></div></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">RAM</span><span class="val">6.2 / 8.0 GB</span></div>
+              <div class="cell"><span class="lab">Pressure</span><span class="val"><span class="dot" style="background:#34D399"></span>NORMAL</span></div>
+            </div>
+            <div class="row" style="margin-top:11px"><span class="lab">Shizuku</span><span class="val"><span class="dot" style="background:#34D399"></span>POWER MODE</span></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <span class="tab active">Overview</span><span class="tab">Radio</span><span class="tab">System</span><span class="tab">Power</span><span class="tab">SIM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ RADIO ═══════════════ -->
+  <div class="card">
+    <h2>Radio</h2>
+    <p class="cap">Alex's tab — full cellular detail. Four tiers: signal, serving network, IMS, network config.</p>
+    <span class="content-tag">Direction C · tiered list</span>
+    <div class="phone">
+      <div class="screen" style="background:#0B1220;color:#EAF1FA">
+        <div class="statusbar"><span>14:32</span><span>5G ▲</span></div>
+        <div class="apphead">
+          <span class="brand">droidscan</span>
+          <span class="badge chip-powermode">Power Mode</span>
+        </div>
+        <div class="scroll">
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Cellular Signal</span><span class="tier-live">● live</span></div>
+            <div class="row"><span class="lab">RSRP</span><span class="val"><span class="dot" style="background:#FBBF24"></span>−112 dBm</span></div>
+            <div class="row"><span class="lab">RSRQ</span><span class="val"><span class="dot" style="background:#FBBF24"></span>−14 dB</span></div>
+            <div class="row"><span class="lab">SINR</span><span class="val"><span class="dot" style="background:#FBBF24"></span>2 dB</span></div>
+            <div class="row">
+              <span class="lab">Strength</span>
+              <span class="val" style="font-size:12px">
+                <span class="bars" style="height:12px">
+                  <span class="bar" style="height:5px;background:#FBBF24"></span>
+                  <span class="bar" style="height:7px;background:#FBBF24"></span>
+                  <span class="bar" style="height:9px;background:#FBBF24"></span>
+                  <span class="bar" style="height:11px;background:#1E2D4A"></span>
+                  <span class="bar" style="height:13px;background:#1E2D4A"></span>
+                </span>
+                <span style="color:#8CA0BE;font-size:10px;margin-left:6px">NR</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Serving Network</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Operator</span><span class="val">EE</span></div>
+              <div class="cell"><span class="lab">Network</span><span class="val">NR</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">PLMN</span><span class="val">23430</span></div>
+              <div class="cell"><span class="lab">Roaming</span><span class="val">NO</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Band</span><span class="val">n78</span></div>
+              <div class="cell"><span class="lab">Cell ID</span><span class="val">12345678</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">TAC</span><span class="val">38542</span></div>
+              <div class="cell"><span class="lab">Call</span><span class="val">IDLE</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Radio Power</span><span class="val">ON</span></div>
+              <div class="cell"><span class="lab">Data Roam</span><span class="val">OFF</span></div>
+            </div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">IMS / Registration</span></div>
+            <div class="row"><span class="lab">IMS Registration</span><span class="val"><span class="dot" style="background:#F87171"></span>NOT REG</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">IMS Capable</span><span class="val">YES</span></div>
+              <div class="cell"><span class="lab">VoLTE</span><span class="val">ENABLED</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">WiFi Calling</span><span class="val">OFF</span></div>
+              <div class="cell"><span class="lab">ePDG</span><span class="val">INACTIVE</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">NR-NSA</span><span class="val">AVAILABLE</span></div>
+              <div class="cell"><span class="lab">Pref NW</span><span class="val">NR/LTE</span></div>
+            </div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Network Config</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Type</span><span class="val">NR</span></div>
+              <div class="cell"><span class="lab">APN</span><span class="val">ee.co.uk</span></div>
+            </div>
+            <div class="row"><span class="lab">IPv4</span><span class="val">10.42.0.17</span></div>
+            <div class="row"><span class="lab">IPv6</span><span class="val" style="font-size:11px">2001:db8::cafe</span></div>
+            <div class="row"><span class="lab">WiFi SSID</span><span class="val">EE-BT-5G</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">VPN</span><span class="val">Off</span></div>
+              <div class="cell"><span class="lab">Hotspot</span><span class="val">OFF</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <span class="tab">Overview</span><span class="tab active">Radio</span><span class="tab">System</span><span class="tab">Power</span><span class="tab">SIM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SYSTEM ═══════════════ -->
+  <div class="card">
+    <h2>System</h2>
+    <p class="cap">CPU, memory, wakelocks, storage, device identity. Power Mode tiers appear when Shizuku is live.</p>
+    <span class="content-tag">Direction C · tiered list</span>
+    <div class="phone">
+      <div class="screen" style="background:#0B1220;color:#EAF1FA">
+        <div class="statusbar"><span>14:32</span><span>5G ▲</span></div>
+        <div class="apphead">
+          <span class="brand">droidscan</span>
+          <span class="badge chip-powermode">Power Mode</span>
+        </div>
+        <div class="scroll">
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">CPU</span><span class="tier-live">● live</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Core 0</span><span class="val">58%</span></div>
+              <div class="cell"><span class="lab">Core 1</span><span class="val">62%</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Core 2</span><span class="val"><span class="dot" style="background:#FBBF24"></span>77%</span></div>
+              <div class="cell"><span class="lab">Core 3</span><span class="val"><span class="dot" style="background:#FBBF24"></span>91%</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Core 4</span><span class="val">43%</span></div>
+              <div class="cell"><span class="lab">Core 5</span><span class="val">39%</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Core 6</span><span class="val">31%</span></div>
+              <div class="cell"><span class="lab">Core 7</span><span class="val">28%</span></div>
+            </div>
+            <div class="tier-sub">Top CPU</div>
+            <div class="row"><span class="lab" style="font-size:11px">com.game.example</span><span class="val" style="font-size:11px;color:#8CA0BE">34%</span></div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Memory</span></div>
+            <div class="gauge"><div class="g-track"><div class="g-fill" style="width:78%;background:#FBBF24"></div></div></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">RAM</span><span class="val">6.2 / 8.0 GB</span></div>
+              <div class="cell"><span class="lab">Pressure</span><span class="val"><span class="dot" style="background:#34D399"></span>NORMAL</span></div>
+            </div>
+            <div class="tier-sub">Top memory</div>
+            <div class="row"><span class="lab" style="font-size:11px">com.game.example</span><span class="val" style="font-size:11px;color:#8CA0BE">812 MB</span></div>
+            <div class="row"><span class="lab" style="font-size:11px">system</span><span class="val" style="font-size:11px;color:#8CA0BE">431 MB</span></div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Wakelocks</span><span class="tier-live chip-ok" style="font-size:9px;border-radius:5px;padding:2px 6px">POWER MODE</span></div>
+            <div class="row"><span class="lab" style="font-size:11px">screen-off-timer</span><span class="val" style="font-size:11px;color:#8CA0BE">active</span></div>
+            <div class="row"><span class="lab" style="font-size:11px">audio_out_*</span><span class="val" style="font-size:11px;color:#8CA0BE">active</span></div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Storage</span></div>
+            <div class="gauge"><div class="g-track"><div class="g-fill" style="width:64%;background:#34D399"></div></div></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Internal</span><span class="val">160 / 256 GB</span></div>
+              <div class="cell"><span class="lab">External</span><span class="val">—</span></div>
+            </div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Device</span></div>
+            <div class="row"><span class="lab">Model</span><span class="val">Pixel 8</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Manufacturer</span><span class="val">Google</span></div>
+              <div class="cell"><span class="lab">Android</span><span class="val">14</span></div>
+            </div>
+            <div class="row"><span class="lab">Security Patch</span><span class="val">2026-05-01</span></div>
+            <div class="row"><span class="lab">Kernel</span><span class="val" style="font-size:11px">5.15.123-android13-8-…</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">SELinux</span><span class="val">Enforced</span></div>
+              <div class="cell"><span class="lab">Resolution</span><span class="val">1080×2400</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Density</span><span class="val">420</span></div>
+              <div class="cell"><span class="lab">Uptime</span><span class="val">3d 04h</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <span class="tab">Overview</span><span class="tab">Radio</span><span class="tab active">System</span><span class="tab">Power</span><span class="tab">SIM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ POWER ═══════════════ -->
+  <div class="card">
+    <h2>Power</h2>
+    <p class="cap">Sam's tab — crisis banner at top, battery, sensors, thermal summary, mode, top processes.</p>
+    <span class="content-tag">Direction C · tiered list</span>
+    <div class="phone">
+      <div class="screen" style="background:#0B1220;color:#EAF1FA">
+        <div class="statusbar"><span>14:32</span><span>5G ▲</span></div>
+        <div class="apphead">
+          <span class="brand">droidscan</span>
+          <span class="badge chip-powermode">Power Mode</span>
+        </div>
+        <div class="scroll">
+          <div class="banner">
+            <span style="font-size:15px">⚠</span>
+            <div>
+              <div class="b-t">Thermal throttling active</div>
+              <div class="b-s">Peak 52.1°C — CPU cores hottest</div>
+            </div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Battery</span><span class="tier-live">67%</span></div>
+            <div class="gauge"><div class="g-track"><div class="g-fill" style="width:67%;background:#34D399"></div></div></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Health</span><span class="val">Good</span></div>
+              <div class="cell"><span class="lab">Temp</span><span class="val"><span class="dot" style="background:#FBBF24"></span>42°C</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Charge</span><span class="val">850 mA</span></div>
+              <div class="cell"><span class="lab">Discharge</span><span class="val">1.2 A</span></div>
+            </div>
+            <div class="row"><span class="lab">Est. remaining</span><span class="val">5h 12m</span></div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Radio / Sensors</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Bluetooth</span><span class="val">ON</span></div>
+              <div class="cell"><span class="lab">eSIM</span><span class="val">NO</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Hotspot</span><span class="val">OFF</span></div>
+              <div class="cell"><span class="lab">WiFi Call</span><span class="val">OFF</span></div>
+            </div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Thermal</span><span class="tier-live chip-throttle" style="font-size:9px;border-radius:5px;padding:2px 6px">THROTTLING</span></div>
+            <div class="row"><span class="lab">CPU Cores</span><span class="val" style="font-size:11.5px">48.2°C avg · <span style="color:#F87171">52.1°C peak</span></span></div>
+            <div class="row"><span class="lab">GPU</span><span class="val" style="font-size:11.5px">45.0°C avg · <span style="color:#FBBF24">49.8°C peak</span></span></div>
+            <div class="row"><span class="lab">Battery/Power</span><span class="val" style="font-size:11.5px">42.0°C avg · 42.0°C peak</span></div>
+            <div class="row"><span class="lab">Chassis</span><span class="val" style="font-size:11.5px">38.5°C avg · 41.0°C peak</span></div>
+            <div class="row"><span class="lab">Modem/RF</span><span class="val" style="font-size:11.5px">46.1°C avg · <span style="color:#FBBF24">48.9°C peak</span></span></div>
+            <div class="row" style="margin-top:11px;border-top:1px solid #1E2D4A;padding-top:10px"><span class="lab">Peak overall</span><span class="val" style="color:#F87171">52.1°C</span></div>
+            <div class="expand">▼ Show all 14 raw sensors</div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Mode</span><span class="tier-live chip-ok" style="font-size:9px;border-radius:5px;padding:2px 6px">SHIZUKU</span></div>
+            <div class="row"><span class="lab">Status</span><span class="val" style="font-size:12px">Available — kernel-level data</span></div>
+            <div class="row"><span class="lab">Wakelocks</span><span class="val" style="font-size:12px">5 active</span></div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Top Processes</span></div>
+            <div class="row"><span class="lab" style="font-size:11px">com.game.example</span><span class="val" style="font-size:11px;color:#8CA0BE">812 MB</span></div>
+            <div class="row"><span class="lab" style="font-size:11px">com.google.android.gms</span><span class="val" style="font-size:11px;color:#8CA0BE">624 MB</span></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <span class="tab">Overview</span><span class="tab">Radio</span><span class="tab">System</span><span class="tab active">Power</span><span class="tab">SIM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SIM ═══════════════ -->
+  <div class="card">
+    <h2>SIM</h2>
+    <p class="cap">Per-slot identity, capabilities, and the current data connection. No-SIM empty state rides this tab.</p>
+    <span class="content-tag">Direction C · tiered list</span>
+    <div class="phone">
+      <div class="screen" style="background:#0B1220;color:#EAF1FA">
+        <div class="statusbar"><span>14:32</span><span>5G ▲</span></div>
+        <div class="apphead">
+          <span class="brand">droidscan</span>
+          <span class="badge chip-powermode">Power Mode</span>
+        </div>
+        <div class="scroll">
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">SIM 1 · EE</span><span class="tier-live chip-ok" style="font-size:9px;border-radius:5px;padding:2px 6px">PROVISIONED</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Carrier</span><span class="val">EE</span></div>
+              <div class="cell"><span class="lab">eSIM Profiles</span><span class="val">0</span></div>
+            </div>
+            <div class="row"><span class="lab">ICCID</span><span class="val" style="font-size:12px">•••• •••• •••• 2046</span></div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Identity</span></div>
+            <div class="row"><span class="lab">Home PLMN</span><span class="val">23430</span></div>
+            <div class="row"><span class="lab">SPN (SIM Name)</span><span class="val">EE</span></div>
+            <div class="row"><span class="lab">MSISDN</span><span class="val" style="font-size:11px">N/A (carrier)</span></div>
+            <div class="row"><span class="lab">IMSI</span><span class="val" style="font-size:11px">N/A (priv. API 29+)</span></div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Capabilities</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">VoLTE</span><span class="val">ON</span></div>
+              <div class="cell"><span class="lab">WiFi Call</span><span class="val">OFF</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">NR-NSA</span><span class="val">YES</span></div>
+              <div class="cell"><span class="lab">IMS Reg</span><span class="val"><span class="dot" style="background:#F87171"></span>NOT REG</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Pref NW</span><span class="val">NR/LTE</span></div>
+              <div class="cell"><span class="lab">Call</span><span class="val">IDLE</span></div>
+            </div>
+          </div>
+
+          <div class="tier">
+            <div class="tier-hd"><span class="tier-label">Current Connection</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Active Network</span><span class="val">NR</span></div>
+              <div class="cell"><span class="lab">APN</span><span class="val">ee.co.uk</span></div>
+            </div>
+            <div class="row"><span class="lab">DNS</span><span class="val">10.42.0.1</span></div>
+            <div class="dual">
+              <div class="cell"><span class="lab">VPN</span><span class="val">Off</span></div>
+              <div class="cell"><span class="lab">Hotspot</span><span class="val">OFF</span></div>
+            </div>
+            <div class="dual">
+              <div class="cell"><span class="lab">Network PLMN</span><span class="val">23430</span></div>
+              <div class="cell"><span class="lab">Roaming</span><span class="val">NO</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <span class="tab">Overview</span><span class="tab">Radio</span><span class="tab">System</span><span class="tab">Power</span><span class="tab active">SIM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <p class="foot">
+    What changed from the current build — the tiered list keeps the app's existing card+row content (so no data is lost, nothing is invented),
+    but the skin is now <b>Direction C</b>: sans uppercase tier labels instead of <code>── SIGNAL ──</code> rules, mono values kept,
+    status dots rendered smaller and calmer, gauges become rounded 6px tracks, and the whole palette shifts from GitHub-dark to telecom navy
+    with a single cyan accent. The crisis banner lives at the top of Power (Sam's flow); Overview surfaces a compact THROTTLING chip inside
+    the Power tier rather than a full banner.
+  </p>
+</div>
+</body>
+</html>

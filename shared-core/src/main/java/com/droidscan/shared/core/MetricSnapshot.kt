@@ -20,6 +20,16 @@ data class RadioSnapshot(
     val dataNetworkType: String? = null,  // "NR", "LTE", "HSPA", "EDGE"
     val isRoaming: Boolean? = null,
     val operatorName: String? = null,
+    // ── HSS / Subscriber fields ──
+    val networkPlmn: String? = null,         // MCC-MNC of current serving network
+    val callState: String? = null,           // IDLE | RINGING | OFFHOOK
+    val dataRoamingEnabled: Boolean? = null, // Data roaming setting (device-level)
+    val preferredNetworkType: String? = null, // e.g. "NR/LTE/GSM/WCDMA" (from Settings.Global)
+    val imsCapable: Boolean? = null,         // Device IMS capability (from CarrierConfig)
+    val volteEnabled: Boolean? = null,       // VoLTE specifically enabled
+    val wifiCallingStatus: String? = null,   // WiFi Calling: "READY" | "ACTIVE" | "UNAVAILABLE" | null
+    val radioPowerState: String? = null,     // "ON" | "OFF" | "UNAVAILABLE" (API 30+)
+    val nrNsaAvailable: Boolean? = null,     // NR-NSA (EN-DC) capability
     val timestampMs: Long = currentTimeMs()
 )
 
@@ -109,6 +119,10 @@ data class NetworkConfigSnapshot(
     val vpnLabel: String? = null,
     val hotspotActive: Boolean = false,
     val apnName: String? = null,
+    val wifiSsid: String? = null,
+    val wifiRssi: Int? = null,          // dBm (-127..0), actual received signal
+    val wifiLinkSpeedMbps: String? = null,
+    val latencyMs: Int? = null,         // last TCP connect latency to well-known host (active probe)
     val timestampMs: Long = currentTimeMs()
 )
 
@@ -126,7 +140,22 @@ data class SimSlot(
     val esimProfileCount: Int = 0,
     val isProvisioned: Boolean = false,
     val iccidLast4: String? = null,  // last 4 digits only for privacy
-    val subscriptionId: Int? = null
+    val subscriptionId: Int? = null,
+    // ── Subscriber identity (HSS) ──
+    val homePlmn: String? = null,          // MCC-MNC from SIM (e.g. "310410")
+    val simOperatorName: String? = null,   // SPN (e.g. "T-Mobile")
+    val msisdn: String? = null,            // Phone number — often null on modern Android
+    val imsiPrefix: String? = null,        // First 5-6 digits of IMSI (MCC-MNC only) — experimental
+    // ── Per-SIM radio capabilities (read via createForSubscriptionId) ──
+    val volteEnabled: Boolean? = null,     // VoLTE specifically enabled for this sub
+    val wifiCallingStatus: String? = null, // "ACTIVE" | "READY" | "UNAVAILABLE"
+    val imsRegistered: Boolean? = null,    // IMS registration for this sub
+    val imsCapable: Boolean? = null,       // CarrierConfig volte availability for this sub
+    val nrNsaAvailable: Boolean? = null,   // CarrierConfig NR-NSA for this sub
+    val preferredNetworkType: String? = null,
+    val callState: String? = null,         // IDLE | RINGING | OFFHOOK
+    val dataNetworkType: String? = null,   // "NR (5G)", "LTE (4G)", ...
+    val rsrp: Int? = null                  // registered-cell RSRP for this sub (dBm)
 )
 
 @Serializable
@@ -139,6 +168,8 @@ data class SystemInfoSnapshot(
     val kernelVersion: String? = null,
     val selinuxEnforced: Boolean? = null,
     val uptimeMs: Long = 0L,
+    val resolution: String? = null,
+    val densityDpi: String? = null,
     val timestampMs: Long = currentTimeMs()
 )
 

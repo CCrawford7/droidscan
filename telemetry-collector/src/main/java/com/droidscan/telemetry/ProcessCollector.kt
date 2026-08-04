@@ -1,12 +1,15 @@
 package com.droidscan.telemetry
 
 import android.app.ActivityManager
-import android.app.usage.UsageStatsManager
+import android.util.Log
 import com.droidscan.shared.core.*
 import java.io.File
 
 class ProcessCollector {
     private var am: ActivityManager? = null
+
+    // Previous /proc/stat per-core tick sample, for delta-based (instantaneous) CPU load.
+    private var prevCpuTicks: List<LongArray>? = null
 
     fun attach(activityManager: ActivityManager) {
         am = activityManager
@@ -63,22 +66,24 @@ class ProcessCollector {
         )
     }
 
+    /**
+     * Reads instantaneous per-core CPU load by diffing successive /proc/stat samples.
+     * The first read returns all zeros (no baseline yet) rather than a misleading
+     * since-boot average.
+     */
     private fun readCpuLoads(): List<Float> {
         return try {
-            val stat = File("/proc/stat").readText()
-            val cpuLines = stat.lines().filter { it.startsWith("cpu") && it.length > 3 }
-            cpuLines.map { line ->
-                val parts = line.trim().split("\\s+".toRegex())
-                if (parts.size < 5) 0f else {
-                    val user = parts[1].toLongOrNull() ?: 0L
-                    val nice = parts[2].toLongOrNull() ?: 0L
-                    val system = parts[3].toLongOrNull() ?: 0L
-                    val idle = parts[4].toLongOrNull() ?: 0L
-                    val total = user + nice + system + idle
-                    if (total == 0L) 0f else (user + nice + system).toFloat() / total
-                }
+            val content = File("/proc/stat").readText()
+            val current = parseProcStat(content)
+            val previous = prevCpuTicks
+            prevCpuTicks = current
+            if (previous == null || previous.size != current.size) {
+                current.map { 0f }
+            } else {
+                computeCpuLoads(previous, current)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to read /proc/stat for CPU load: ${e.message}", e)
             emptyList()
         }
     }
@@ -100,8 +105,47 @@ class ProcessCollector {
                     }
                 } else emptyList()
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to read kernel wakelocks: ${e.message}", e)
             emptyList()
+        }
+    }
+
+    companion object {
+        private const val TAG = "ProcessCollector"
+
+        /**
+         * Parses /proc/stat content into per-core tick arrays [user, nice, system, idle].
+         * The aggregate "cpu" line is excluded; only "cpu0", "cpu1", ... are returned,
+         * in file order.
+         */
+        internal fun parseProcStat(content: String): List<LongArray> {
+            return content.lines().mapNotNull { line ->
+                val parts = line.trim().split("\\s+".toRegex())
+                val name = parts.getOrNull(0) ?: return@mapNotNull null
+                if (!name.startsWith("cpu") || name.length <= 3) return@mapNotNull null
+                if (parts.size < 5) return@mapNotNull null
+                val user = parts.getOrNull(1)?.toLongOrNull() ?: return@mapNotNull null
+                val nice = parts.getOrNull(2)?.toLongOrNull() ?: return@mapNotNull null
+                val system = parts.getOrNull(3)?.toLongOrNull() ?: return@mapNotNull null
+                val idle = parts.getOrNull(4)?.toLongOrNull() ?: return@mapNotNull null
+                longArrayOf(user, nice, system, idle)
+            }
+        }
+
+        /** Computes instantaneous per-core load (0.0..1.0) from two tick samples. */
+        internal fun computeCpuLoads(prev: List<LongArray>, curr: List<LongArray>): List<Float> {
+            val size = minOf(prev.size, curr.size)
+            return (0 until size).map { i ->
+                val p = prev[i]
+                val c = curr[i]
+                val dUser = c[0] - p[0]
+                val dNice = c[1] - p[1]
+                val dSystem = c[2] - p[2]
+                val dIdle = c[3] - p[3]
+                val dTotal = dUser + dNice + dSystem + dIdle
+                if (dTotal <= 0) 0f else (dUser + dNice + dSystem).toFloat() / dTotal
+            }
         }
     }
 }

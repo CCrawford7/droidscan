@@ -233,6 +233,123 @@
       "currentValueContext": "Shown as estimated additional draw compared to normal usage without hotspot active.",
       "healthyRange": "Minimal when idle. Adds significant drain when actively passing data to connected devices.",
       "commonCauses": "Connected devices actively using internet, background sync on connected devices, poor cellular signal (hotspot uses more power to maintain connection)."
+    },
+    {
+      "id": "homePlmn",
+      "label": "Home PLMN (MCC-MNC)",
+      "section": "sim",
+      "whatItMeasures": "The Public Land Mobile Network identity of your home carrier — a combination of your country code (MCC) and carrier code (MNC).",
+      "currentValueContext": "First 3 digits = country (MCC), next 2-3 = carrier (MNC). This is read directly from your SIM card.",
+      "healthyRange": "Should match your carrier's assigned MCC-MNC. Mismatch may indicate wrong SIM or a compromised device.",
+      "commonCauses": "Different carrier SIM inserted, roaming partner SIM, MVNO using host carrier's MNC."
+    },
+    {
+      "id": "networkPlmn",
+      "label": "Network PLMN (Serving)",
+      "section": "radio",
+      "whatItMeasures": "The MCC-MNC of the cellular network your phone is currently connected to for service.",
+      "currentValueContext": "This is the PLMN broadcast by the tower you're camped on. May differ from your home PLMN when roaming.",
+      "healthyRange": "Should match home PLMN when not roaming. Different PLMN = roaming on another carrier's network.",
+      "commonCauses": "Roaming internationally, using a secondary carrier's network due to weak home signal, network sharing agreement."
+    },
+    {
+      "id": "callState",
+      "label": "Call State",
+      "section": "radio",
+      "whatItMeasures": "The current state of voice calling on your device — idle, ringing, or in a call.",
+      "currentValueContext": "IDLE = no call activity. RINGING = incoming call. OFFHOOK = call in progress.",
+      "healthyRange": "IDLE is normal when not on a call. OFFHOOK is normal during calls.",
+      "commonCauses": "Incoming/outgoing calls, call waiting, dialing a number."
+    },
+    {
+      "id": "radioPowerState",
+      "label": "Radio Power State",
+      "section": "radio",
+      "whatItMeasures": "Whether the cellular radio (modem) is powered on, off, or in an unavailable state.",
+      "currentValueContext": "ON = radio is active (normal). OFF = radio powered down (airplane mode). UNAVAILABLE = cannot determine.",
+      "healthyRange": "ON is the only normal state for active cellular service.",
+      "commonCauses": "Airplane mode, system crash causing modem restart, radio firmware issue, battery saver turning off radio."
+    },
+    {
+      "id": "imsCapable",
+      "label": "IMS Capable",
+      "section": "radio",
+      "whatItMeasures": "Whether your carrier and device support IP Multimedia Subsystem — required for VoLTE, WiFi Calling, and RCS.",
+      "currentValueContext": "Read from the carrier's configuration database. YES = IMS features are provisioned.",
+      "healthyRange": "YES is normal for modern smartphones with VoLTE service.",
+      "commonCauses": "Carrier provisioning, device firmware support, MVNO without IMS agreement, outdated carrier settings."
+    },
+    {
+      "id": "volteEnabled",
+      "label": "VoLTE",
+      "section": "radio",
+      "whatItMeasures": "Whether Voice over LTE (VoLTE) is enabled on your device — allowing high-quality voice calls over the 4G/5G data connection.",
+      "currentValueContext": "ENABLED = your calls will use VoLTE. DISABLED = calls fall back to older networks.",
+      "healthyRange": "ENABLED provides better call quality and faster call setup.",
+      "commonCauses": "Carrier provisioning, device VoLTE toggle, IMS registration status, network compatibility."
+    },
+    {
+      "id": "wifiCallingStatus",
+      "label": "WiFi Calling",
+      "section": "radio",
+      "whatItMeasures": "Whether WiFi Calling is available and active on your device — allowing calls over WiFi when cellular signal is weak.",
+      "currentValueContext": "READY = enabled and available. ACTIVE = currently using WiFi for calls. UNAVAILABLE = not available.",
+      "healthyRange": "READY or ACTIVE is normal for supported carriers.",
+      "commonCauses": "Carrier support, WiFi connection quality, E911 address registration required, IMS registration status."
+    },
+    {
+      "id": "nrNsaAvailable",
+      "label": "NR-NSA (EN-DC)",
+      "section": "radio",
+      "whatItMeasures": "Whether your carrier supports Non-Standalone 5G (also called EN-DC) — 5G that uses LTE as an anchor.",
+      "currentValueContext": "YES = carrier config supports NR-NSA. This is the most common 5G deployment today.",
+      "healthyRange": "YES is normal for 5G-capable devices on carriers that offer 5G.",
+      "commonCauses": "Carrier 5G deployment strategy, device firmware, plan provisioning, network coverage area."
+    },
+    {
+      "id": "preferredNetworkType",
+      "label": "Preferred Network Type",
+      "section": "radio",
+      "whatItMeasures": "The network modes your device is configured to prefer — e.g., 5G/LTE only, or auto-switching between generations.",
+      "currentValueContext": "Set in device settings. Common values: 'NR/LTE/GSM/WCDMA' (auto), 'LTE only', 'NR only'.",
+      "healthyRange": "Auto mode (NR/LTE/GSM/WCDMA) is best for most users.",
+      "commonCauses": "User setting change, carrier provisioning, troubleshooting connectivity issues, developer options."
+    },
+    {
+      "id": "msisdn",
+      "label": "MSISDN (Phone Number)",
+      "section": "sim",
+      "whatItMeasures": "Your mobile phone number associated with your SIM card — also called MSISDN in HSS terms.",
+      "currentValueContext": "Read from SIM or network. NOTE: Most carriers no longer store this on the SIM, so it often shows as unavailable.",
+      "healthyRange": "Any valid phone number is normal. 'N/A' is common on modern Android.",
+      "commonCauses": "Carrier not writing MSISDN to SIM, Android 10+ privacy restrictions, multi-SIM configuration."
+    },
+    {
+      "id": "imsi",
+      "label": "IMSI",
+      "section": "sim",
+      "whatItMeasures": "International Mobile Subscriber Identity — the unique global identifier for your SIM card's subscription.",
+      "currentValueContext": "Only MCC-MNC prefix shown for privacy. Full IMSI requires privileged system API (denied on Android 10+).",
+      "healthyRange": "Should start with your carrier's MCC-MNC. 'N/A' is normal on modern Android without root.",
+      "commonCauses": "Android 10+ privacy restrictions (hidden API), privileged permission required, app not a system app."
+    },
+    {
+      "id": "spn",
+      "label": "SPN (Service Provider Name)",
+      "section": "sim",
+      "whatItMeasures": "The service provider name stored on your SIM card — typically your carrier's branding name.",
+      "currentValueContext": "Read directly from SIM card EF-SPN. This is the name your carrier wants displayed.",
+      "healthyRange": "Any valid carrier name is normal.",
+      "commonCauses": "Carrier branding on SIM, MVNO using host carrier name, carrier settings update."
+    },
+    {
+      "id": "dataRoamingEnabled",
+      "label": "Data Roaming",
+      "section": "radio",
+      "whatItMeasures": "Whether your device has data roaming enabled — allowing mobile data while connected to a foreign network.",
+      "currentValueContext": "ON = mobile data works while roaming. OFF = data disabled when roaming (WiFi only).",
+      "healthyRange": "OFF is normal for domestic use to avoid charges. ON is needed when travelling abroad.",
+      "commonCauses": "User setting in mobile network options, travel, carrier data roaming configuration."
     }
   ]
 }

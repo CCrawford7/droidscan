@@ -2,6 +2,7 @@ package com.droidscan.telemetry
 
 import android.os.Build
 import android.os.PowerManager
+import android.util.Log
 import com.droidscan.shared.core.ThermalSnapshot
 import com.droidscan.shared.core.ThermalZone
 import java.io.File
@@ -63,8 +64,10 @@ class ThermalCollector {
                     ))
                 }
             }
-        } catch (_: Exception) {
-            // Cannot read kernel zones without Shizuku
+        } catch (e: Exception) {
+            // Cannot read kernel zones without Shizuku — but log WHY so Power Mode
+            // failures aren't invisible.
+            Log.w("ThermalCollector", "Failed to read /sys/class/thermal zones: ${e.message}")
         }
         return zones
     }

@@ -1,20 +1,54 @@
 package com.droidscan.telemetry
 
 import android.os.Build
+import android.os.SystemClock
+import android.util.DisplayMetrics
+import android.util.Log
+import android.view.WindowManager
 import com.droidscan.shared.core.SystemInfoSnapshot
 import java.io.File
 
 class SystemInfoCollector {
+    companion object {
+        private const val TAG = "SystemInfoCollector"
+    }
+
+    private var wm: WindowManager? = null
+    private var displayMetrics: DisplayMetrics? = null
+
+    fun attach(windowManager: WindowManager?) {
+        wm = windowManager
+        displayMetrics = try {
+            val metrics = DisplayMetrics()
+            windowManager?.defaultDisplay?.getRealMetrics(metrics)
+            metrics
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to read display metrics: ${e.message}")
+            null
+        }
+    }
 
     fun read(): SystemInfoSnapshot {
+        // Kernel version via system property (works without /proc access)
         val kernelVersion = try {
-            File("/proc/version").readText().trim().split(" ").getOrNull(2)
+            System.getProperty("os.version")?.takeIf { it.isNotEmpty() }
         } catch (_: Exception) { null }
 
+        // SELinux status — check via system property
         val selinuxEnforced = try {
-            val selinux = File("/sys/fs/selinux/enforce")
-            if (selinux.exists()) selinux.readText().trim() == "1" else null
+            val prop = System.getProperty("selinux.enforce")
+            if (prop == "1") true
+            else null  // Runtime.exec("getenforce") blocked on Android 14+
         } catch (_: Exception) { null }
+
+        // Uptime via SystemClock (reliable, no /proc needed)
+        val uptimeMs = SystemClock.elapsedRealtime()
+
+        val resolution = displayMetrics?.let {
+            "${it.widthPixels}x${it.heightPixels}"
+        }
+
+        val densityDpi = displayMetrics?.densityDpi?.let { "${it} dpi" }
 
         return SystemInfoSnapshot(
             deviceModel = Build.MODEL,
@@ -24,7 +58,9 @@ class SystemInfoCollector {
             securityPatch = Build.VERSION.SECURITY_PATCH,
             kernelVersion = kernelVersion,
             selinuxEnforced = selinuxEnforced,
-            uptimeMs = System.currentTimeMillis() - readBootTime()
+            uptimeMs = uptimeMs,
+            resolution = resolution,
+            densityDpi = densityDpi
         )
     }
 
@@ -34,7 +70,8 @@ class SystemInfoCollector {
             val btimeLine = uptimeFile.readLines().firstOrNull { it.startsWith("btime") }
             btimeLine?.split("\\s+".toRegex())?.getOrNull(1)?.toLongOrNull()?.times(1000)
                 ?: System.currentTimeMillis()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to read boot time from /proc/stat: ${e.message}")
             System.currentTimeMillis()
         }
     }

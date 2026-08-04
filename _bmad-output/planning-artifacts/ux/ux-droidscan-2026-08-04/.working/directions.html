@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>droidscan — Design Directions Board</title>
+<!--
+  droidscan v1 — three candidate visual directions applied to the SAME hero screen (Overview).
+  Direction A · Terminal Purist   — the phone IS a terminal (btop/htop)
+  Direction B · Diagnostic Cockpit — operations console (Grafana/Datadog)
+  Direction C · Signal Clarity     — precision instrument (Network Signal Guru register)
+  Each column: rationale, near-1:1 Overview hero in a phone frame, secondary screen
+  (glossary bottom sheet), and a state variant (Radio permission denied).
+  Real product content from the run; voice-checked strings; inline CSS, system fonts,
+  no JS, no network. Hex values per direction documented in <style> comments.
+-->
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#090B10; color:#E8EDF5; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding:32px 20px 64px; }
+  .page { max-width:1500px; margin:0 auto; }
+  h1 { font-size:22px; font-weight:700; letter-spacing:-0.01em; }
+  .lede { color:#8A94A8; font-size:14px; margin-top:6px; line-height:1.5; max-width:900px; }
+  .rule { border:0; border-top:1px solid #232938; margin:20px 0 28px; }
+  .cols { display:grid; grid-template-columns:repeat(auto-fit, minmax(380px,1fr)); gap:24px; align-items:start; }
+  .col { background:#10131B; border:1px solid #232938; border-radius:16px; padding:22px; }
+  .col h2 { font-size:17px; font-weight:700; }
+  .col .dir-tag { display:inline-block; font-size:10.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#8A94A8; border:1px solid #2C3444; border-radius:99px; padding:3px 10px; margin:8px 0 10px; }
+  .col .rationale { font-size:12.5px; color:#A8B0C0; line-height:1.55; margin-bottom:16px; }
+  .subheads { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px; }
+  .subhead { font-size:10.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#8A94A8; margin-bottom:8px; }
+
+  /* ── phone frame ── */
+  .phone { width:300px; margin:0 auto; border-radius:30px; border:6px solid #232B38; background:#000; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,.45); }
+  .screen { height:620px; position:relative; display:flex; flex-direction:column; overflow:hidden; }
+  .statusbar { display:flex; justify-content:space-between; align-items:center; padding:8px 16px 4px; font-family:ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size:10px; }
+  .apphead { display:flex; justify-content:space-between; align-items:center; padding:4px 16px 8px; }
+  .brand { font-family:ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-weight:700; font-size:17px; }
+  .badge { font-size:9.5px; font-weight:600; letter-spacing:0.03em; border-radius:5px; padding:3px 7px; }
+  .tabbar { display:flex; margin-top:auto; border-top:1px solid; }
+  .tab { flex:1; text-align:center; padding:10px 0 12px; font-size:10px; font-weight:600; letter-spacing:0.02em; }
+  .tab.active { border-bottom:2px solid; }
+  .mini { margin-top:4px; }
+  .mini .frame { border-radius:12px; overflow:hidden; border:1px solid #232B38; }
+
+  /* mono helper */
+  .mono { font-family:ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  .sn-row { display:flex; justify-content:space-between; align-items:center; }
+  .dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>droidscan — design directions board</h1>
+  <p class="lede">Three complete visual personalities on the same Overview hero. Each differs in density, typography, motion register, and chrome — they are not palette swaps. Below every phone: the glossary bottom sheet (secondary surface) and the Radio permission-denied empty state (failure path).</p>
+  <hr class="rule">
+  <div class="cols">
+
+  <!-- ═══════════════ DIRECTION A · TERMINAL PURIST ═══════════════ -->
+  <!--
+    Dir A — Terminal Purist. bg #0D1117 · surface #161B22 · raised #21262D · border #30363D
+    ink #E6EDF3 · ink2 #8B949E · accent #58A6FF · ok #3FB950 · warn #D29922 · crit #F85149 · live #39D2C0
+    Density: dense (row 24px) · type: mono everywhere, uppercase section rules · corners: 2-4px
+    Motion: instant, no easing flourish · register: the device screen IS a terminal
+  -->
+  <div class="col">
+    <h2>A · Terminal Purist</h2>
+    <span class="dir-tag">btop in your pocket</span>
+    <p class="rationale">The phone screen is a terminal emulator — zero chrome, section rules, mono everywhere. This is the strongest anti-*#*#4636#*#* statement: engineers get a tool that already speaks their language, dense enough to be trusted at a glance.</p>
+
+    <div class="phone">
+      <div class="screen" style="background:#0D1117;color:#E6EDF3">
+        <div class="statusbar" style="color:#8B949E"><span>14:32</span><span>5G ▲</span></div>
+        <div class="apphead" style="border-bottom:1px solid #21262D">
+          <span class="brand" style="color:#58A6FF">droidscan</span>
+          <span class="badge mono" style="color:#39D2C0;border:1px solid #21262D">POWER MODE</span>
+        </div>
+        <div style="flex:1;padding:8px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;line-height:1.5">
+          <div style="color:#58A6FF">── SIGNAL ────────────────────────</div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">RSRP</span><span><span class="dot" style="background:#D29922"></span>−112 dBm</span></div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">RSRQ</span><span><span class="dot" style="background:#D29922"></span>−14 dB</span></div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">SINR</span><span><span class="dot" style="background:#D29922"></span>2 dB</span></div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">IMS</span><span><span class="dot" style="background:#F85149"></span>NOT_REGISTERED</span></div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">BAND</span><span>n78</span></div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">CELL</span><span>12345678</span></div>
+          <div style="color:#58A6FF;margin-top:6px">── POWER ─────────────────────────</div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">BATTERY</span><span>67%</span></div>
+          <div style="padding:2px 0"><div style="height:5px;background:#21262D;width:100%"><div style="height:5px;background:#3FB950;width:67%"></div></div></div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">TEMP</span><span><span class="dot" style="background:#D29922"></span>42°C</span></div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">CPU AVG</span><span><span class="dot" style="background:#D29922"></span>78%</span></div>
+          <div style="color:#F85149;margin-top:6px">▮ THERMAL THROTTLING ACTIVE</div>
+          <div style="color:#58A6FF;margin-top:6px">── SYSTEM ───────────────────────</div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">MODEL</span><span>Pixel 8</span></div>
+          <div class="sn-row" style="padding:3px 0"><span style="color:#8B949E">ANDROID</span><span>14</span></div>
+        </div>
+        <div class="tabbar" style="border-color:#21262D;font-family:ui-monospace,Menlo,Consolas,monospace">
+          <span class="tab active" style="color:#58A6FF;border-color:#58A6FF">⌂ OVERVIEW</span>
+          <span class="tab" style="color:#8B949E">◉ RADIO</span>
+          <span class="tab" style="color:#8B949E">⚙ SYSTEM</span>
+          <span class="tab" style="color:#8B949E">⚡ POWER</span>
+          <span class="tab" style="color:#8B949E">○ SIM</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subheads">
+      <div>
+        <div class="subhead">Glossary sheet</div>
+        <div class="mini"><div class="frame" style="background:#0D1117;color:#E6EDF3;border-color:#21262D;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;padding:12px">
+          <div style="color:#58A6FF;font-weight:700">RSRP</div>
+          <div style="color:#8B949E">REFERENCE SIGNAL RECEIVED POWER</div>
+          <div style="margin-top:6px;color:#8B949E">WHAT IT MEASURES</div>
+          <div>Received power of the serving cell's reference signal</div>
+          <div style="margin-top:6px;color:#8B949E">CURRENT CONTEXT</div>
+          <div><span class="dot" style="background:#D29922"></span>−112 dBm — Weak; dropped calls indoors likely</div>
+          <div style="margin-top:6px;color:#8B949E">HEALTHY RANGE</div>
+          <div>−80 to −90 excellent · −110 to −120 weak</div>
+        </div></div>
+      </div>
+      <div>
+        <div class="subhead">Empty state</div>
+        <div class="mini"><div class="frame" style="background:#0D1117;color:#E6EDF3;border-color:#21262D;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;padding:14px">
+          <div style="color:#8B949E">── RADIO ──</div>
+          <div style="margin-top:8px;color:#D29922">△ LOCATION REQUIRED</div>
+          <div style="margin-top:4px;color:#8B949E">Cell metrics need location access. Grant it in Settings.</div>
+          <div style="margin-top:8px;color:#58A6FF">[ OPEN SETTINGS ]</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DIRECTION B · DIAGNOSTIC COCKPIT ═══════════════ -->
+  <!--
+    Dir B — Diagnostic Cockpit. bg #0A0E16 · surface #111827 · raised #182236 · border #24304A
+    ink #E5EAF3 · ink2 #8B98B8 · accent #2993F3 · ok #73BF69 · warn #E5A83E · crit #E24D42 · live #0FB5BA
+    Density: card grid (padding 12px) · type: sans labels + mono values · corners: 10-14px
+    Motion: card stagger 150ms · register: operations console, one glance
+  -->
+  <div class="col">
+    <h2>B · Diagnostic Cockpit</h2>
+    <span class="dir-tag">operations console</span>
+    <p class="rationale">Grafana-class operations console. Card sections lift by tone, left-border accents encode status at the periphery of vision, sans labels guide the eye while mono values keep the data honest. Richer hierarchy, more approachable at arm's length.</p>
+
+    <div class="phone">
+      <div class="screen" style="background:#0A0E16;color:#E5EAF3">
+        <div class="statusbar" style="color:#8B98B8"><span>14:32</span><span>5G ▲</span></div>
+        <div class="apphead">
+          <span class="brand mono" style="color:#2993F3">droidscan</span>
+          <span class="badge" style="color:#0FB5BA;background:rgba(15,181,186,.12)">Power Mode</span>
+        </div>
+        <div style="flex:1;padding:6px 14px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:12px;font-weight:600;color:#8B98B8;letter-spacing:.04em;text-transform:uppercase">Signal</div>
+          <div style="background:#111827;border:1px solid #24304A;border-left:3px solid #E5A83E;border-radius:10px;padding:10px 12px">
+            <div class="sn-row" style="font-size:12px"><span style="color:#8B98B8">RSRP</span><span class="mono" style="font-size:13px;font-weight:600"><span class="dot" style="background:#E5A83E"></span>−112 dBm</span></div>
+            <div class="sn-row" style="font-size:12px;margin-top:6px"><span style="color:#8B98B8">RSRQ</span><span class="mono" style="font-size:13px;font-weight:600"><span class="dot" style="background:#E5A83E"></span>−14 dB</span></div>
+            <div class="sn-row" style="font-size:12px;margin-top:6px"><span style="color:#8B98B8">SINR</span><span class="mono" style="font-size:13px;font-weight:600"><span class="dot" style="background:#E5A83E"></span>2 dB</span></div>
+          </div>
+          <div style="background:#111827;border:1px solid #24304A;border-left:3px solid #E24D42;border-radius:10px;padding:10px 12px">
+            <div class="sn-row" style="font-size:12px"><span style="color:#8B98B8">IMS</span><span class="mono" style="font-size:13px;font-weight:600"><span class="dot" style="background:#E24D42"></span>NOT_REGISTERED</span></div>
+            <div class="sn-row" style="font-size:12px;margin-top:6px"><span style="color:#8B98B8">Band · Cell</span><span class="mono" style="font-size:13px">n78 · 12345678</span></div>
+          </div>
+          <div style="font-size:12px;font-weight:600;color:#8B98B8;letter-spacing:.04em;text-transform:uppercase;margin-top:4px">Power</div>
+          <div style="background:#111827;border:1px solid #24304A;border-left:3px solid #73BF69;border-radius:10px;padding:10px 12px">
+            <div class="sn-row" style="font-size:12px"><span style="color:#8B98B8">Battery</span><span class="mono" style="font-size:13px;font-weight:600">67%</span></div>
+            <div style="height:5px;background:#24304A;border-radius:3px;margin-top:7px;overflow:hidden"><div style="height:5px;background:#73BF69;width:67%"></div></div>
+            <div class="sn-row" style="font-size:12px;margin-top:7px"><span style="color:#8B98B8">Temp</span><span class="mono" style="font-size:13px;font-weight:600"><span class="dot" style="background:#E5A83E"></span>42°C</span></div>
+            <div class="sn-row" style="font-size:12px;margin-top:6px"><span style="color:#8B98B8">CPU avg</span><span class="mono" style="font-size:13px;font-weight:600"><span class="dot" style="background:#E5A83E"></span>78%</span></div>
+          </div>
+          <div style="background:rgba(226,77,66,.10);border:1px solid rgba(226,77,66,.35);border-radius:10px;padding:9px 12px;font-size:12px;font-weight:600;color:#F2B8B3">Thermal throttling active</div>
+        </div>
+        <div class="tabbar" style="border-color:#24304A;background:#0D1320">
+          <span class="tab active" style="color:#2993F3;border-color:#2993F3">Overview</span>
+          <span class="tab" style="color:#8B98B8">Radio</span>
+          <span class="tab" style="color:#8B98B8">System</span>
+          <span class="tab" style="color:#8B98B8">Power</span>
+          <span class="tab" style="color:#8B98B8">SIM</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subheads">
+      <div>
+        <div class="subhead">Glossary sheet</div>
+        <div class="mini"><div class="frame" style="background:#111827;color:#E5EAF3;border-color:#24304A;padding:12px">
+          <div style="font-size:12.5px;font-weight:700;color:#2993F3">RSRP</div>
+          <div style="font-size:10px;color:#8B98B8;letter-spacing:.05em;text-transform:uppercase;margin-top:2px">Reference Signal Received Power</div>
+          <div style="font-size:10px;color:#8B98B8;letter-spacing:.05em;text-transform:uppercase;margin-top:9px">What it measures</div>
+          <div style="font-size:11.5px;margin-top:3px">Received power of the serving cell's reference signal</div>
+          <div style="font-size:10px;color:#8B98B8;letter-spacing:.05em;text-transform:uppercase;margin-top:9px">Current context</div>
+          <div style="font-size:11.5px;margin-top:3px"><span class="dot" style="background:#E5A83E"></span>−112 dBm — Weak; dropped calls indoors likely</div>
+          <div style="font-size:10px;color:#8B98B8;letter-spacing:.05em;text-transform:uppercase;margin-top:9px">Healthy range</div>
+          <div style="font-size:11.5px;margin-top:3px" class="mono">−80 to −90 excellent · −110 to −120 weak</div>
+        </div></div>
+      </div>
+      <div>
+        <div class="subhead">Empty state</div>
+        <div class="mini"><div class="frame" style="background:#111827;color:#E5EAF3;border-color:#24304A;padding:14px">
+          <div style="font-size:12.5px;font-weight:600;color:#E5A83E">Location required for cell metrics</div>
+          <div style="font-size:11.5px;color:#8B98B8;margin-top:5px;line-height:1.5">Radio needs location access to read cell identity. You can change this anytime in Settings.</div>
+          <div style="display:inline-block;margin-top:10px;font-size:11.5px;font-weight:600;color:#0A0E16;background:#2993F3;border-radius:8px;padding:6px 12px">Open Settings</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DIRECTION C · SIGNAL CLARITY ═══════════════ -->
+  <!--
+    Dir C — Signal Clarity. bg #0B1220 · surface #101A2E · raised #16233C · border #1E2D4A
+    ink #EAF1FA · ink2 #8CA0BE · accent #22D3EE · ok #34D399 · warn #FBBF24 · crit #F87171 · live #60A5FA
+    Density: airy (padding 16-20px) · type: large mono readout + sans labels · corners: 14-16px
+    Motion: soft fade, gentle · register: precision instrument, calm confidence
+  -->
+  <div class="col">
+    <h2>C · Signal Clarity</h2>
+    <span class="dir-tag">precision instrument</span>
+    <p class="rationale">A precision instrument with calm confidence. The signal story leads as a large readout with its trend line; generous whitespace and a single cyan accent read modern and considered, not hackerly. The least dense, most approachable direction — while never hiding the engineering.</p>
+
+    <div class="phone">
+      <div class="screen" style="background:#0B1220;color:#EAF1FA">
+        <div class="statusbar" style="color:#8CA0BE"><span>14:32</span><span>5G ▲</span></div>
+        <div class="apphead">
+          <span class="brand mono" style="color:#22D3EE">droidscan</span>
+          <span class="badge" style="color:#60A5FA;background:rgba(96,165,250,.12)">Power Mode</span>
+        </div>
+        <div style="flex:1;padding:8px 20px;display:flex;flex-direction:column;gap:18px">
+          <div style="background:#101A2E;border:1px solid #1E2D4A;border-radius:16px;padding:18px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:12px;font-weight:600;color:#8CA0BE;letter-spacing:.05em;text-transform:uppercase">Signal</span>
+              <span class="dot" style="background:#FBBF24"></span>
+            </div>
+            <div class="mono" style="font-size:34px;font-weight:700;margin-top:10px;color:#EAF1FA">−112 <span style="font-size:15px;font-weight:600;color:#8CA0BE">dBm</span></div>
+            <div style="font-size:12.5px;color:#FBBF24;margin-top:4px">Weak — dropped calls likely indoors</div>
+            <div class="mono" style="font-size:10px;color:#8CA0BE;letter-spacing:.06em;margin-top:14px">TREND · 5 MIN</div>
+            <svg width="100%" height="26" viewBox="0 0 240 26" preserveAspectRatio="none">
+              <polyline points="0,8 24,10 48,7 72,12 96,14 120,11 144,16 168,14 192,18 216,17 240,20" fill="none" stroke="#22D3EE" stroke-width="1.6"/>
+            </svg>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">
+              <div><div style="font-size:10px;color:#8CA0BE">RSRQ</div><div class="mono" style="font-size:15px;font-weight:600">−14 dB</div></div>
+              <div><div style="font-size:10px;color:#8CA0BE">SINR</div><div class="mono" style="font-size:15px;font-weight:600">2 dB</div></div>
+              <div><div style="font-size:10px;color:#8CA0BE">IMS</div><div class="mono" style="font-size:15px;font-weight:600;color:#F87171">NOT REG</div></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#8CA0BE;margin-top:14px"><span class="mono">n78</span><span class="mono">Cell 12345678</span></div>
+          </div>
+          <div style="background:#101A2E;border:1px solid #1E2D4A;border-radius:16px;padding:18px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:12px;font-weight:600;color:#8CA0BE;letter-spacing:.05em;text-transform:uppercase">Power</span>
+              <span class="mono" style="font-size:15px;font-weight:700">67%</span>
+            </div>
+            <div style="height:7px;background:#1E2D4A;border-radius:4px;margin-top:10px;overflow:hidden"><div style="height:7px;background:#34D399;width:67%"></div></div>
+            <div class="sn-row" style="font-size:12.5px;margin-top:12px"><span style="color:#8CA0BE">Temp</span><span class="mono" style="font-weight:600"><span class="dot" style="background:#FBBF24"></span>42°C</span></div>
+            <div class="sn-row" style="font-size:12.5px;margin-top:8px"><span style="color:#8CA0BE">CPU avg</span><span class="mono" style="font-weight:600"><span class="dot" style="background:#FBBF24"></span>78%</span></div>
+          </div>
+          <div style="background:rgba(248,113,113,.10);border:1px solid rgba(248,113,113,.30);border-radius:12px;padding:12px 16px;font-size:12.5px;font-weight:600;color:#FBC5C5">Thermal throttling active</div>
+        </div>
+        <div class="tabbar" style="border-color:#1E2D4A;background:#0D1626">
+          <span class="tab active" style="color:#22D3EE;border-color:#22D3EE">Overview</span>
+          <span class="tab" style="color:#8CA0BE">Radio</span>
+          <span class="tab" style="color:#8CA0BE">System</span>
+          <span class="tab" style="color:#8CA0BE">Power</span>
+          <span class="tab" style="color:#8CA0BE">SIM</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subheads">
+      <div>
+        <div class="subhead">Glossary sheet</div>
+        <div class="mini"><div class="frame" style="background:#101A2E;color:#EAF1FA;border-color:#1E2D4A;padding:16px">
+          <div style="font-size:14px;font-weight:700;color:#22D3EE">RSRP</div>
+          <div style="font-size:10.5px;color:#8CA0BE;letter-spacing:.05em;text-transform:uppercase;margin-top:2px">Reference Signal Received Power</div>
+          <div style="font-size:10.5px;color:#8CA0BE;letter-spacing:.05em;text-transform:uppercase;margin-top:12px">What it measures</div>
+          <div style="font-size:12px;margin-top:4px;line-height:1.5">Received power of the serving cell's reference signal</div>
+          <div style="font-size:10.5px;color:#8CA0BE;letter-spacing:.05em;text-transform:uppercase;margin-top:12px">Current context</div>
+          <div style="font-size:12px;margin-top:4px;line-height:1.5"><span class="dot" style="background:#FBBF24"></span>−112 dBm — Weak; dropped calls indoors likely</div>
+          <div style="font-size:10.5px;color:#8CA0BE;letter-spacing:.05em;text-transform:uppercase;margin-top:12px">Healthy range</div>
+          <div style="font-size:12px;margin-top:4px" class="mono">−80 to −90 excellent · −110 to −120 weak</div>
+        </div></div>
+      </div>
+      <div>
+        <div class="subhead">Empty state</div>
+        <div class="mini"><div class="frame" style="background:#101A2E;color:#EAF1FA;border-color:#1E2D4A;padding:16px">
+          <div style="font-size:13px;font-weight:600;color:#FBBF24">Location required</div>
+          <div style="font-size:12px;color:#8CA0BE;margin-top:5px;line-height:1.55">Cell metrics need location access. Grant it in Settings to read band and cell ID.</div>
+          <div style="display:inline-block;margin-top:12px;font-size:12px;font-weight:600;color:#0B1220;background:#22D3EE;border-radius:10px;padding:7px 14px">Open Settings</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <p class="foot" style="color:#8A94A8;font-size:12.5px;margin-top:24px;line-height:1.7;max-width:900px">
+    How to read this board — every direction renders the <b>same</b> Overview hero for the same device at the same moment
+    (RSRP −112, IMS not registered, throttling active), so the decision is purely about visual personality.
+    <b>A</b> = densest, most "engineer", lowest polish bar but strongest statement. <b>B</b> = best glanceability and hierarchy, closest to Grafana muscle memory.
+    <b>C</b> = most modern and approachable, biggest delta from the current build, least dense.
+    Pick one direction (or a blend, e.g. "B's cards with A's density") and we promote it — plus the theme from <code>.working/color-themes.html</code> — into <code>DESIGN.md</code> and <code>EXPERIENCE.md</code>.
+  </p>
+</div>
+</body>
+</html>

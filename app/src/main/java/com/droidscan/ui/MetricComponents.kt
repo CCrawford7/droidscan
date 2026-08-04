@@ -63,7 +63,8 @@ fun MetricRow(
     value: MetricValue,
     glossaryId: String? = null,
     onTap: ((String) -> Unit)? = null,
-    indent: Boolean = false
+    indent: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     val statusColor = if (value.numeric != null && value.threshold != null) {
         val tier = if (value.inverted) {
@@ -79,7 +80,7 @@ fun MetricRow(
     } else TerminalTextSecondary
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 1.dp)
             .then(

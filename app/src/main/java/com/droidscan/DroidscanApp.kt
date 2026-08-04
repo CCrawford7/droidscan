@@ -16,6 +16,7 @@ class DroidscanApp : Application() {
         val radioCollector = RadioCollector().also {
             val tm = getSystemService(TELEPHONY_SERVICE) as android.telephony.TelephonyManager
             it.attach(tm)
+            it.attachContext(this)
         }
 
         val powerManager = getSystemService(POWER_SERVICE) as android.os.PowerManager
@@ -42,9 +43,20 @@ class DroidscanApp : Application() {
             it.attach(this)
         }
 
+        val systemCollector = SystemInfoCollector().also {
+            val wm = getSystemService(WINDOW_SERVICE) as? android.view.WindowManager
+            it.attach(wm)
+        }
+
         val shizukuDetector = ShizukuDetector().apply {
             initialize()
         }
+
+        // File-backed metric history (P1): powers trend charts + the future
+        // diagnostic engine. Bounded to ~1h of 1s snapshots.
+        val historyStore = com.droidscan.shared.core.MetricHistoryStore(
+            file = java.io.File(filesDir, "metrics_history.jsonl")
+        )
 
         telemetryCollector = TelemetryCollector(
             radioCollector = radioCollector,
@@ -54,8 +66,9 @@ class DroidscanApp : Application() {
             processCollector = processCollector,
             networkCollector = networkCollector,
             simCollector = simCollector,
-            systemCollector = SystemInfoCollector(),
-            shizukuDetector = shizukuDetector
+            systemCollector = systemCollector,
+            shizukuDetector = shizukuDetector,
+            historyStore = historyStore
         )
     }
 

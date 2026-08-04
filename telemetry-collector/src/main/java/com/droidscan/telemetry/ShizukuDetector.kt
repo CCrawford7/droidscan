@@ -21,14 +21,32 @@ class ShizukuDetector {
 
     fun initialize() {
         available = try {
-            // Check if Shizuku runtime classes are present on the classpath.
-            // The actual service connection happens asynchronously; we just
-            // verify the infrastructure exists. Collectors that need Shizuku
-            // will fall back gracefully if the service isn't connected.
-            Class.forName("rikka.shizuku.Shizuku")
+            val shizukuClass = Class.forName("rikka.shizuku.Shizuku")
             Class.forName("rikka.shizuku.ShizukuProvider")
-            Log.i("ShizukuDetector", "Shizuku API 13+ runtime detected — Power Mode may be available")
-            true
+
+            // Real service-bound + permission check (not just classpath presence).
+            // Class.forName only proves the runtime is installed; Power Mode is only
+            // usable when the binder is live AND the app holds the Shizuku permission.
+            val bound = try {
+                shizukuClass.getMethod("pingBinder").invoke(null) as? Boolean ?: false
+            } catch (e: Exception) {
+                false
+            }
+
+            val permissionGranted = try {
+                val result = shizukuClass.getMethod("checkSelfPermission").invoke(null) as? Int
+                result == android.content.pm.PackageManager.PERMISSION_GRANTED
+            } catch (e: Exception) {
+                false
+            }
+
+            if (bound && permissionGranted) {
+                Log.i("ShizukuDetector", "Shizuku service bound + permission granted — Power Mode available")
+                true
+            } else {
+                Log.i("ShizukuDetector", "Shizuku runtime present but not ready (bound=$bound, permGranted=$permissionGranted) — Standard Mode")
+                false
+            }
         } catch (e: ClassNotFoundException) {
             Log.i("ShizukuDetector", "Shizuku not installed — Standard Mode")
             false

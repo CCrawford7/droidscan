@@ -2,6 +2,7 @@ package com.droidscan.telemetry
 
 import android.os.Environment
 import android.os.StatFs
+import android.util.Log
 import com.droidscan.shared.core.StorageSnapshot
 import com.droidscan.shared.core.StorageConsumer
 import java.io.File
@@ -20,8 +21,10 @@ class StorageCollector {
         if (externalMounted) {
             val extStat = StatFs(Environment.getExternalStorageDirectory().absolutePath)
             val extBlockSize = extStat.blockSizeLong
-            externalUsed = extStat.blockCountLong * extBlockSize
-            externalFree = extStat.availableBlocksLong * extBlockSize
+            val extTotal = extStat.blockCountLong * extBlockSize
+            val free = extStat.availableBlocksLong * extBlockSize
+            externalUsed = extTotal - free
+            externalFree = free
         } else {
             externalUsed = null
             externalFree = null
@@ -43,7 +46,9 @@ class StorageCollector {
                     }
                 }
             }
-        } catch (_: Exception) { }
+        } catch (e: Exception) {
+            Log.w("StorageCollector", "Failed to enumerate /data/app consumers: ${e.message}", e)
+        }
 
         return StorageSnapshot(
             internalUsedBytes = internalTotal - internalFree,
