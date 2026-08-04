@@ -13,6 +13,7 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import com.droidscan.shared.core.SimSlot
 import com.droidscan.shared.core.SimStatusSnapshot
+import com.droidscan.shared.core.rsrpOrNull
 
 class SimStatusCollector {
     private var sm: SubscriptionManager? = null
@@ -162,14 +163,21 @@ class SimStatusCollector {
         }
 
         val rsrp = try {
-            subTm.allCellInfo?.firstOrNull { it.isRegistered }?.let { cell ->
-                val raw = when (cell) {
-                    is CellInfoLte -> (cell.cellSignalStrength as? CellSignalStrengthLte)?.rsrp
-                    is CellInfoNr -> (cell.cellSignalStrength as? CellSignalStrengthNr)?.getCsiRsrp()
+            // Primary: registered cell from this sub's allCellInfo.
+            val fromCellInfo = subTm.allCellInfo?.firstOrNull { it.isRegistered }?.let { cell ->
+                when (cell) {
+                    is CellInfoLte -> (cell.cellSignalStrength as? CellSignalStrengthLte)?.rsrp.rsrpOrNull()
+                    is CellInfoNr -> (cell.cellSignalStrength as? CellSignalStrengthNr)?.getCsiRsrp().rsrpOrNull()
                     else -> null
                 }
-                // NR CSI returns Int.MAX_VALUE when not measurable — treat as unknown
-                raw?.takeIf { it != Int.MAX_VALUE }
+            }
+            // Fallback: the consolidated SignalStrength object for this sub — on
+            // some OEMs (OPPO/OnePlus) it reports RSRP even when allCellInfo has
+            // no registered cell yet or returns the MAX_VALUE sentinel.
+            fromCellInfo ?: subTm.signalStrength?.getCellSignalStrengths()?.let { strengths ->
+                val lte = strengths.filterIsInstance<CellSignalStrengthLte>().firstOrNull()
+                val nr = strengths.filterIsInstance<CellSignalStrengthNr>().firstOrNull()
+                (lte?.rsrp ?: nr?.getCsiRsrp()).rsrpOrNull()
             }
         } catch (e: Exception) {
             logOnce(subId, "allCellInfo", e.message ?: e.javaClass.simpleName)

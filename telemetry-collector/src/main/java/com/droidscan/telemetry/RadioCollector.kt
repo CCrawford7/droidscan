@@ -13,6 +13,9 @@ import android.telephony.CellSignalStrengthLte
 import android.telephony.CellSignalStrengthNr
 import android.telephony.TelephonyManager
 import com.droidscan.shared.core.RadioSnapshot
+import com.droidscan.shared.core.rsrpOrNull
+import com.droidscan.shared.core.rsrqOrNull
+import com.droidscan.shared.core.sinrOrNull
 
 class RadioCollector {
     private var tm: TelephonyManager? = null
@@ -47,15 +50,13 @@ class RadioCollector {
         }
         val activeCell = cellInfoList?.firstOrNull { it.isRegistered }
 
-        // NR/LTE reads return Int.MAX_VALUE when the value is not measurable;
-        // treat that sentinel as "unknown" instead of displaying 2147483647.
-        fun Int?.signalOrNull(): Int? = this?.takeIf { it != Int.MAX_VALUE }
-
         // The allCellInfo path is the canonical source for RSRP/RSRQ/SINR, but on
         // some OEMs (verified OPPO/OnePlus) it can return the MAX_VALUE sentinel
         // or no registered cell — while the modem still reports the values via
         // getSignalStrength(). Fall back to the consolidated SignalStrength object
-        // whenever allCellInfo comes up empty for a metric.
+        // whenever allCellInfo comes up empty for a metric. All raw values are
+        // passed through the shared signalOrNull/rsrpOrNull/rsrqOrNull/sinrOrNull
+        // validators (sentinel guard + physical range check).
         fun strengthObj(): Pair<CellSignalStrengthLte?, CellSignalStrengthNr?> = try {
             val ss = manager.signalStrength
             if (ss == null) Pair(null, null) else {
@@ -68,9 +69,9 @@ class RadioCollector {
         val allCellInfoRsrp = activeCell?.let { cell ->
             when (cell) {
                 is CellInfoLte ->
-                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthLte)?.rsrp.signalOrNull() }
+                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthLte)?.rsrp.rsrpOrNull() }
                 is CellInfoNr ->
-                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthNr)?.getCsiRsrp().signalOrNull() }
+                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthNr)?.getCsiRsrp().rsrpOrNull() }
                 else -> null
             }
         }
@@ -78,9 +79,9 @@ class RadioCollector {
         val allCellInfoRsrq = activeCell?.let { cell ->
             when (cell) {
                 is CellInfoLte ->
-                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthLte)?.rsrq.signalOrNull() }
+                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthLte)?.rsrq.rsrqOrNull() }
                 is CellInfoNr ->
-                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthNr)?.getCsiRsrq().signalOrNull() }
+                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthNr)?.getCsiRsrq().rsrqOrNull() }
                 else -> null
             }
         }
@@ -88,23 +89,23 @@ class RadioCollector {
         val allCellInfoSinr = activeCell?.let { cell ->
             when (cell) {
                 is CellInfoLte ->
-                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthLte)?.rssnr.signalOrNull() }
+                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthLte)?.rssnr.sinrOrNull() }
                 is CellInfoNr ->
-                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthNr)?.getCsiSinr().signalOrNull() }
+                    cell.cellSignalStrength?.let { (it as? CellSignalStrengthNr)?.getCsiSinr().sinrOrNull() }
                 else -> null
             }
         }
 
         val (fallbackLte, fallbackNr) = strengthObj()
         val rsrp: Int? = allCellInfoRsrp
-            ?: fallbackLte?.rsrp?.signalOrNull()
-            ?: fallbackNr?.getCsiRsrp()?.signalOrNull()
+            ?: fallbackLte?.rsrp?.rsrpOrNull()
+            ?: fallbackNr?.getCsiRsrp()?.rsrpOrNull()
         val rsrq: Int? = allCellInfoRsrq
-            ?: fallbackLte?.rsrq?.signalOrNull()
-            ?: fallbackNr?.getCsiRsrq()?.signalOrNull()
+            ?: fallbackLte?.rsrq?.rsrqOrNull()
+            ?: fallbackNr?.getCsiRsrq()?.rsrqOrNull()
         val sinr: Int? = allCellInfoSinr
-            ?: fallbackLte?.rssnr?.signalOrNull()
-            ?: fallbackNr?.getCsiSinr()?.signalOrNull()
+            ?: fallbackLte?.rssnr?.sinrOrNull()
+            ?: fallbackNr?.getCsiSinr()?.sinrOrNull()
 
         val bands = activeCell?.let { cell ->
             when (cell) {

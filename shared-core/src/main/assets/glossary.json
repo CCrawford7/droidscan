@@ -23,9 +23,9 @@
       "label": "SINR",
       "section": "radio",
       "whatItMeasures": "Signal to Interference plus Noise Ratio — how clean your signal is versus background noise and interference.",
-      "currentValueContext": "Measured in dB. Higher = cleaner signal. This is the best indicator of actual data performance.",
-      "healthyRange": "13 dB+ is excellent. 5-13 dB is good. Below 5 dB means poor conditions.",
-      "commonCauses": "Edge of cell coverage, interference from other towers, building materials, many users on the same tower."
+      "currentValueContext": "Measured in dB. Higher = cleaner signal. This is the best indicator of actual data performance. '--' means the radio reports no measurable value right now (not a bad signal — often just idle), or a physically impossible reading was rejected. Valid real-world range is -23 dB to +40 dB.",
+      "healthyRange": "13 dB+ is excellent. 5-13 dB is good. Below 5 dB means poor conditions. A displayed value below -23 dB or above +40 dB is an invalid/placeholder reading, not a real measurement.",
+      "commonCauses": "Edge of cell coverage, interference from other towers, building materials, many users on the same tower. Some phone models (e.g. certain OPPO/OnePlus builds) only expose SINR via the consolidated signal-strength API, so it may be unavailable while that path is quiet."
     },
     {
       "id": "activeBands",
