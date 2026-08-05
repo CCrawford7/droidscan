@@ -1,51 +1,112 @@
 package com.droidscan.ui
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.droidscan.shared.core.*
 import com.droidscan.ui.theme.*
 
-// ─── Section Divider ────────────────────────────────────
+// ── Typography ──────────────────────────────────────────
+// Design rule: labels are SANS (ink2), values are MONO (ink). This split is
+// the single biggest typographic change from the old all-mono register.
+
+private val LabelText = FontFamily.SansSerif
+private val ValueText = FontFamily.Monospace
+
+// ── Status helpers ──────────────────────────────────────
+
+/** Resolves a value to its status color + tier. No threshold → secondary text. */
+private fun statusOf(value: MetricValue): Pair<Color, StatusTier?> {
+    if (value.numeric == null || value.threshold == null) return TerminalTextSecondary to null
+    val tier = if (value.inverted) evaluateStatusInverted(value.numeric, value.threshold)
+               else evaluateStatus(value.numeric, value.threshold)
+    return (when (tier) {
+        StatusTier.GREEN -> TerminalAccentGreen
+        StatusTier.YELLOW -> TerminalAccentYellow
+        StatusTier.RED -> TerminalAccentRed
+    }) to tier
+}
+
+/** Spoken status word for TalkBack (dot is decorative; text carries state). */
+private fun StatusTier?.spoken(): String = when (this) {
+    StatusTier.GREEN -> "good"
+    StatusTier.YELLOW -> "caution"
+    StatusTier.RED -> "critical"
+    null -> ""
+}
+
+// ── TierCard (replaces MetricCard) ──────────────────────
+// Load-bearing container. Fill `surface`, 1dp `border` hairline, 14dp radius.
+// Header: uppercase cyan sans label + optional right-aligned live readout.
 
 @Composable
-fun SectionDivider(title: String) {
-    Row(
-        modifier = Modifier
+fun TierCard(
+    title: String,
+    liveReadout: String? = null,
+    liveColor: Color = TerminalAccentCyan,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp, horizontal = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .background(TerminalSurface, RoundedCornerShape(14.dp))
+            .border(1.dp, TerminalBorder, RoundedCornerShape(14.dp))
+            .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 14.dp)
     ) {
-        Text(
-            "──",
-            color = TerminalAccentBlue,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            title,
-            color = TerminalAccentBlue,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            "─".repeat(30),
-            color = TerminalBorder,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 11.sp
-        )
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                title,
+                color = TerminalAccentBlue,
+                fontFamily = LabelText,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.09.sp
+            )
+            liveReadout?.let {
+                Text(
+                    it,
+                    color = liveColor,
+                    fontFamily = ValueText,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        Spacer(Modifier.height(10.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(9.dp)) { content() }
     }
+}
+
+/** Hairline above an emphasized last row (e.g. Peak overall in Power). */
+@Composable
+fun TierDivider() {
+    Box(Modifier.fillMaxWidth().height(1.dp).background(TerminalBorder))
 }
 
 // ─── Metric Row (Label + Status Dot + Value) ───────────
@@ -66,60 +127,59 @@ fun MetricRow(
     indent: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val statusColor = if (value.numeric != null && value.threshold != null) {
-        val tier = if (value.inverted) {
-            evaluateStatusInverted(value.numeric, value.threshold)
-        } else {
-            evaluateStatus(value.numeric, value.threshold)
+    val (statusColor, tier) = statusOf(value)
+    val rowModifier = modifier
+        .fillMaxWidth()
+        .then(
+            if (onTap != null && glossaryId != null)
+                Modifier.pointerInput(glossaryId) { detectTapGestures { onTap(glossaryId) } }
+            else Modifier
+        )
+        .semantics(mergeDescendants = true) {
+            // Announce label + value + status as ONE utterance for TalkBack.
+            val spoken = tier.spoken()
+            contentDescription = if (spoken.isNotEmpty()) "$label, ${value.text}, $spoken" else "$label, ${value.text}"
         }
-        when (tier) {
-            StatusTier.GREEN -> TerminalAccentGreen
-            StatusTier.YELLOW -> TerminalAccentYellow
-            StatusTier.RED -> TerminalAccentRed
-        }
-    } else TerminalTextSecondary
 
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 1.dp)
-            .then(
-                if (onTap != null && glossaryId != null)
-                    Modifier.pointerInput(glossaryId) { detectTapGestures { onTap(glossaryId) } }
-                else Modifier
-            ),
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        modifier = rowModifier,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Status dot
-        if (value.threshold != null && value.numeric != null) {
-            Canvas(modifier = Modifier.size(6.dp).padding(end = 4.dp)) {
-                drawCircle(color = statusColor)
-            }
-        } else {
-            Spacer(Modifier.width(10.dp))
-        }
-
-        // Label
+        // Label (sans, ink2)
         Text(
-            if (indent) "  $label" else label,
+            if (indent) "    $label" else label,
             color = TerminalTextSecondary,
-            fontFamily = FontFamily.Monospace,
+            fontFamily = LabelText,
             fontSize = 12.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
 
-        // Value
+        // Status dot — decorative (7dp), immediately before the value.
+        if (value.threshold != null && value.numeric != null) {
+            Canvas(modifier = Modifier.size(7.dp).padding(end = 6.dp)) {
+                drawCircle(color = statusColor)
+            }
+        } else {
+            Spacer(Modifier.width(13.dp))
+        }
+
+        // Value (mono, ink, 600)
         Text(
             value.text,
             color = statusColor,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 12.sp,
-            fontWeight = if (value.numeric != null) FontWeight.Medium else FontWeight.Normal
+            fontFamily = ValueText,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
 
-// ─── Dual Metric Row (two metrics side-by-side) ─────────
+// ─── Dual Pair (two metrics side-by-side, label above value) ─────────
 
 @Composable
 fun DualMetricRow(
@@ -130,16 +190,61 @@ fun DualMetricRow(
     onTap: ((String) -> Unit)? = null
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 1.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            MetricRow(leftLabel, leftValue, leftGlossaryId, onTap)
+        DualCell(leftLabel, leftValue, leftGlossaryId, onTap, Modifier.weight(1f))
+        DualCell(rightLabel, rightValue, rightGlossaryId, onTap, Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun DualCell(
+    label: String,
+    value: MetricValue,
+    glossaryId: String?,
+    onTap: ((String) -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    val (statusColor, tier) = statusOf(value)
+    val cellModifier = modifier
+        .then(
+            if (onTap != null && glossaryId != null)
+                Modifier.pointerInput(glossaryId) { detectTapGestures { onTap(glossaryId) } }
+            else Modifier
+        )
+        .semantics(mergeDescendants = true) {
+            val spoken = tier.spoken()
+            contentDescription = if (spoken.isNotEmpty()) "$label, ${value.text}, $spoken" else "$label, ${value.text}"
         }
-        Column(modifier = Modifier.weight(1f)) {
-            MetricRow(rightLabel, rightValue, rightGlossaryId, onTap)
+    Column(cellModifier) {
+        Text(
+            label,
+            color = TerminalTextSecondary,
+            fontFamily = LabelText,
+            fontSize = 11.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Spacer(Modifier.height(2.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (value.threshold != null && value.numeric != null) {
+                Canvas(modifier = Modifier.size(7.dp).padding(end = 6.dp)) {
+                    drawCircle(color = statusColor)
+                }
+            } else {
+                Spacer(Modifier.width(13.dp))
+            }
+            Text(
+                value.text,
+                color = statusColor,
+                fontFamily = ValueText,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -162,32 +267,57 @@ fun BarGauge(
         else -> color
     }
 
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp)) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(label, color = TerminalTextSecondary, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
-            Text(formatBytes(current), color = TerminalTextPrimary, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+            Text(label, color = TerminalTextSecondary, fontFamily = LabelText, fontSize = 11.sp)
+            Text(formatBytes(current), color = TerminalTextPrimary, fontFamily = ValueText, fontSize = 11.sp)
         }
-        Canvas(modifier = Modifier.fillMaxWidth().height(8.dp).padding(top = 1.dp)) {
+        Spacer(Modifier.height(3.dp))
+        // 6dp tall track, 3dp radius, `border` track.
+        Canvas(modifier = Modifier.fillMaxWidth().height(6.dp)) {
             val w = size.width
             val h = size.height
-            drawRoundRect(TerminalBorder, size = androidx.compose.ui.geometry.Size(w, h), cornerRadius = androidx.compose.ui.geometry.CornerRadius(2f))
-            drawRoundRect(barColor, size = androidx.compose.ui.geometry.Size(w * fraction, h), cornerRadius = androidx.compose.ui.geometry.CornerRadius(2f))
+            drawRoundRect(TerminalBorder, size = Size(w, h), cornerRadius = CornerRadius(3f))
+            drawRoundRect(barColor, size = Size(w * fraction, h), cornerRadius = CornerRadius(3f))
         }
+        Spacer(Modifier.height(3.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             Text(
                 "${(fraction * 100).toInt()}%",
                 color = barColor,
-                fontFamily = FontFamily.Monospace,
+                fontFamily = ValueText,
                 fontSize = 10.sp
             )
         }
     }
 }
 
-// ─── Sparkline ──────────────────────────────────────────
+// ─── Chip (status / capability) ─────────────────────────
+// 9sp semibold, status-color text on status@~12% tint, 5dp radius.
+// Variants: THROTTLING (crit), POWER MODE / SHIZUKU (live), PROVISIONED (ok).
+
+@Composable
+fun Chip(text: String, color: Color = TerminalAccentCyan) {
+    Surface(
+        shape = RoundedCornerShape(5.dp),
+        color = color.copy(alpha = 0.12f)
+    ) {
+        Text(
+            text,
+            color = color,
+            fontFamily = LabelText,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 0.03.sp,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+        )
+    }
+}
+
+// ─── Sparkline (reserved for v1.1 — not wired) ──────────
 
 @Composable
 fun MiniSparkline(
@@ -210,7 +340,7 @@ fun MiniSparkline(
             val y = h - ((v - min) / range * h).toFloat()
             if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
         }
-        drawPath(path, color, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
+        drawPath(path, color, style = Stroke(width = 2f))
     }
 }
 

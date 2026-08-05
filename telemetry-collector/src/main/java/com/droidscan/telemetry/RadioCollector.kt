@@ -39,9 +39,13 @@ class RadioCollector {
     fun read(): RadioSnapshot {
         val manager = tm ?: return RadioSnapshot()
 
+        var cellInfoDenied = false
         val cellInfoList = try {
             manager.allCellInfo
         } catch (e: SecurityException) {
+            // Surface this to the UI so it can show the "Location required" banner.
+            // Without the flag the UI can't distinguish denial from a transient gap.
+            cellInfoDenied = true
             Log.w("RadioCollector", "allCellInfo denied (missing permission?): ${e.message}")
             null
         } catch (e: Exception) {
@@ -306,7 +310,8 @@ class RadioCollector {
             volteEnabled = volteEnabled,
             wifiCallingStatus = wifiCallingStatus,
             radioPowerState = radioPowerState,
-            nrNsaAvailable = nrNsaAvailable
+            nrNsaAvailable = nrNsaAvailable,
+            cellInfoDenied = cellInfoDenied
         )
     }
 }

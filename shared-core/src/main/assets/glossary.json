@@ -7,7 +7,8 @@
       "whatItMeasures": "Reference Signal Received Power — the strength of the cellular signal from the tower to your phone.",
       "currentValueContext": "Measured in dBm (decibel-milliwatts). Higher (less negative) = stronger signal.",
       "healthyRange": "-80 dBm to -100 dBm is good. Below -120 dBm is very weak.",
-      "commonCauses": "Thick walls, basement, distance from tower, building materials, network congestion."
+      "commonCauses": "Thick walls, basement, distance from tower, building materials, network congestion.",
+      "expansion": "REFERENCE SIGNAL RECEIVED POWER"
     },
     {
       "id": "rsrq",
@@ -16,7 +17,8 @@
       "whatItMeasures": "Reference Signal Received Quality — the quality of the received signal, factoring in interference and noise.",
       "currentValueContext": "Measured in dB. Higher (less negative) = better quality.",
       "healthyRange": "-5 dB to -10 dB is good. Below -15 dB indicates significant interference.",
-      "commonCauses": "Network congestion, interference from other cell towers, physical obstructions causing signal reflections."
+      "commonCauses": "Network congestion, interference from other cell towers, physical obstructions causing signal reflections.",
+      "expansion": "REFERENCE SIGNAL RECEIVED QUALITY"
     },
     {
       "id": "sinr",
@@ -25,7 +27,8 @@
       "whatItMeasures": "Signal to Interference plus Noise Ratio — how clean your signal is versus background noise and interference.",
       "currentValueContext": "Measured in dB. Higher = cleaner signal. This is the best indicator of actual data performance. '--' means the radio reports no measurable value right now (not a bad signal — often just idle), or a physically impossible reading was rejected. Valid real-world range is -23 dB to +40 dB.",
       "healthyRange": "13 dB+ is excellent. 5-13 dB is good. Below 5 dB means poor conditions. A displayed value below -23 dB or above +40 dB is an invalid/placeholder reading, not a real measurement.",
-      "commonCauses": "Edge of cell coverage, interference from other towers, building materials, many users on the same tower. Some phone models (e.g. certain OPPO/OnePlus builds) only expose SINR via the consolidated signal-strength API, so it may be unavailable while that path is quiet."
+      "commonCauses": "Edge of cell coverage, interference from other towers, building materials, many users on the same tower. Some phone models (e.g. certain OPPO/OnePlus builds) only expose SINR via the consolidated signal-strength API, so it may be unavailable while that path is quiet.",
+      "expansion": "SIGNAL TO INTERFERENCE PLUS NOISE RATIO"
     },
     {
       "id": "activeBands",
@@ -34,7 +37,8 @@
       "whatItMeasures": "The specific frequency band your phone is currently connected to for cellular service.",
       "currentValueContext": "Bands are numbered — n71 is low-band 5G (better range), n78 is mid-band 5G (faster speeds), B41 is mid-band 4G LTE.",
       "healthyRange": "Any connected band is normal. Some bands are faster but shorter range.",
-      "commonCauses": "Your carrier determines which bands are available in your area. Phone switches bands automatically based on signal and congestion."
+      "commonCauses": "Your carrier determines which bands are available in your area. Phone switches bands automatically based on signal and congestion.",
+      "expansion": ""
     },
     {
       "id": "imsRegistered",
@@ -43,7 +47,8 @@
       "whatItMeasures": "IP Multimedia Subsystem registration — whether your phone can use VoLTE (voice over 4G/5G) and WiFi Calling.",
       "currentValueContext": "When registered, calls use data networks. When not registered, calls fall back to older 2G/3G networks.",
       "healthyRange": "Registered = good. Not registered = calls may drop or fail.",
-      "commonCauses": "Carrier provisioning issue, incorrect APN settings, roaming on a network that doesn't support your IMS profile, software bug."
+      "commonCauses": "Carrier provisioning issue, incorrect APN settings, roaming on a network that doesn't support your IMS profile, software bug.",
+      "expansion": "IP MULTIMEDIA SUBSYSTEM REGISTRATION"
     },
     {
       "id": "dataNetworkType",
@@ -52,7 +57,8 @@
       "whatItMeasures": "The generation and type of cellular network your phone is currently using for data.",
       "currentValueContext": "NR = 5G, LTE = 4G, HSPA = 3G, EDGE/GPRS = 2G. Faster generations deliver better speeds.",
       "healthyRange": "NR or LTE is normal for modern smartphones.",
-      "commonCauses": "Network coverage area, carrier settings, phone capabilities, network congestion, data saver mode."
+      "commonCauses": "Network coverage area, carrier settings, phone capabilities, network congestion, data saver mode.",
+      "expansion": ""
     },
     {
       "id": "isRoaming",
@@ -61,7 +67,8 @@
       "whatItMeasures": "Whether your phone is connected to a network other than your primary carrier's home network.",
       "currentValueContext": "On = you're using another carrier's network. May incur extra charges depending on your plan.",
       "healthyRange": "Off is normal when not travelling. On is expected when abroad or in areas without your carrier's coverage.",
-      "commonCauses": "International travel, remote area with no home carrier coverage, network outage on your carrier."
+      "commonCauses": "International travel, remote area with no home carrier coverage, network outage on your carrier.",
+      "expansion": ""
     },
     {
       "id": "ecid",
@@ -70,7 +77,8 @@
       "whatItMeasures": "A unique identifier for the specific cell tower sector your phone is connected to.",
       "currentValueContext": "This number identifies which physical tower you're connected to. Useful for tracking coverage patterns.",
       "healthyRange": "Any value is normal. Frequent changes mean you're moving or the network is handing you off between towers.",
-      "commonCauses": "Walking or driving between cell coverage areas, network load balancing."
+      "commonCauses": "Walking or driving between cell coverage areas, network load balancing.",
+      "expansion": "E-UTRAN CELL IDENTIFIER"
     },
     {
       "id": "batteryLevel",
@@ -79,7 +87,8 @@
       "whatItMeasures": "The current charge level of your phone's battery as a percentage of its capacity.",
       "currentValueContext": "0% = empty, 100% = full charge. Below 20% most phones enter low-power mode.",
       "healthyRange": "20-100% is normal operating range.",
-      "commonCauses": "Usage patterns, screen brightness, background processes, cellular signal strength (weak signal drains more), battery age."
+      "commonCauses": "Usage patterns, screen brightness, background processes, cellular signal strength (weak signal drains more), battery age.",
+      "expansion": ""
     },
     {
       "id": "batteryHealth",
@@ -88,7 +97,8 @@
       "whatItMeasures": "The physical condition of your battery as reported by the built-in fuel gauge chip.",
       "currentValueContext": "Good = normal. Overheat = too hot, may limit charging. Dead = needs replacement. Cold = below operating temperature.",
       "healthyRange": "Good is the only normal reading for a healthy battery.",
-      "commonCauses": "Battery age (lithium batteries degrade after 2-3 years), physical damage, extreme temperatures, manufacturing defect."
+      "commonCauses": "Battery age (lithium batteries degrade after 2-3 years), physical damage, extreme temperatures, manufacturing defect.",
+      "expansion": ""
     },
     {
       "id": "chargeRate",
@@ -97,7 +107,8 @@
       "whatItMeasures": "How fast your battery is currently charging or discharging, in microamps.",
       "currentValueContext": "Positive = charging. Negative = discharging. Zero = not connected to power and not draining.",
       "healthyRange": "Charging: 1,000,000-3,000,000 µA is typical. Discharging: -100,000 to -500,000 µA is normal screen-on drain.",
-      "commonCauses": "Charger speed, cable quality, battery temperature (charging slows when hot), background activity."
+      "commonCauses": "Charger speed, cable quality, battery temperature (charging slows when hot), background activity.",
+      "expansion": ""
     },
     {
       "id": "perProcessPower",
@@ -106,7 +117,8 @@
       "whatItMeasures": "Estimated power draw attributed to each running app and system process.",
       "currentValueContext": "Higher values mean that app is draining more battery. Based on estimated power profiles, not direct measurement.",
       "healthyRange": "Screen usually consumes 30-50% of total. Background apps should be under 5% each.",
-      "commonCauses": "App actively doing work, background sync, location services, poor network causing retries, buggy app keeping CPU awake."
+      "commonCauses": "App actively doing work, background sync, location services, poor network causing retries, buggy app keeping CPU awake.",
+      "expansion": ""
     },
     {
       "id": "cpuLoad",
@@ -115,7 +127,8 @@
       "whatItMeasures": "How busy each CPU core is, as a percentage of its maximum capacity.",
       "currentValueContext": "0.0 = idle. 1.0 = completely busy. Most phones have 8 cores (4 efficiency + 4 performance).",
       "healthyRange": "Idle: under 0.1 per core. Normal usage: 0.2-0.5. Heavy gaming/editing: 0.8-1.0.",
-      "commonCauses": "Running apps, background processes, system updates, malware, thermal throttling reducing max speed."
+      "commonCauses": "Running apps, background processes, system updates, malware, thermal throttling reducing max speed.",
+      "expansion": ""
     },
     {
       "id": "memoryPressure",
@@ -124,7 +137,8 @@
       "whatItMeasures": "How constrained the system is by available RAM. High pressure means apps will be killed to free memory.",
       "currentValueContext": "Normal = plenty of RAM. Moderate = system is starting to reclaim memory. Critical = apps are being killed.",
       "healthyRange": "Normal is best. Brief Moderate is OK. Critical means you should close some apps.",
-      "commonCauses": "Too many apps running, memory leak in an app, very large app (game or editor), outdated phone with limited RAM."
+      "commonCauses": "Too many apps running, memory leak in an app, very large app (game or editor), outdated phone with limited RAM.",
+      "expansion": ""
     },
     {
       "id": "storageUsed",
@@ -133,7 +147,8 @@
       "whatItMeasures": "How much of your internal storage is occupied by apps, media, system files, and cached data.",
       "currentValueContext": "Shown as used vs total. Also broken down by system vs user data for clarity.",
       "healthyRange": "Under 80% full is comfortable. Above 90% the system may slow down. Above 95% you'll get warnings.",
-      "commonCauses": "Photos and videos, large games, cached streaming data, downloaded content, system updates."
+      "commonCauses": "Photos and videos, large games, cached streaming data, downloaded content, system updates.",
+      "expansion": ""
     },
     {
       "id": "simProvisioning",
@@ -142,7 +157,8 @@
       "whatItMeasures": "Whether your SIM or eSIM is activated and ready for service on your carrier's network.",
       "currentValueContext": "Provisioned = ready to use. Not provisioned = SIM may not be activated with your carrier.",
       "healthyRange": "Provisioned is the only normal state for active service.",
-      "commonCauses": "New SIM not yet activated, eSIM download incomplete, carrier provisioning delay, SIM card failure."
+      "commonCauses": "New SIM not yet activated, eSIM download incomplete, carrier provisioning delay, SIM card failure.",
+      "expansion": ""
     },
     {
       "id": "esimProfiles",
@@ -151,7 +167,8 @@
       "whatItMeasures": "The number of eSIM profiles installed on your device. Each profile represents a carrier subscription.",
       "currentValueContext": "One profile per active eSIM line. Multiple profiles can be installed but only two (usually) active at once.",
       "healthyRange": "1-2 profiles is typical. Power users may have 3-5 for travel.",
-      "commonCauses": "Adding travel eSIMs, switching carriers, work/personal dual-SIM setup, left old profiles installed."
+      "commonCauses": "Adding travel eSIMs, switching carriers, work/personal dual-SIM setup, left old profiles installed.",
+      "expansion": "EMBEDDED SIM PROFILES"
     },
     {
       "id": "ipAddress",
@@ -160,7 +177,8 @@
       "whatItMeasures": "Your device's current IP address on the network — unique identifier for sending and receiving data.",
       "currentValueContext": "IPv4 shown as four numbers separated by dots. IPv6 shown as hexadecimal. Multiple addresses means multiple network interfaces.",
       "healthyRange": "Any valid IP address is normal. If no IP is shown, you're not connected to any network.",
-      "commonCauses": "DHCP assignment from router, carrier-assigned IP for mobile data, VPN assigning a new IP, IP address conflict."
+      "commonCauses": "DHCP assignment from router, carrier-assigned IP for mobile data, VPN assigning a new IP, IP address conflict.",
+      "expansion": "INTERNET PROTOCOL ADDRESS"
     },
     {
       "id": "activeNetwork",
@@ -169,7 +187,8 @@
       "whatItMeasures": "Which network interface your phone is currently using for internet traffic.",
       "currentValueContext": "WiFi = connected to a wireless network. Mobile = using cellular data. VPN = all traffic going through VPN tunnel.",
       "healthyRange": "Any is normal. WiFi is usually faster and uses less battery than mobile data.",
-      "commonCauses": "WiFi range, mobile data enabled, VPN app active, airplane mode, hotspot/tethering active."
+      "commonCauses": "WiFi range, mobile data enabled, VPN app active, airplane mode, hotspot/tethering active.",
+      "expansion": ""
     },
     {
       "id": "temperature",
@@ -178,7 +197,8 @@
       "whatItMeasures": "The temperature of various components inside your phone — CPU, battery, modem, and others.",
       "currentValueContext": "Multiple zones monitored independently. The hottest zone typically determines whether the phone throttles.",
       "healthyRange": "Under 40°C is cool. 40-55°C is warm. Above 55°C may trigger throttling to protect components.",
-      "commonCauses": "Heavy gaming or video, direct sunlight, fast charging, poor case ventilation, faulty battery."
+      "commonCauses": "Heavy gaming or video, direct sunlight, fast charging, poor case ventilation, faulty battery.",
+      "expansion": ""
     },
     {
       "id": "throttling",
@@ -187,7 +207,8 @@
       "whatItMeasures": "Whether the system is intentionally reducing performance to lower temperature and protect components.",
       "currentValueContext": "Active = phone is hot and performance is being reduced. Inactive = everything is normal.",
       "healthyRange": "Inactive is ideal. Brief throttling during heavy use is normal. Constant throttling suggests a problem.",
-      "commonCauses": "High ambient temperature, sustained heavy load (gaming, video recording), blocked ventilation, case trapping heat."
+      "commonCauses": "High ambient temperature, sustained heavy load (gaming, video recording), blocked ventilation, case trapping heat.",
+      "expansion": ""
     },
     {
       "id": "kernelVersion",
@@ -196,7 +217,8 @@
       "whatItMeasures": "The version of the Linux kernel your Android OS is running on — the core bridge between software and hardware.",
       "currentValueContext": "This is the version string reported by the OS. Newer kernels have better security and hardware support.",
       "healthyRange": "Any officially supported version from your device manufacturer is normal.",
-      "commonCauses": "Android OS updates, custom ROM installation, carrier-mandated kernel versions."
+      "commonCauses": "Android OS updates, custom ROM installation, carrier-mandated kernel versions.",
+      "expansion": ""
     },
     {
       "id": "selinuxStatus",
@@ -205,7 +227,8 @@
       "whatItMeasures": "Security-Enhanced Linux — Android's mandatory access control system. Enforced means security policies are active.",
       "currentValueContext": "Enforced = security policies active. Permissive = policies log but don't block (less secure).",
       "healthyRange": "Enforced is normal for production devices.",
-      "commonCauses": "Custom ROMs may set permissive for compatibility. Some rooting methods disable SELinux enforcement."
+      "commonCauses": "Custom ROMs may set permissive for compatibility. Some rooting methods disable SELinux enforcement.",
+      "expansion": "SECURITY-ENHANCED LINUX STATUS"
     },
     {
       "id": "uptime",
@@ -214,7 +237,8 @@
       "whatItMeasures": "How long it's been since your phone was last restarted or powered on.",
       "currentValueContext": "Longer uptime means the phone hasn't had a fresh start recently. Good for stability, but occasional reboots help clear accumulated state.",
       "healthyRange": "Days to weeks is normal. Months without reboot may indicate OS updates are being skipped.",
-      "commonCauses": "No recent restart, OS update pending, good stability, or significant uptime (user habit)."
+      "commonCauses": "No recent restart, OS update pending, good stability, or significant uptime (user habit).",
+      "expansion": ""
     },
     {
       "id": "wakelocks",
@@ -223,7 +247,8 @@
       "whatItMeasures": "System-level locks that prevent the phone from entering deep sleep. Each wakelock keeps some part of the hardware awake.",
       "currentValueContext": "Power Mode only. Each entry shows what's holding the phone awake and for how long. More wakelocks = more battery drain.",
       "healthyRange": "A few seconds per minute is normal. Multiple minutes of wake time means something is preventing sleep.",
-      "commonCauses": "Apps with background services, push notifications, music playback, navigation, buggy apps not releasing wakelocks."
+      "commonCauses": "Apps with background services, push notifications, music playback, navigation, buggy apps not releasing wakelocks.",
+      "expansion": ""
     },
     {
       "id": "hotspotOverhead",
@@ -232,7 +257,8 @@
       "whatItMeasures": "The additional power drain caused by using your phone as a WiFi hotspot or mobile tethering.",
       "currentValueContext": "Shown as estimated additional draw compared to normal usage without hotspot active.",
       "healthyRange": "Minimal when idle. Adds significant drain when actively passing data to connected devices.",
-      "commonCauses": "Connected devices actively using internet, background sync on connected devices, poor cellular signal (hotspot uses more power to maintain connection)."
+      "commonCauses": "Connected devices actively using internet, background sync on connected devices, poor cellular signal (hotspot uses more power to maintain connection).",
+      "expansion": ""
     },
     {
       "id": "homePlmn",
@@ -241,7 +267,8 @@
       "whatItMeasures": "The Public Land Mobile Network identity of your home carrier — a combination of your country code (MCC) and carrier code (MNC).",
       "currentValueContext": "First 3 digits = country (MCC), next 2-3 = carrier (MNC). This is read directly from your SIM card.",
       "healthyRange": "Should match your carrier's assigned MCC-MNC. Mismatch may indicate wrong SIM or a compromised device.",
-      "commonCauses": "Different carrier SIM inserted, roaming partner SIM, MVNO using host carrier's MNC."
+      "commonCauses": "Different carrier SIM inserted, roaming partner SIM, MVNO using host carrier's MNC.",
+      "expansion": "HOME PUBLIC LAND MOBILE NETWORK"
     },
     {
       "id": "networkPlmn",
@@ -250,7 +277,8 @@
       "whatItMeasures": "The MCC-MNC of the cellular network your phone is currently connected to for service.",
       "currentValueContext": "This is the PLMN broadcast by the tower you're camped on. May differ from your home PLMN when roaming.",
       "healthyRange": "Should match home PLMN when not roaming. Different PLMN = roaming on another carrier's network.",
-      "commonCauses": "Roaming internationally, using a secondary carrier's network due to weak home signal, network sharing agreement."
+      "commonCauses": "Roaming internationally, using a secondary carrier's network due to weak home signal, network sharing agreement.",
+      "expansion": "NETWORK PUBLIC LAND MOBILE NETWORK"
     },
     {
       "id": "callState",
@@ -259,7 +287,8 @@
       "whatItMeasures": "The current state of voice calling on your device — idle, ringing, or in a call.",
       "currentValueContext": "IDLE = no call activity. RINGING = incoming call. OFFHOOK = call in progress.",
       "healthyRange": "IDLE is normal when not on a call. OFFHOOK is normal during calls.",
-      "commonCauses": "Incoming/outgoing calls, call waiting, dialing a number."
+      "commonCauses": "Incoming/outgoing calls, call waiting, dialing a number.",
+      "expansion": ""
     },
     {
       "id": "radioPowerState",
@@ -268,7 +297,8 @@
       "whatItMeasures": "Whether the cellular radio (modem) is powered on, off, or in an unavailable state.",
       "currentValueContext": "ON = radio is active (normal). OFF = radio powered down (airplane mode). UNAVAILABLE = cannot determine.",
       "healthyRange": "ON is the only normal state for active cellular service.",
-      "commonCauses": "Airplane mode, system crash causing modem restart, radio firmware issue, battery saver turning off radio."
+      "commonCauses": "Airplane mode, system crash causing modem restart, radio firmware issue, battery saver turning off radio.",
+      "expansion": ""
     },
     {
       "id": "imsCapable",
@@ -277,7 +307,8 @@
       "whatItMeasures": "Whether your carrier and device support IP Multimedia Subsystem — required for VoLTE, WiFi Calling, and RCS.",
       "currentValueContext": "Read from the carrier's configuration database. YES = IMS features are provisioned.",
       "healthyRange": "YES is normal for modern smartphones with VoLTE service.",
-      "commonCauses": "Carrier provisioning, device firmware support, MVNO without IMS agreement, outdated carrier settings."
+      "commonCauses": "Carrier provisioning, device firmware support, MVNO without IMS agreement, outdated carrier settings.",
+      "expansion": "IP MULTIMEDIA SUBSYSTEM CAPABLE"
     },
     {
       "id": "volteEnabled",
@@ -286,7 +317,8 @@
       "whatItMeasures": "Whether Voice over LTE (VoLTE) is enabled on your device — allowing high-quality voice calls over the 4G/5G data connection.",
       "currentValueContext": "ENABLED = your calls will use VoLTE. DISABLED = calls fall back to older networks.",
       "healthyRange": "ENABLED provides better call quality and faster call setup.",
-      "commonCauses": "Carrier provisioning, device VoLTE toggle, IMS registration status, network compatibility."
+      "commonCauses": "Carrier provisioning, device VoLTE toggle, IMS registration status, network compatibility.",
+      "expansion": "VOICE OVER LTE ENABLED"
     },
     {
       "id": "wifiCallingStatus",
@@ -295,7 +327,8 @@
       "whatItMeasures": "Whether WiFi Calling is available and active on your device — allowing calls over WiFi when cellular signal is weak.",
       "currentValueContext": "READY = enabled and available. ACTIVE = currently using WiFi for calls. UNAVAILABLE = not available.",
       "healthyRange": "READY or ACTIVE is normal for supported carriers.",
-      "commonCauses": "Carrier support, WiFi connection quality, E911 address registration required, IMS registration status."
+      "commonCauses": "Carrier support, WiFi connection quality, E911 address registration required, IMS registration status.",
+      "expansion": ""
     },
     {
       "id": "nrNsaAvailable",
@@ -304,7 +337,8 @@
       "whatItMeasures": "Whether your carrier supports Non-Standalone 5G (also called EN-DC) — 5G that uses LTE as an anchor.",
       "currentValueContext": "YES = carrier config supports NR-NSA. This is the most common 5G deployment today.",
       "healthyRange": "YES is normal for 5G-capable devices on carriers that offer 5G.",
-      "commonCauses": "Carrier 5G deployment strategy, device firmware, plan provisioning, network coverage area."
+      "commonCauses": "Carrier 5G deployment strategy, device firmware, plan provisioning, network coverage area.",
+      "expansion": "NEW RADIO NON-STANDALONE AVAILABLE"
     },
     {
       "id": "preferredNetworkType",
@@ -313,7 +347,8 @@
       "whatItMeasures": "The network modes your device is configured to prefer — e.g., 5G/LTE only, or auto-switching between generations.",
       "currentValueContext": "Set in device settings. Common values: 'NR/LTE/GSM/WCDMA' (auto), 'LTE only', 'NR only'.",
       "healthyRange": "Auto mode (NR/LTE/GSM/WCDMA) is best for most users.",
-      "commonCauses": "User setting change, carrier provisioning, troubleshooting connectivity issues, developer options."
+      "commonCauses": "User setting change, carrier provisioning, troubleshooting connectivity issues, developer options.",
+      "expansion": ""
     },
     {
       "id": "msisdn",
@@ -322,7 +357,8 @@
       "whatItMeasures": "Your mobile phone number associated with your SIM card — also called MSISDN in HSS terms.",
       "currentValueContext": "Read from SIM or network. NOTE: Most carriers no longer store this on the SIM, so it often shows as unavailable.",
       "healthyRange": "Any valid phone number is normal. 'N/A' is common on modern Android.",
-      "commonCauses": "Carrier not writing MSISDN to SIM, Android 10+ privacy restrictions, multi-SIM configuration."
+      "commonCauses": "Carrier not writing MSISDN to SIM, Android 10+ privacy restrictions, multi-SIM configuration.",
+      "expansion": "MOBILE STATION INTERNATIONAL SUBSCRIBER DIRECTORY NUMBER"
     },
     {
       "id": "imsi",
@@ -331,7 +367,8 @@
       "whatItMeasures": "International Mobile Subscriber Identity — the unique global identifier for your SIM card's subscription.",
       "currentValueContext": "Only MCC-MNC prefix shown for privacy. Full IMSI requires privileged system API (denied on Android 10+).",
       "healthyRange": "Should start with your carrier's MCC-MNC. 'N/A' is normal on modern Android without root.",
-      "commonCauses": "Android 10+ privacy restrictions (hidden API), privileged permission required, app not a system app."
+      "commonCauses": "Android 10+ privacy restrictions (hidden API), privileged permission required, app not a system app.",
+      "expansion": "INTERNATIONAL MOBILE SUBSCRIBER IDENTITY"
     },
     {
       "id": "spn",
@@ -340,7 +377,8 @@
       "whatItMeasures": "The service provider name stored on your SIM card — typically your carrier's branding name.",
       "currentValueContext": "Read directly from SIM card EF-SPN. This is the name your carrier wants displayed.",
       "healthyRange": "Any valid carrier name is normal.",
-      "commonCauses": "Carrier branding on SIM, MVNO using host carrier name, carrier settings update."
+      "commonCauses": "Carrier branding on SIM, MVNO using host carrier name, carrier settings update.",
+      "expansion": "SERVICE PROVIDER NAME"
     },
     {
       "id": "dataRoamingEnabled",
@@ -349,7 +387,8 @@
       "whatItMeasures": "Whether your device has data roaming enabled — allowing mobile data while connected to a foreign network.",
       "currentValueContext": "ON = mobile data works while roaming. OFF = data disabled when roaming (WiFi only).",
       "healthyRange": "OFF is normal for domestic use to avoid charges. ON is needed when travelling abroad.",
-      "commonCauses": "User setting in mobile network options, travel, carrier data roaming configuration."
+      "commonCauses": "User setting in mobile network options, travel, carrier data roaming configuration.",
+      "expansion": ""
     }
   ]
 }

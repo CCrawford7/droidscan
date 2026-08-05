@@ -37,11 +37,15 @@ class ThermalCollector {
         val allZones = if (powerZones.isNotEmpty()) powerZones else standardZones
         val maxTemp = allZones.maxOfOrNull { it.temperatureCelsius }
         val isThrottling = allZones.any { it.throttling }
+        // Name of the zone that hit maxTemp — used by the CrisisBanner subtitle
+        // ("CPU cores hottest" / "Peak 52.1°C").
+        val peakZoneName = allZones.firstOrNull { it.temperatureCelsius == maxTemp }?.name
 
         return ThermalSnapshot(
             zones = allZones,
             isThrottling = isThrottling,
-            maxTemperature = maxTemp
+            maxTemperature = maxTemp,
+            peakZoneName = peakZoneName
         )
     }
 

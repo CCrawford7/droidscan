@@ -30,6 +30,7 @@ data class RadioSnapshot(
     val wifiCallingStatus: String? = null,   // WiFi Calling: "READY" | "ACTIVE" | "UNAVAILABLE" | null
     val radioPowerState: String? = null,     // "ON" | "OFF" | "UNAVAILABLE" (API 30+)
     val nrNsaAvailable: Boolean? = null,     // NR-NSA (EN-DC) capability
+    val cellInfoDenied: Boolean? = null,     // true when allCellInfo threw SecurityException (location not granted)
     val timestampMs: Long = currentTimeMs()
 )
 
@@ -38,6 +39,7 @@ data class ThermalSnapshot(
     val zones: List<ThermalZone> = emptyList(),
     val isThrottling: Boolean? = null,
     val maxTemperature: Float? = null,
+    val peakZoneName: String? = null,        // name of the zone at maxTemperature (e.g. "cpu-0")
     val timestampMs: Long = currentTimeMs()
 )
 
