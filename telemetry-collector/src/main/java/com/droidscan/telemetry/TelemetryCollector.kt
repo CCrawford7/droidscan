@@ -17,6 +17,8 @@ class TelemetryCollector(
     private val networkCollector: NetworkConfigCollector = NetworkConfigCollector(),
     private val simCollector: SimStatusCollector = SimStatusCollector(),
     private val systemCollector: SystemInfoCollector = SystemInfoCollector(),
+    private val gnssCollector: GnssCollector = GnssCollector(),
+    private val imsCollector: ImsCollector = ImsCollector(),
     private val shizukuDetector: ShizukuDetector = ShizukuDetector(),
     private val historyStore: MetricHistoryStore? = null
 ) {
@@ -54,6 +56,14 @@ class TelemetryCollector(
         emit(systemCollector.read())
     }.flowOn(Dispatchers.IO)
 
+    fun observeGnss(): Flow<GnssSnapshot> = flow {
+        while (true) { emit(gnssCollector.read()); delay(2000L) }
+    }.flowOn(Dispatchers.IO)
+
+    fun observeIms(): Flow<ImsSnapshot> = flow {
+        while (true) { emit(imsCollector.read()); delay(2000L) }
+    }.flowOn(Dispatchers.IO)
+
     private var firstDump = false // toggle to true for debugging snapshot output
 
     fun observeAll(): Flow<MetricSnapshot> = flow {
@@ -67,6 +77,8 @@ class TelemetryCollector(
                 networkConfig = networkCollector.read(),
                 simStatus = simCollector.read(),
                 systemInfo = systemCollector.read(),
+                gnss = gnssCollector.read(),
+                ims = imsCollector.read(),
                 shizukuAvailable = shizukuDetector.isAvailable()
             )
             ringBuffer.add(snapshot)
@@ -95,13 +107,33 @@ class TelemetryCollector(
         sb.appendLine("--- RADIO / SUBSCRIBER ---")
         val r = snapshot.radio
         sb.appendLine("RSRP: ${r.rsrp} dBm | RSRQ: ${r.rsrq} dB | SINR: ${r.sinr} dB")
-        sb.appendLine("Bands: ${r.activeBands} | Cell: ${r.cellId} | TAC: ${r.tac}")
+        sb.appendLine("SS-RSRP: ${r.ssRsrp} | SS-RSRQ: ${r.ssRsrq} | SS-SINR: ${r.ssSinr}")
+        sb.appendLine("Bands: ${r.activeBands} | PCI: ${r.pci} | Cell: ${r.cellId} | TAC: ${r.tac}")
+        sb.appendLine("EARFCN: ${r.earfcn} | NR-ARFCN: ${r.nrarfcn} | BW: ${r.bandwidthKhz} kHz | DL: ${r.dlFrequencyMhz} MHz")
         sb.appendLine("Network: ${r.dataNetworkType} | Operator: ${r.operatorName}")
         sb.appendLine("PLMN (network): ${r.networkPlmn} | Roaming: ${r.isRoaming} | DataRoam: ${r.dataRoamingEnabled}")
         sb.appendLine("CallState: ${r.callState} | RadioPwr: ${r.radioPowerState}")
         sb.appendLine("IMS: ${r.imsRegistered} | IMS capable: ${r.imsCapable} | ePDG: ${r.epdgTunnelActive}")
         sb.appendLine("VoLTE: ${r.volteEnabled} | WiFiCall: ${r.wifiCallingStatus}")
         sb.appendLine("NR-NSA: ${r.nrNsaAvailable} | PrefNet: ${r.preferredNetworkType}")
+        sb.appendLine("")
+        sb.appendLine("--- IMS (ImsMmTelManager) ---")
+        val ims = snapshot.ims
+        if (ims.perSub.isEmpty()) {
+            sb.appendLine("  apiAvailable=${ims.apiAvailable} | accessDenied=${ims.accessDenied} | (no per-sub data)")
+        } else ims.perSub.forEach { reg ->
+            sb.appendLine("  sub ${reg.subscriptionId}: ${reg.registrationState} | ${reg.transportType} | VoLTE=${reg.volteEnabled} | WFC=${reg.wfcEnabled} | VT=${reg.vtEnabled} | WFC-Roam=${reg.wfcRoamingEnabled}")
+        }
+        sb.appendLine("")
+        sb.appendLine("--- GNSS ---")
+        val g = snapshot.gnss
+        sb.appendLine("Available: ${g.available} | LocationDenied: ${g.locationDenied} | Fix: ${g.hasFix} | Sats: ${g.satellites.size}")
+        g.satellites.groupBy { it.constellation }.forEach { (const, list) ->
+            sb.appendLine("  $const: ${list.size} visible, ${list.count { it.usedInFix }} in fix, peak ${list.maxOf { it.cn0DbHz }} dB-Hz")
+        }
+        g.satellites.sortedByDescending { it.cn0DbHz }.take(3).forEach {
+            sb.appendLine("    PRN ${it.prn} @ ${"%.1f".format(it.cn0DbHz)} dB-Hz ${if (it.usedInFix) "*" else ""} ${it.carrierFrequencyHz / 1e6}MHz")
+        }
         sb.appendLine("")
         sb.appendLine("--- NETWORK ---")
         val nw = snapshot.networkConfig
@@ -129,7 +161,7 @@ class TelemetryCollector(
         sb.appendLine("--- POWER ---")
         val p = snapshot.power
         sb.appendLine("Level: ${p.batteryLevel}% | Health: ${p.batteryHealth} | Temp: ${p.batteryTemperature}°C")
-        sb.appendLine("Charge: ${p.chargeRateMicroamps} uA | Drain: ${p.currentDrainMicroamps} uA")
+        sb.appendLine("Charge: ${p.chargeRateMicroamps} uA | Drain: ${p.currentDrainMicroamps} uA | AvgDraw: ${p.batteryCurrentAverageMicroamps} uA | Counter: ${p.batteryChargeCounterMicroAh} uAh")
         sb.appendLine("Time remaining: ${p.estimatedTimeRemainingMs} | eSIM: ${p.esimActive} | BT: ${p.bluetoothActive} | Hotspot: ${p.hotspotActive}")
         sb.appendLine("")
         sb.appendLine("--- CPU / MEMORY ---")

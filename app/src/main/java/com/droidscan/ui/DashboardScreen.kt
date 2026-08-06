@@ -255,8 +255,11 @@ fun OverviewTab(
                 MetricRow("RSRQ", MetricValue("${snapshot.radio.rsrq ?: "--"} dB", snapshot.radio.rsrq?.toDouble(), RadioThresholds.rsrq, inverted = true), "rsrq", onTap)
                 MetricRow("SINR", MetricValue("${snapshot.radio.sinr ?: "--"} dB", snapshot.radio.sinr?.toDouble(), RadioThresholds.sinr, inverted = true), "sinr", onTap)
                 SignalStrengthBar(snapshot.radio.rsrp, snapshot.radio.dataNetworkType)
-                DualMetricRow("Network", MetricValue(snapshot.radio.dataNetworkType ?: "--"), "Band", MetricValue(snapshot.radio.activeBands.joinToString(", ").ifEmpty { "--" }), "dataNetworkType", "activeBands", onTap)
-                DualMetricRow("IMS", MetricValue(if (snapshot.radio.imsRegistered == true) "REG" else if (snapshot.radio.imsRegistered == false) "NO" else "--"), "Roaming", MetricValue(if (snapshot.radio.isRoaming == true) "YES" else "NO"), "imsRegistered", "isRoaming", onTap)
+                val bandDisplay = radioBandDisplay(snapshot.radio)
+                DualMetricRow("Network", MetricValue(snapshot.radio.dataNetworkType ?: "--"), "Band", MetricValue(bandDisplay), "dataNetworkType", "activeBands", onTap)
+                val overviewIms = snapshot.ims.perSub.firstOrNull()?.registrationState
+                    ?: if (snapshot.radio.imsRegistered == true) "REG" else if (snapshot.radio.imsRegistered == false) "NO" else "--"
+                DualMetricRow("IMS", MetricValue(overviewIms), "Roaming", MetricValue(if (snapshot.radio.isRoaming == true) "YES" else "NO"), "imsRegistered", "isRoaming", onTap)
             }
         }
 
@@ -321,23 +324,55 @@ fun RadioTab(
                 MetricRow("RSRQ", MetricValue("${snapshot.radio.rsrq ?: "--"} dB", snapshot.radio.rsrq?.toDouble(), RadioThresholds.rsrq, inverted = true), "rsrq", onTap)
                 MetricRow("SINR", MetricValue("${snapshot.radio.sinr ?: "--"} dB", snapshot.radio.sinr?.toDouble(), RadioThresholds.sinr, inverted = true), "sinr", onTap)
                 SignalStrengthBar(snapshot.radio.rsrp, snapshot.radio.dataNetworkType)
+                // NR: sync-signal RSRP/RSRQ/SINR (SS-*) — the canonical 5G field metric.
+                if (snapshot.radio.nrarfcn != null || snapshot.radio.dataNetworkType?.startsWith("NR") == true) {
+                    MetricRow("SS-RSRP", MetricValue("${snapshot.radio.ssRsrp ?: "--"} dBm", snapshot.radio.ssRsrp?.toDouble(), RadioThresholds.rsrp, inverted = true), "ssRsrp", onTap)
+                    MetricRow("SS-RSRQ", MetricValue("${snapshot.radio.ssRsrq ?: "--"} dB", snapshot.radio.ssRsrq?.toDouble(), RadioThresholds.rsrq, inverted = true), "ssRsrp", onTap)
+                    MetricRow("SS-SINR", MetricValue("${snapshot.radio.ssSinr ?: "--"} dB", snapshot.radio.ssSinr?.toDouble(), RadioThresholds.sinr, inverted = true), "ssRsrp", onTap)
+                }
             }
         }
 
         TierCard("SERVING NETWORK") {
             DualMetricRow("Operator", MetricValue(snapshot.radio.operatorName ?: "--"), "Network", MetricValue(snapshot.radio.dataNetworkType ?: "--"), null, "dataNetworkType", onTap)
             DualMetricRow("PLMN", MetricValue(snapshot.radio.networkPlmn ?: "--"), "Roaming", MetricValue(if (snapshot.radio.isRoaming == true) "YES" else if (snapshot.radio.isRoaming == false) "NO" else "--"), null, "isRoaming", onTap)
-            DualMetricRow("Band", MetricValue(snapshot.radio.activeBands.joinToString(", ").ifEmpty { "--" }), "Cell ID", MetricValue(snapshot.radio.cellId?.toString() ?: "--"), "activeBands", "ecid", onTap)
-            DualMetricRow("TAC", MetricValue(snapshot.radio.tac?.toString() ?: "--"), "Call State", MetricValue(snapshot.radio.callState ?: "--"))
-            DualMetricRow("Radio Power", MetricValue(snapshot.radio.radioPowerState ?: "--"), "Data Roam", MetricValue(if (snapshot.radio.dataRoamingEnabled == true) "ON" else if (snapshot.radio.dataRoamingEnabled == false) "OFF" else "--"))
+            DualMetricRow("Call State", MetricValue(snapshot.radio.callState ?: "--"), "Radio Power", MetricValue(snapshot.radio.radioPowerState ?: "--"))
+            DualMetricRow("Data Roam", MetricValue(if (snapshot.radio.dataRoamingEnabled == true) "ON" else if (snapshot.radio.dataRoamingEnabled == false) "OFF" else "--"), "Pref NW", MetricValue(snapshot.radio.preferredNetworkType ?: "--"))
+        }
+
+        TierCard("CELL / FREQUENCY") {
+            val bwMhz = snapshot.radio.bandwidthKhz?.div(1000f)?.let { "${it} MHz" }
+            DualMetricRow("Band", MetricValue(radioBandDisplay(snapshot.radio)), "Bandwidth", MetricValue(bwMhz ?: "--"), "activeBands", "bandwidth", onTap)
+            DualMetricRow("EARFCN", MetricValue(snapshot.radio.earfcn?.toString() ?: "--"), "NR-ARFCN", MetricValue(snapshot.radio.nrarfcn?.toString() ?: "--"), "earfcn", "nrarfcn", onTap)
+            DualMetricRow("PCI", MetricValue(snapshot.radio.pci?.toString() ?: "--"), "Cell ID", MetricValue(snapshot.radio.cellId?.toString() ?: "--"), "pci", "ecid", onTap)
+            DualMetricRow("TAC", MetricValue(snapshot.radio.tac?.toString() ?: "--"), "DL Freq", MetricValue(snapshot.radio.dlFrequencyMhz?.let(::formatMhz) ?: "--"), null, "earfcn", onTap)
         }
 
         TierCard("IMS / REGISTRATION") {
-            MetricRow("IMS Registration", MetricValue(if (snapshot.radio.imsRegistered == true) "REGISTERED" else if (snapshot.radio.imsRegistered == false) "NOT REG" else "Unknown"), "imsRegistered", onTap)
-            DualMetricRow("IMS Capable", MetricValue(if (snapshot.radio.imsCapable == true) "YES" else if (snapshot.radio.imsCapable == false) "NO" else "--"), "VoLTE", MetricValue(if (snapshot.radio.volteEnabled == true) "ENABLED" else if (snapshot.radio.volteEnabled == false) "DISABLED" else if (snapshot.radio.volteEnabled == null) "?" else "--"))
-            DualMetricRow("WiFi Calling", MetricValue(snapshot.radio.wifiCallingStatus ?: "--"), "ePDG", MetricValue(if (snapshot.radio.epdgTunnelActive == true) "ACTIVE" else if (snapshot.radio.epdgTunnelActive == false) "INACTIVE" else "N/A"))
-            DualMetricRow("NR-NSA", MetricValue(if (snapshot.radio.nrNsaAvailable == true) "AVAILABLE" else if (snapshot.radio.nrNsaAvailable == false) "NO" else "--"), "Pref NW", MetricValue(snapshot.radio.preferredNetworkType ?: "--"))
+            val ims = snapshot.ims
+            if (ims.apiAvailable && ims.accessDenied) {
+                MetricRow("Status", MetricValue("Precise phone perm required"))
+                MetricRow("Hint", MetricValue("Grant via Settings → Permissions"))
+            } else if (ims.perSub.isNotEmpty()) {
+                val reg = ims.perSub.first()
+                MetricRow("Registration", MetricValue(reg.registrationState ?: "--"), "imsRegistered", onTap)
+                DualMetricRow("Transport", MetricValue(reg.transportType ?: "--"), "VoLTE", MetricValue(reg.volteEnabled?.let { if (it) "ENABLED" else "DISABLED" } ?: "--"), null, "imsRegistered", onTap)
+                DualMetricRow("WiFi Calling", MetricValue(reg.wfcEnabled?.let { if (it) "ENABLED" else "DISABLED" } ?: "--"), "VT", MetricValue(reg.vtEnabled?.let { if (it) "ENABLED" else "DISABLED" } ?: "--"), null, "imsCapable", onTap)
+                if (ims.perSub.size > 1) {
+                    ims.perSub.drop(1).forEach { r ->
+                        MetricRow("Sub ${r.subscriptionId}", MetricValue(r.registrationState ?: "--"), indent = true)
+                    }
+                }
+                DualMetricRow("NR-NSA", MetricValue(if (snapshot.radio.nrNsaAvailable == true) "AVAILABLE" else if (snapshot.radio.nrNsaAvailable == false) "NO" else "--"), "Pref NW", MetricValue(snapshot.radio.preferredNetworkType ?: "--"))
+            } else {
+                MetricRow("IMS Registration", MetricValue(if (snapshot.radio.imsRegistered == true) "REGISTERED" else if (snapshot.radio.imsRegistered == false) "NOT REG" else "Unknown"), "imsRegistered", onTap)
+                DualMetricRow("IMS Capable", MetricValue(if (snapshot.radio.imsCapable == true) "YES" else if (snapshot.radio.imsCapable == false) "NO" else "--"), "VoLTE", MetricValue(if (snapshot.radio.volteEnabled == true) "ENABLED" else if (snapshot.radio.volteEnabled == false) "DISABLED" else if (snapshot.radio.volteEnabled == null) "?" else "--"))
+                DualMetricRow("WiFi Calling", MetricValue(snapshot.radio.wifiCallingStatus ?: "--"), "ePDG", MetricValue(if (snapshot.radio.epdgTunnelActive == true) "ACTIVE" else if (snapshot.radio.epdgTunnelActive == false) "INACTIVE" else "N/A"))
+                DualMetricRow("NR-NSA", MetricValue(if (snapshot.radio.nrNsaAvailable == true) "AVAILABLE" else if (snapshot.radio.nrNsaAvailable == false) "NO" else "--"), "Pref NW", MetricValue(snapshot.radio.preferredNetworkType ?: "--"))
+            }
         }
+
+        GnssCard(snapshot, onTap)
 
         TierCard("NETWORK CONFIG") {
             DualMetricRow("Type", MetricValue(snapshot.networkConfig.activeNetworkType ?: "--"), "APN", MetricValue(snapshot.networkConfig.apnName ?: "--"), "activeNetwork", null, onTap)
@@ -346,6 +381,60 @@ fun RadioTab(
             if (snapshot.networkConfig.wifiSsid != null)
                 MetricRow("WiFi SSID", MetricValue(snapshot.networkConfig.wifiSsid ?: "--"))
             DualMetricRow("VPN", MetricValue(if (snapshot.networkConfig.vpnActive) snapshot.networkConfig.vpnLabel ?: "Active" else "Off"), "Hotspot", MetricValue(if (snapshot.networkConfig.hotspotActive) "ON" else "OFF"), null, null, onTap)
+        }
+    }
+}
+
+// ─── GNSS / Satellites ───────────────────────────────────
+
+@Composable
+fun GnssCard(snapshot: MetricSnapshot, onTap: (String) -> Unit) {
+    TierCard("GNSS / SATELLITES", liveReadout = snapshot.gnss.satellites.maxOfOrNull { it.cn0DbHz }?.let { "%.0f dB-Hz".format(it) }, liveColor = TerminalAccentCyan) {
+        val g = snapshot.gnss
+        when {
+            g.locationDenied -> {
+                MetricRow("Status", MetricValue("Location denied"))
+                MetricRow("Hint", MetricValue("Grant location to read satellites"))
+            }
+            !g.available -> MetricRow("Status", MetricValue("No GNSS receiver"))
+            g.satellites.isEmpty() -> MetricRow("Status", MetricValue(if (g.hasFix) "FIX ACQUIRED" else "Searching…"))
+            else -> {
+                val used = g.satellites.count { it.usedInFix }
+                MetricRow("Fix", MetricValue(if (g.hasFix) "ACQUIRED" else "searching"))
+                DualMetricRow("Visible", MetricValue("${g.satellites.size}"), "In Fix", MetricValue("$used"), null, "gnss", onTap)
+
+                // Per-constellation summary: visible · in-fix · peak C/N0.
+                g.satellites.groupBy { it.constellation }.toSortedMap().forEach { (const, list) ->
+                    val peak = list.maxOf { it.cn0DbHz }
+                    val usedCount = list.count { it.usedInFix }
+                    MetricRow(
+                        const,
+                        MetricValue("${list.size} vis · $usedCount fix · ${"%.1f".format(peak)} dB-Hz", list.maxOfOrNull { it.cn0DbHz }?.toDouble(), null),
+                        "cn0", onTap
+                    )
+                }
+
+                Spacer(Modifier.height(2.dp))
+                TierDivider()
+
+                // Strongest satellites (top 4 by C/N0) — the constellation sky view.
+                g.satellites.sortedByDescending { it.cn0DbHz }.take(4).forEach { sat ->
+                    MetricRow(
+                        "PRN ${sat.prn} · ${sat.constellation}",
+                        MetricValue("${"%.1f".format(sat.cn0DbHz)} dB-Hz" + if (sat.usedInFix) " · FIX" else ""),
+                        "cn0", onTap, indent = true
+                    )
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(Modifier.fillMaxWidth()) {
+                    Text(
+                        "L1 1575.42 · L5 1176.45 MHz · ${g.satellites.count { it.hasEphemeris }} ephemeris",
+                        color = TerminalTextSecondary.copy(alpha = 0.6f),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 9.sp
+                    )
+                }
+            }
         }
     }
 }
@@ -464,8 +553,11 @@ fun PowerTab(
             DualMetricRow("Health", MetricValue(snapshot.power.batteryHealth ?: "--"), "Temp", MetricValue("${String.format("%.1f", snapshot.power.batteryTemperature ?: 0f)}°C", snapshot.power.batteryTemperature?.toDouble(), BatteryThresholds.temperatureCelsius), "batteryHealth", null, onTap)
             val chargeMa = snapshot.power.chargeRateMicroamps?.div(1000) ?: 0
             val drainMa = snapshot.power.currentDrainMicroamps?.div(1000) ?: 0
+            val avgMa = snapshot.power.batteryCurrentAverageMicroamps?.div(1000)
             if (chargeMa > 0) MetricRow("Charge Rate", MetricValue("${chargeMa} mA"), "chargeRate", onTap)
             if (drainMa > 0) MetricRow("Discharge Rate", MetricValue("${drainMa} mA"))
+            if (avgMa != null && avgMa != 0) MetricRow("Avg Current", MetricValue("${avgMa} mA"))
+            snapshot.power.batteryChargeCounterMicroAh?.let { MetricRow("Charge Counter", MetricValue("${it / 1000} mAh")) }
             snapshot.power.estimatedTimeRemainingMs?.let { MetricRow("Est. Remaining", MetricValue(formatUptime(it))) }
         }
 
@@ -858,7 +950,8 @@ fun SettingsScreen(snapshot: MetricSnapshot) {
         Manifest.permission.NEARBY_WIFI_DEVICES to "Nearby devices",
         "android.permission.READ_SIM_STATE" to "SIM info",
         Manifest.permission.READ_PHONE_STATE to "Phone state",
-        Manifest.permission.READ_BASIC_PHONE_STATE to "Basic phone state"
+        Manifest.permission.READ_BASIC_PHONE_STATE to "Basic phone state",
+        Manifest.permission.READ_PRECISE_PHONE_STATE to "Precise phone (PCI/IMS)"
     )
     Column(
         Modifier
@@ -969,6 +1062,33 @@ private fun SheetSection(title: String, content: @Composable () -> Unit) {
     }
 }
 
+// ─── Band / frequency display helpers ────────────────────
+
+/** Formats a MHz value as "806", "2110", "3316.67" (no trailing .00). */
+fun formatMhz(freqMhz: Double): String {
+    val s = "%.2f".format(freqMhz).trimEnd('0').trimEnd('.')
+    return "$s MHz"
+}
+
+/**
+ * Best-effort human label for the serving band. Prefers the 3GPP-derived
+ * band+frequency ("n78 @ 3316.67 MHz"), falls back to the raw CellIdentity
+ * band list ("B3, B7"), then "--".
+ */
+fun radioBandDisplay(radio: RadioSnapshot): String {
+    val knownLte = radio.activeBands.firstOrNull { it.startsWith("B") }
+    val knownNr = radio.activeBands.firstOrNull { it.startsWith("n") }
+    val earfcn = radio.earfcn
+    val nrarfcn = radio.nrarfcn
+    val bandInfo = when {
+        earfcn != null -> lteBandInfo(earfcn, knownLte)
+        nrarfcn != null -> nrBandInfo(nrarfcn, knownNr)
+        else -> null
+    }
+    return bandInfo?.let { "${it.band} @ ${formatMhz(it.dlFrequencyMhz)}" }
+        ?: radio.activeBands.joinToString(", ").ifEmpty { "--" }
+}
+
 // ─── Glossary Loader + live-value resolution ────────────
 
 fun loadGlossary(context: Context): List<GlossaryEntry> {
@@ -999,8 +1119,16 @@ fun resolveLiveValue(id: String, s: MetricSnapshot): Pair<MetricValue, Color?>? 
     "dataNetworkType" -> MetricValue(s.radio.dataNetworkType ?: "--") to null
     "activeBands" -> MetricValue(s.radio.activeBands.joinToString(", ").ifEmpty { "--" }) to null
     "isRoaming" -> MetricValue(if (s.radio.isRoaming == true) "YES" else if (s.radio.isRoaming == false) "NO" else "--") to null
-    "imsRegistered" -> MetricValue(if (s.radio.imsRegistered == true) "REG" else if (s.radio.imsRegistered == false) "NO" else "--") to null
+    "imsRegistered" -> MetricValue(s.ims.perSub.firstOrNull()?.registrationState
+        ?: if (s.radio.imsRegistered == true) "REG" else if (s.radio.imsRegistered == false) "NO" else "--") to null
     "ecid" -> MetricValue(s.radio.cellId?.toString() ?: "--") to null
+    "pci" -> MetricValue(s.radio.pci?.toString() ?: "--") to null
+    "earfcn" -> MetricValue(s.radio.earfcn?.toString() ?: "--") to null
+    "nrarfcn" -> MetricValue(s.radio.nrarfcn?.toString() ?: "--") to null
+    "bandwidth" -> MetricValue(s.radio.bandwidthKhz?.div(1000f)?.let { "${it} MHz" } ?: "--") to null
+    "ssRsrp" -> MetricValue("${s.radio.ssRsrp ?: "--"} dBm", s.radio.ssRsrp?.toDouble(), RadioThresholds.rsrp, inverted = true).let { it to statusColorOf(it) }
+    "cn0" -> MetricValue(s.gnss.satellites.maxOfOrNull { it.cn0DbHz }?.let { "%.1f dB-Hz".format(it) } ?: "--") to null
+    "gnss" -> MetricValue("${s.gnss.satellites.size} vis · ${s.gnss.satellites.count { it.usedInFix }} fix") to null
     "batteryLevel" -> MetricValue("${s.power.batteryLevel ?: "--"}%", s.power.batteryLevel?.toDouble(), BatteryThresholds.levelPercent, inverted = true).let { it to statusColorOf(it) }
     "chargeRate" -> MetricValue("${s.power.chargeRateMicroamps?.div(1000) ?: 0} mA") to null
     "cpuLoad" -> MetricValue(s.processes.perCoreLoad.maxOrNull()?.let { "${(it * 100).toInt()}%" } ?: "--") to null

@@ -31,6 +31,15 @@ data class RadioSnapshot(
     val radioPowerState: String? = null,     // "ON" | "OFF" | "UNAVAILABLE" (API 30+)
     val nrNsaAvailable: Boolean? = null,     // NR-NSA (EN-DC) capability
     val cellInfoDenied: Boolean? = null,     // true when allCellInfo threw SecurityException (location not granted)
+    // ── Physical layer / frequency depth ──
+    val pci: Int? = null,                    // Physical Cell ID (LTE + NR)
+    val earfcn: Int? = null,                 // LTE E-UTRA ARFCN (3GPP 36.101)
+    val nrarfcn: Int? = null,                // NR ARFCN (3GPP 38.101)
+    val bandwidthKhz: Int? = null,           // channel bandwidth in kHz (LTE/NR)
+    val dlFrequencyMhz: Double? = null,      // derived downlink carrier frequency
+    val ssRsrp: Int? = null,                 // NR SS-RSRP (dBm)
+    val ssRsrq: Int? = null,                 // NR SS-RSRQ (dB)
+    val ssSinr: Int? = null,                 // NR SS-SINR (dB)
     val timestampMs: Long = currentTimeMs()
 )
 
@@ -78,6 +87,8 @@ data class PowerSnapshot(
     val chargeRateMicroamps: Int? = null,
     val estimatedTimeRemainingMs: Long? = null,
     val currentDrainMicroamps: Int? = null,
+    val batteryCurrentAverageMicroamps: Int? = null, // rolling average current draw (µA)
+    val batteryChargeCounterMicroAh: Long? = null,   // remaining capacity (µAh)
     val perProcessPower: Map<String, Double> = emptyMap(),
     val esimActive: Boolean = false,
     val bluetoothActive: Boolean = false,
@@ -176,6 +187,53 @@ data class SystemInfoSnapshot(
 )
 
 // ──────────────────────────────────────────────
+// GNSS satellite telemetry
+// ──────────────────────────────────────────────
+
+@Serializable
+data class GnssSnapshot(
+    val available: Boolean = false,
+    val locationDenied: Boolean = false,
+    val hasFix: Boolean = false,
+    val satellites: List<GnssSatellite> = emptyList(),
+    val timestampMs: Long = currentTimeMs()
+)
+
+@Serializable
+data class GnssSatellite(
+    val prn: Int,
+    val constellation: String,        // "GPS", "GLONASS", "GALILEO", "BEIDOU", "QZSS", "SBAS", "IRNSS"
+    val cn0DbHz: Double,              // Carrier-to-Noise density (dB-Hz)
+    val carrierFrequencyHz: Double,   // L1 (1575.42) / L5 (1176.45) etc.
+    val hasEphemeris: Boolean,
+    val hasAlmanac: Boolean,
+    val usedInFix: Boolean
+)
+
+// ──────────────────────────────────────────────
+// IMS registration (ImsMmTelManager per sub)
+// ──────────────────────────────────────────────
+
+@Serializable
+data class ImsSnapshot(
+    val perSub: List<ImsRegistration> = emptyList(),
+    val accessDenied: Boolean = false,
+    val apiAvailable: Boolean = false,
+    val timestampMs: Long = currentTimeMs()
+)
+
+@Serializable
+data class ImsRegistration(
+    val subscriptionId: Int,
+    val registrationState: String? = null,   // REGISTERED | REGISTERING | NOT REGISTERED
+    val transportType: String? = null,       // WWAN | WLAN
+    val volteEnabled: Boolean? = null,       // VoLTE setting enabled
+    val vtEnabled: Boolean? = null,          // Video Telephony setting enabled
+    val wfcEnabled: Boolean? = null,         // VoWiFi setting enabled
+    val wfcRoamingEnabled: Boolean? = null
+)
+
+// ──────────────────────────────────────────────
 // Unified metric envelope
 // ──────────────────────────────────────────────
 
@@ -189,6 +247,8 @@ data class MetricSnapshot(
     val networkConfig: NetworkConfigSnapshot = NetworkConfigSnapshot(),
     val simStatus: SimStatusSnapshot = SimStatusSnapshot(),
     val systemInfo: SystemInfoSnapshot = SystemInfoSnapshot(),
+    val gnss: GnssSnapshot = GnssSnapshot(),
+    val ims: ImsSnapshot = ImsSnapshot(),
     val shizukuAvailable: Boolean = false,
     val timestampMs: Long = currentTimeMs()
 )

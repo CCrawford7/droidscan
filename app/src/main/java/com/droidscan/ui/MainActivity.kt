@@ -74,6 +74,13 @@ class MainActivity : ComponentActivity() {
                 } else {
                     Log.i("DroidscanPerms", "READ_SIM_STATE already granted")
                 }
+                // API 34+: READ_PRECISE_PHONE_STATE unlocks precise cell identity
+                // (PCI/TAC) + IMS registration via ImsMmTelManager.
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PRECISE_PHONE_STATE)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissions.add(Manifest.permission.READ_PRECISE_PHONE_STATE)
+                }
             }
         } else {
             // API 32 and below: request READ_PHONE_STATE

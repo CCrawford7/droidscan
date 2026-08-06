@@ -35,6 +35,19 @@ class PowerCollector {
             try { manager.computeChargeTimeRemaining() } catch (_: Exception) { null }
         } else null
 
+        // Rolling average draw + remaining charge counter (µAh). Both return a
+        // sentinel (Integer/Long.MIN_VALUE) when unsupported, so guard on sane
+        // magnitudes as well.
+        val currentAverage = try {
+            manager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE)
+                .takeIf { it in -20_000_000L..20_000_000L }
+                ?.toInt()
+        } catch (_: Exception) { null }
+        val chargeCounter = try {
+            manager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
+                .takeIf { it in 0L..30_000_000L }  // 0..30 Ah upper bound
+        } catch (_: Exception) { null }
+
         // Detect eSIM presence via subscription manager
         val esimActive = ctx?.let {
             try {
@@ -65,6 +78,8 @@ class PowerCollector {
             chargeRateMicroamps = chargeRate,
             estimatedTimeRemainingMs = timeRemaining,
             currentDrainMicroamps = if (!isCharging && chargeRate < 0) -chargeRate else null,
+            batteryCurrentAverageMicroamps = currentAverage,
+            batteryChargeCounterMicroAh = chargeCounter,
             perProcessPower = emptyMap(),
             esimActive = esimActive,
             bluetoothActive = btActive,

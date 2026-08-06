@@ -13,6 +13,8 @@ import android.telephony.CellSignalStrengthLte
 import android.telephony.CellSignalStrengthNr
 import android.telephony.TelephonyManager
 import com.droidscan.shared.core.RadioSnapshot
+import com.droidscan.shared.core.lteBandInfo
+import com.droidscan.shared.core.nrBandInfo
 import com.droidscan.shared.core.rsrpOrNull
 import com.droidscan.shared.core.rsrqOrNull
 import com.droidscan.shared.core.sinrOrNull
@@ -100,16 +102,33 @@ class RadioCollector {
             }
         }
 
+        // NR SS-RSRP/SS-RSRQ/SS-SINR (sync-signal based; distinct from CSI).
+        // Many field tools surface SS as the canonical NR metric, so we capture
+        // both and let the UI choose. SS values also back-stop the primary RSRP
+        // chain when CSI is unavailable.
+        val ssRsrp = activeCell?.let { cell ->
+            (cell.cellSignalStrength as? CellSignalStrengthNr)?.ssRsrp?.rsrpOrNull()
+        }
+        val ssRsrq = activeCell?.let { cell ->
+            (cell.cellSignalStrength as? CellSignalStrengthNr)?.ssRsrq?.rsrqOrNull()
+        }
+        val ssSinr = activeCell?.let { cell ->
+            (cell.cellSignalStrength as? CellSignalStrengthNr)?.ssSinr?.sinrOrNull()
+        }
+
         val (fallbackLte, fallbackNr) = strengthObj()
         val rsrp: Int? = allCellInfoRsrp
             ?: fallbackLte?.rsrp?.rsrpOrNull()
             ?: fallbackNr?.getCsiRsrp()?.rsrpOrNull()
+            ?: ssRsrp
         val rsrq: Int? = allCellInfoRsrq
             ?: fallbackLte?.rsrq?.rsrqOrNull()
             ?: fallbackNr?.getCsiRsrq()?.rsrqOrNull()
+            ?: ssRsrq
         val sinr: Int? = allCellInfoSinr
             ?: fallbackLte?.rssnr?.sinrOrNull()
             ?: fallbackNr?.getCsiSinr()?.sinrOrNull()
+            ?: ssSinr
 
         val bands = activeCell?.let { cell ->
             when (cell) {
@@ -124,6 +143,34 @@ class RadioCollector {
                 else -> null
             }
         } ?: emptyList()
+
+        // ── Physical layer / frequency depth ──
+        val pci = activeCell?.let { cell ->
+            when (cell) {
+                is CellInfoLte -> cell.cellIdentity?.pci
+                is CellInfoNr -> (cell.cellIdentity as? CellIdentityNr)?.pci
+                else -> null
+            }
+        }
+        val earfcn = activeCell?.let { cell -> (cell.cellIdentity as? CellIdentityLte)?.earfcn }
+        val nrarfcn = activeCell?.let { cell -> (cell.cellIdentity as? CellIdentityNr)?.nrarfcn }
+        // getBandwidth() is in kHz and only exposed on LTE (CellIdentityNr has no
+        // bandwidth accessor in the public API).
+        val bandwidthKhz = activeCell?.let { cell ->
+            if (cell is CellInfoLte)
+                (cell.cellIdentity as? CellIdentityLte)?.bandwidth?.takeIf { it > 0 }
+            else null
+        }
+        // Derive the downlink carrier frequency from 3GPP band tables. Prefer the
+        // band reported by CellIdentity.bands (API 30+) to disambiguate windows
+        // shared by two bands (B1/B4, n77/n78, n5/n26).
+        val knownLteBand = bands.firstOrNull { it.startsWith("B") }
+        val knownNrBand = bands.firstOrNull { it.startsWith("n") }
+        val dlFrequencyMhz = when {
+            earfcn != null -> lteBandInfo(earfcn, knownLteBand)?.dlFrequencyMhz
+            nrarfcn != null -> nrBandInfo(nrarfcn, knownNrBand)?.dlFrequencyMhz
+            else -> null
+        }
 
         val cellId = activeCell?.let { cell ->
             when (cell) {
@@ -311,7 +358,16 @@ class RadioCollector {
             wifiCallingStatus = wifiCallingStatus,
             radioPowerState = radioPowerState,
             nrNsaAvailable = nrNsaAvailable,
-            cellInfoDenied = cellInfoDenied
+            cellInfoDenied = cellInfoDenied,
+            // Physical layer / frequency depth
+            pci = pci,
+            earfcn = earfcn,
+            nrarfcn = nrarfcn,
+            bandwidthKhz = bandwidthKhz,
+            dlFrequencyMhz = dlFrequencyMhz,
+            ssRsrp = ssRsrp,
+            ssRsrq = ssRsrq,
+            ssSinr = ssSinr
         )
     }
 }

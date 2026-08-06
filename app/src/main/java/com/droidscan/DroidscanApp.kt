@@ -48,6 +48,14 @@ class DroidscanApp : Application() {
             it.attach(wm)
         }
 
+        val gnssCollector = GnssCollector().also {
+            it.attach(this)
+        }
+
+        val imsCollector = ImsCollector().also {
+            it.attach(this)
+        }
+
         val shizukuDetector = ShizukuDetector().apply {
             initialize()
         }
@@ -67,6 +75,8 @@ class DroidscanApp : Application() {
             networkCollector = networkCollector,
             simCollector = simCollector,
             systemCollector = systemCollector,
+            gnssCollector = gnssCollector,
+            imsCollector = imsCollector,
             shizukuDetector = shizukuDetector,
             historyStore = historyStore
         )

@@ -389,6 +389,76 @@
       "healthyRange": "OFF is normal for domestic use to avoid charges. ON is needed when travelling abroad.",
       "commonCauses": "User setting in mobile network options, travel, carrier data roaming configuration.",
       "expansion": ""
+    },
+    {
+      "id": "pci",
+      "label": "Physical Cell ID (PCI)",
+      "section": "radio",
+      "whatItMeasures": "The physical-layer identifier of the specific cell tower sector you are connected to (0-1007 for LTE, 0-1007 for NR).",
+      "currentValueContext": "PCI is assigned by the network and re-used across towers — it identifies the sector, not the tower. Combined with Cell ID + TAC it uniquely locates the serving cell.",
+      "healthyRange": "Any value 0-1007 is normal. Sudden changes mean you switched to a different sector or tower.",
+      "commonCauses": "Tower handover, moving between sectors, carrier network configuration, new sites being added.",
+      "expansion": "PHYSICAL CELL IDENTIFIER"
+    },
+    {
+      "id": "earfcn",
+      "label": "EARFCN",
+      "section": "radio",
+      "whatItMeasures": "E-UTRA Absolute Radio Frequency Channel Number — the LTE channel number of the carrier your phone is camped on.",
+      "currentValueContext": "A channel number, not a frequency. Convert to MHz via 3GPP 36.101 (100 kHz steps). Example: EARFCN 6300 → 806 MHz (Band 20).",
+      "healthyRange": "Valid EARFCN 0-262143. Value maps directly to the LTE band table.",
+      "commonCauses": "Determined by the serving network — changes when you switch bands or towers.",
+      "expansion": "E-UTRA ABSOLUTE RADIO FREQUENCY CHANNEL NUMBER"
+    },
+    {
+      "id": "nrarfcn",
+      "label": "NR-ARFCN",
+      "section": "radio",
+      "whatItMeasures": "NR Absolute Radio Frequency Channel Number — the 5G channel number of the NR carrier (FR1 or FR2) your phone is using.",
+      "currentValueContext": "Maps to 5G frequency via 3GPP 38.101. FR1 uses 5 kHz steps, FR2 uses 60 kHz. Example: n78 ARFCN 623334 → ~3.3 GHz.",
+      "healthyRange": "Valid range 0-3279165. Value maps to the NR band table (n1, n41, n77, n78, n79, n258...).",
+      "commonCauses": "Determined by the serving 5G network — changes when 5G band changes or during NSA/SA transitions.",
+      "expansion": "NEW RADIO ABSOLUTE RADIO FREQUENCY CHANNEL NUMBER"
+    },
+    {
+      "id": "bandwidth",
+      "label": "Channel Bandwidth",
+      "section": "radio",
+      "whatItMeasures": "The width of the radio channel your phone is using for the connected LTE cell — wider channels carry more data.",
+      "currentValueContext": "Shown in MHz. Common LTE values: 1.4, 3, 5, 10, 15, 20 MHz. NR: 5, 10, 15, 20, 50, 100 MHz.",
+      "healthyRange": "10-20 MHz for LTE, 50-100 MHz for NR 5G is good. Narrower channels = slower speeds but better range.",
+      "commonCauses": "Network configuration, congestion management, carrier aggregation state, rural vs urban deployment.",
+      "expansion": ""
+    },
+    {
+      "id": "ssRsrp",
+      "label": "SS-RSRP (5G)",
+      "section": "radio",
+      "whatItMeasures": "Synchronization Signal Reference Signal Received Power — the strength of the 5G NR signal, measured on the SSB (synchronization block).",
+      "currentValueContext": "Measured in dBm. The 5G equivalent of LTE RSRP. Shown when the phone reports NR serving signal quality.",
+      "healthyRange": "-80 dBm to -100 dBm is good. Below -120 dBm is very weak.",
+      "commonCauses": "Distance from 5G tower, building penetration, mmWave blockers (n258+), carrier 5G deployment.",
+      "expansion": "SYNCHRONIZATION SIGNAL REFERENCE SIGNAL RECEIVED POWER"
+    },
+    {
+      "id": "cn0",
+      "label": "C/N₀ (Carrier-to-Noise)",
+      "section": "gnss",
+      "whatItMeasures": "Carrier-to-Noise density ratio for each GNSS satellite — the strength of the satellite signal your phone's receiver sees.",
+      "currentValueContext": "Measured in dB-Hz. Higher = stronger satellite signal. Peak value across all visible satellites is shown, plus per-constellation summaries.",
+      "healthyRange": "Above 40 dB-Hz = strong. 25-40 dB-Hz = usable for positioning. Below 25 dB-Hz = marginal (urban canyons, indoors).",
+      "commonCauses": "Satellite elevation, sky view obstruction (buildings/trees), antenna quality, ionosphere/troposphere effects, multipath reflections.",
+      "expansion": "CARRIER TO NOISE DENSITY RATIO"
+    },
+    {
+      "id": "gnss",
+      "label": "GNSS Fix",
+      "section": "gnss",
+      "whatItMeasures": "Global Navigation Satellite System status — whether your phone has a satellite position fix, how many satellites are visible, and which are contributing to the fix.",
+      "currentValueContext": "Visible = satellites the receiver can track. In Fix = satellites actually used to compute your position. A fix needs at least 4 satellites in good geometry.",
+      "healthyRange": "A fix with 6+ satellites used in fix is normal outdoors. 'Searching' indoors or with location disabled.",
+      "commonCauses": "Being indoors/underground, airplane mode, location permission denied, GPS hardware state, satellite geometry in urban canyons.",
+      "expansion": "GLOBAL NAVIGATION SATELLITE SYSTEM"
     }
   ]
 }
