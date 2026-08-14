@@ -25,8 +25,9 @@ class ProcessCollector {
         val memInfo = ActivityManager.MemoryInfo()
         manager.getMemoryInfo(memInfo)
 
-        // Per-core load from /proc/stat
-        val coreLoads = readCpuLoads()
+        // Per-core load from /proc/stat — EACCES for the app UID on Android 16,
+        // so Power Mode routes it through the shell bridge (UID 2000 can read it).
+        val coreLoads = readCpuLoads(shizuku)
 
         // Top processes from RunningAppProcessInfo
         val processes = manager.runningAppProcesses?.take(5) ?: emptyList()
@@ -76,10 +77,18 @@ class ProcessCollector {
      * Reads instantaneous per-core CPU load by diffing successive /proc/stat samples.
      * The first read returns all zeros (no baseline yet) rather than a misleading
      * since-boot average.
+     *
+     * Android 10+ gates /proc/stat from ordinary app UIDs (EACCES). In Power Mode
+     * the shell bridge (UID 2000 / root) reads it via `cat`; otherwise we attempt
+     * the direct read for older ROMs and degrade to empty on denial.
      */
-    private fun readCpuLoads(): List<Float> {
+    private fun readCpuLoads(shizuku: ShizukuDetector?): List<Float> {
         return try {
-            val content = File("/proc/stat").readText()
+            val content = when {
+                shizuku?.isAvailable() == true -> shizuku.runCommand("cat /proc/stat").orEmpty()
+                else -> try { File("/proc/stat").readText() } catch (e: Exception) { "" }
+            }
+            if (content.isBlank()) return emptyList()
             val current = parseProcStat(content)
             val previous = prevCpuTicks
             prevCpuTicks = current

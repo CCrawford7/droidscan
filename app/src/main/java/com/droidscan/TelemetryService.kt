@@ -74,9 +74,10 @@ class TelemetryService : Service() {
     private fun startCollecting() {
         collectorJob = scope.launch {
             try {
-                val collector = DroidscanApp.instance.telemetryCollector
+                // Observe the process-wide liveSnapshot (single collection loop in
+                // DroidscanApp) — the notification mirrors the same data the UI shows.
                 var lastNotify = 0L
-                collector.observeAll().collectLatest { snapshot ->
+                DroidscanApp.instance.liveSnapshot.collectLatest { snapshot ->
                     val now = System.currentTimeMillis()
                     if (now - lastNotify >= NOTIFY_INTERVAL_MS) {
                         lastNotify = now

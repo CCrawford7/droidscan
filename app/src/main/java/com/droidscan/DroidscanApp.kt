@@ -1,12 +1,32 @@
 package com.droidscan
 
 import android.app.Application
+import android.util.Log
+import com.droidscan.shared.core.MetricSnapshot
 import com.droidscan.telemetry.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 
 class DroidscanApp : Application() {
 
     lateinit var telemetryCollector: TelemetryCollector
         private set
+
+    // Single collection loop for the whole process. Both the UI (MainActivity)
+    // and the foreground TelemetryService observe this StateFlow, so there is
+    // exactly one telemetry pass per tick — one sensor read, one history append.
+    // Without this, activity + service each ran observeAll() (double reads,
+    // double encrypted-history appends).
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    private val _liveSnapshot = MutableStateFlow(MetricSnapshot())
+    val liveSnapshot: StateFlow<MetricSnapshot> = _liveSnapshot.asStateFlow()
 
     override fun onCreate() {
         super.onCreate()
@@ -85,9 +105,35 @@ class DroidscanApp : Application() {
             shizukuDetector = shizukuDetector,
             historyStore = historyStore
         )
+
+        // Kick the single collection loop. It runs for the process lifetime,
+        // feeding liveSnapshot (UI + notification) and the encrypted history.
+        appScope.launch {
+            try {
+                telemetryCollector.observeAll().collect { _liveSnapshot.value = it }
+            } catch (t: Throwable) {
+                Log.e(TAG, "telemetry loop stopped: ${t.message}", t)
+            }
+        }
+
+        // Startup health check for the encrypted history store — the trend
+        // charts depend on it, so surface any decrypt/read failure immediately.
+        appScope.launch {
+            try {
+                val recent = historyStore.recent(3)
+                Log.i(
+                    TAG,
+                    "history: size=${historyStore.size()} encrypted=${historyStore.isEncrypted()} " +
+                        "recent3=${recent.size} sampleCpu=${recent.lastOrNull()?.processes?.perCoreLoad?.size ?: -1}"
+                )
+            } catch (t: Throwable) {
+                Log.e(TAG, "history health check failed: ${t.message}")
+            }
+        }
     }
 
     companion object {
+        private const val TAG = "DroidscanApp"
         lateinit var instance: DroidscanApp
             private set
     }

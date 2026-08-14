@@ -28,6 +28,15 @@ class MetricHistoryStore(
 ) {
     private val lock = Any()
 
+    // In-memory view of the decrypted JSON lines, loaded once from the file and
+    // kept in sync by append(). This is what makes chart refreshes cheap: the
+    // alternative — re-reading a multi-MB file and re-decrypting every line on
+    // every 10s trend refresh — pins the heap and lags the UI on small devices.
+    // Only the decrypted STRINGS are cached (~5KB/line); snapshots are decoded
+    // on demand, so the chart decodes just its ~120 sampled points.
+    private val cacheLines = ArrayDeque<String>()
+    private var cacheLoaded = false
+
     init {
         file.parentFile?.mkdirs()
         encryptor?.let { migrateLegacyPlaintext(it) }
@@ -41,6 +50,21 @@ class MetricHistoryStore(
         null // tampered / corrupt line — never surface garbage
     }
 
+    private fun parseSnapshot(line: String): MetricSnapshot? = try {
+        json.decodeFromString(MetricSnapshot.serializer(), line)
+    } catch (_: Exception) {
+        null // skip corrupt/partial line
+    }
+
+    /** Loads the decrypted line cache from the file, once per process. */
+    private fun ensureLinesLoaded() {
+        if (cacheLoaded) return
+        file.readLines().takeLast(maxEntries).forEach { line ->
+            decode(line)?.let { cacheLines.addLast(it) }
+        }
+        cacheLoaded = true
+    }
+
     /** Appends [snapshot] to the history, pruning to [maxEntries] if needed. */
     fun append(snapshot: MetricSnapshot) {
         synchronized(lock) {
@@ -48,6 +72,10 @@ class MetricHistoryStore(
                 val line = json.encodeToString(MetricSnapshot.serializer(), snapshot)
                 file.appendText(encode(line) + "\n")
                 prune()
+                if (cacheLoaded) {
+                    cacheLines.addLast(line)
+                    while (cacheLines.size > maxEntries) cacheLines.removeFirst()
+                }
             } catch (e: Exception) {
                 // Never let a history failure break the telemetry loop.
                 // (Logging isn't available in shared-core; failures are best-effort.)
@@ -59,13 +87,33 @@ class MetricHistoryStore(
     fun recent(n: Int): List<MetricSnapshot> {
         synchronized(lock) {
             return try {
-                file.readLines().takeLast(n).mapNotNull { line ->
-                    val plain = decode(line) ?: return@mapNotNull null
-                    try {
-                        json.decodeFromString(MetricSnapshot.serializer(), plain)
-                    } catch (_: Exception) {
-                        null // skip corrupt/partial line
-                    }
+                ensureLinesLoaded()
+                cacheLines.takeLast(n).mapNotNull { parseSnapshot(it) }
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    /**
+     * The chart read path: the last [window] entries, downsampled to at most
+     * [maxPoints], anchored so the newest snapshot is always the last point.
+     * Only the sampled lines are decoded to objects — cheap even with a large
+     * backing file.
+     */
+    fun recentSampled(window: Int, maxPoints: Int): List<MetricSnapshot> {
+        synchronized(lock) {
+            return try {
+                ensureLinesLoaded()
+                val lines = cacheLines.takeLast(window)
+                val n = lines.size
+                if (n <= maxPoints) {
+                    lines.mapNotNull { parseSnapshot(it) }
+                } else {
+                    val step = (n - 1).toDouble() / (maxPoints - 1)
+                    (0 until maxPoints).map { i ->
+                        parseSnapshot(lines[(i * step).toInt()])
+                    }.filterNotNull()
                 }
             } catch (_: Exception) {
                 emptyList()
@@ -76,7 +124,8 @@ class MetricHistoryStore(
     /** Number of persisted entries. */
     fun size(): Int = synchronized(lock) {
         try {
-            file.readLines().size
+            ensureLinesLoaded()
+            cacheLines.size
         } catch (_: Exception) {
             0
         }
@@ -89,16 +138,24 @@ class MetricHistoryStore(
                 file.delete()
             } catch (_: Exception) {
             }
+            cacheLines.clear()
+            cacheLoaded = true
         }
     }
 
     /** True when the backing file stores ciphertext (best-effort). */
     fun isEncrypted(): Boolean = synchronized(lock) {
         try {
-            encryptor != null && file.readLines().firstOrNull()?.let { !it.startsWith("{") } == true
+            encryptor != null && firstLine(file)?.let { !it.startsWith("{") } == true
         } catch (_: Exception) {
             false
         }
+    }
+
+    private fun firstLine(f: File): String? = try {
+        f.bufferedReader(Charsets.UTF_8).use { it.readLine() }
+    } catch (_: Exception) {
+        null
     }
 
     /** Rewrites a legacy plaintext JSONL file to encrypted lines, in place. */

@@ -36,4 +36,12 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     compileOnly(libs.shizuku.api)
     testImplementation(libs.junit)
+    // MetricHistoryStore's default Json param needs the runtime on the test
+    // classpath (shared-core exposes it via implementation, not api).
+    testImplementation(libs.kotlinx.serialization.json)
+    // ShizukuBridge's lazy holds a reference to Shizuku$UserServiceArgs that the
+    // JVM resolves at class-load; make the stub resolvable so constructing a
+    // TelemetryCollector (with its default ShizukuDetector) works in JVM tests.
+    // The lazy is never invoked, so no binder calls happen.
+    testImplementation(libs.shizuku.api)
 }

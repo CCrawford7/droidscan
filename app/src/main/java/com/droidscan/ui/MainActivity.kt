@@ -27,7 +27,6 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grantResults ->
         Log.i("DroidscanPerms", "Permission results: $grantResults")
-        telemetryFlow = DroidscanApp.instance.telemetryCollector.observeAll()
         // Slice #3: once the run permission set is settled, kick the foreground
         // service so collection survives backgrounding.
         TelemetryService.start(applicationContext)
@@ -38,7 +37,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         Log.i("DroidscanPerms", "onCreate called, requesting permissions")
         requestRequiredPermissions()
-        telemetryFlow = DroidscanApp.instance.telemetryCollector.observeAll()
+        // Single shared telemetry flow (owned by DroidscanApp) — the service and
+        // every activity consume the same liveSnapshot, so there's one collector.
+        telemetryFlow = DroidscanApp.instance.liveSnapshot
 
         setContent {
             DroidscanTheme {

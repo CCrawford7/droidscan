@@ -64,6 +64,10 @@ fun DashboardScreen(telemetryFlow: Flow<MetricSnapshot>) {
         telemetryFlow.collectLatest { snapshot -> currentSnapshot = snapshot }
     }
 
+    // Sampled persisted history for the trend charts — shared by every tab so
+    // the encrypted file is read+decrypted by exactly one loop.
+    val trendHistory = rememberTrendHistory()
+
     Scaffold(
         containerColor = TerminalBackground,
         topBar = {
@@ -85,9 +89,9 @@ fun DashboardScreen(telemetryFlow: Flow<MetricSnapshot>) {
                 val contentPadding = Modifier.padding(horizontal = 14.dp)
                 when (selectedTab) {
                     DashboardTab.OVERVIEW -> OverviewTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
-                    DashboardTab.RADIO -> RadioTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
-                    DashboardTab.SYSTEM -> SystemTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
-                    DashboardTab.POWER -> PowerTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
+                    DashboardTab.RADIO -> RadioTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
+                    DashboardTab.SYSTEM -> SystemTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
+                    DashboardTab.POWER -> PowerTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
                     DashboardTab.SIM -> SimTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
                 }
             }
@@ -301,6 +305,7 @@ fun RadioTab(
     snapshot: MetricSnapshot,
     glossary: List<GlossaryEntry>,
     padding: Modifier,
+    trendHistory: List<MetricSnapshot>,
     onTap: (String) -> Unit
 ) {
     Column(
@@ -334,6 +339,15 @@ fun RadioTab(
                 }
             }
         }
+
+        TrendCard(
+            "RSRP TREND", trendRsrp(trendHistory), " dBm", TerminalAccentBlue,
+            windowLabel = "30 min", minY = -130f, maxY = -30f
+        )
+        TrendCard(
+            "SINR TREND", trendSinr(trendHistory), " dB", TerminalAccentGreen,
+            windowLabel = "30 min", minY = -10f, maxY = 40f
+        )
 
         TierCard("SERVING NETWORK") {
             DualMetricRow("Operator", MetricValue(snapshot.radio.operatorName ?: "--"), "Network", MetricValue(snapshot.radio.dataNetworkType ?: "--"), null, "dataNetworkType", onTap)
@@ -448,6 +462,7 @@ fun SystemTab(
     snapshot: MetricSnapshot,
     glossary: List<GlossaryEntry>,
     padding: Modifier,
+    trendHistory: List<MetricSnapshot>,
     onTap: (String) -> Unit
 ) {
     Column(
@@ -459,7 +474,10 @@ fun SystemTab(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         TierCard("CPU", liveReadout = snapshot.processes.perCoreLoad.maxOrNull()?.let { "${(it * 100).toInt()}%" }, liveColor = TerminalAccentCyan) {
-            val hasCpuData = snapshot.processes.perCoreLoad.any { it > 0f }
+            // Non-empty means the bridge read /proc/stat successfully; an idle
+            // device legitimately reads all-zero loads and must not be mistaken
+            // for a privilege failure.
+            val hasCpuData = snapshot.processes.perCoreLoad.isNotEmpty()
             if (!hasCpuData) {
                 // Android 16: /proc/stat is EACCES for non-privileged apps.
                 MetricRow("Status", MetricValue("CPU data requires privilege"))
@@ -482,6 +500,16 @@ fun SystemTab(
                 MetricRow("${p.name.take(22)}", MetricValue(formatBytes(p.memoryBytes ?: 0L)), indent = true)
             }
         }
+
+        TrendCard(
+            "CPU LOAD TREND", trendCpuLoad(trendHistory), "%", TerminalAccentCyan,
+            windowLabel = "30 min", minY = 0f, maxY = 100f,
+            formatValue = { v -> "${(v).toInt()}%" }
+        )
+        TrendCard(
+            "RAM USED TREND", trendRamUsedGiB(trendHistory), " GiB", TerminalAccentBlue,
+            windowLabel = "30 min", minY = 0f
+        )
 
         if (snapshot.processes.kernelWakelocks.isNotEmpty()) {
             TierCard("WAKELOCKS (Power Mode)") {
@@ -544,6 +572,7 @@ fun PowerTab(
     snapshot: MetricSnapshot,
     glossary: List<GlossaryEntry>,
     padding: Modifier,
+    trendHistory: List<MetricSnapshot>,
     onTap: (String) -> Unit
 ) {
     val isThrottling = snapshot.thermal.isThrottling == true
@@ -576,6 +605,12 @@ fun PowerTab(
             snapshot.power.batteryChargeCounterMicroAh?.let { MetricRow("Charge Counter", MetricValue("${it / 1000} mAh")) }
             snapshot.power.estimatedTimeRemainingMs?.let { MetricRow("Est. Remaining", MetricValue(formatUptime(it))) }
         }
+
+        TrendCard(
+            "BATTERY TREND", trendBattery(trendHistory), "%", TerminalAccentGreen,
+            windowLabel = "30 min", minY = 0f, maxY = 100f,
+            formatValue = { v -> "${v.toInt()}%" }
+        )
 
         TierCard("RADIO / SENSORS") {
             DualMetricRow("Bluetooth", MetricValue(if (snapshot.power.bluetoothActive) "ON" else "OFF"), "eSIM", MetricValue(if (snapshot.power.esimActive) "YES" else "NO"))
@@ -679,6 +714,11 @@ fun PowerTab(
                 }
             }
         }
+
+        TrendCard(
+            "THERMAL TREND", trendThermal(trendHistory), "°C", TerminalAccentOrange,
+            windowLabel = "30 min"
+        )
 
         // MODE tier — Shizuku guidance lives in Settings, no nag banner here.
         TierCard(if (snapshot.shizukuAvailable) "POWER MODE (Shizuku)" else "MODE") {

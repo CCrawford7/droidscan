@@ -101,6 +101,23 @@ class TelemetryCollector(
     /** Most-recent [n] persisted snapshots, oldest-first (empty if no store). */
     fun history(n: Int): List<MetricSnapshot> = historyStore?.recent(n) ?: emptyList()
 
+    /**
+     * Evenly-sampled persisted history for trend charts. Delegates to the
+     * store's [MetricHistoryStore.recentSampled] — the last [windowSnapshots]
+     * entries (default 30 min @ 1/s) downsampled to at most [maxPoints],
+     * anchored so the newest snapshot is always the last point.
+     *
+     * The store caches decrypted lines in memory and decodes only the sampled
+     * points, so this stays cheap even with a multi-MB backing file (re-reading
+     * + re-decrypting everything every refresh would pin the heap and lag the
+     * chart on small devices).
+     */
+    fun historyForCharts(
+        windowSnapshots: Int = CHART_WINDOW_SNAPSHOTS,
+        maxPoints: Int = CHART_MAX_POINTS
+    ): List<MetricSnapshot> =
+        historyStore?.recentSampled(windowSnapshots, maxPoints) ?: emptyList()
+
     /** Builds the full human-readable diagnostic report for [snapshot]. */
     fun buildDebugDump(snapshot: MetricSnapshot): String {
         val sb = StringBuilder()
@@ -212,4 +229,9 @@ class TelemetryCollector(
     fun getRingBuffer(): List<MetricSnapshot> = ringBuffer.toList()
     fun isShizukuAvailable(): Boolean = shizukuDetector.isAvailable()
     fun transport(): String = shizukuDetector.transport()
+
+    companion object {
+        const val CHART_WINDOW_SNAPSHOTS = 1800 // 30 min @ 1/s
+        const val CHART_MAX_POINTS = 120
+    }
 }
