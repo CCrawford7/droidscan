@@ -12,6 +12,7 @@ class TelemetryCollector(
     private val radioCollector: RadioCollector = RadioCollector(),
     private val thermalCollector: ThermalCollector = ThermalCollector(),
     private val storageCollector: StorageCollector = StorageCollector(),
+    private val storageWearCollector: StorageWearCollector = StorageWearCollector(),
     private val powerCollector: PowerCollector = PowerCollector(),
     private val processCollector: ProcessCollector = ProcessCollector(),
     private val networkCollector: NetworkConfigCollector = NetworkConfigCollector(),
@@ -36,12 +37,16 @@ class TelemetryCollector(
         while (true) { emit(storageCollector.read()); delay(5000L) }
     }.flowOn(Dispatchers.IO)
 
+    fun observeStorageWear(): Flow<StorageWearSnapshot> = flow {
+        while (true) { emit(storageWearCollector.read(shizukuDetector)); delay(60_000L) }
+    }.flowOn(Dispatchers.IO)
+
     fun observePower(): Flow<PowerSnapshot> = flow {
         while (true) { emit(powerCollector.read()); delay(10000L) }
     }.flowOn(Dispatchers.IO)
 
     fun observeProcesses(): Flow<ProcessSnapshot> = flow {
-        while (true) { emit(processCollector.read(shizukuDetector.isAvailable())); delay(1000L) }
+        while (true) { emit(processCollector.read(shizukuDetector)); delay(1000L) }
     }.flowOn(Dispatchers.IO)
 
     fun observeNetworkConfig(): Flow<NetworkConfigSnapshot> = flow {
@@ -72,8 +77,9 @@ class TelemetryCollector(
                 radio = radioCollector.read(),
                 thermal = thermalCollector.read(shizukuDetector.isAvailable()),
                 storage = storageCollector.read(),
+                storageWear = storageWearCollector.read(shizukuDetector),
                 power = powerCollector.read(),
-                processes = processCollector.read(shizukuDetector.isAvailable()),
+                processes = processCollector.read(shizukuDetector),
                 networkConfig = networkCollector.read(),
                 simStatus = simCollector.read(),
                 systemInfo = systemCollector.read(),
@@ -153,6 +159,17 @@ class TelemetryCollector(
         sb.appendLine("Internal used=${st.internalUsedBytes} free=${st.internalFreeBytes}")
         sb.appendLine("External: mounted=${st.externalMounted} free=${st.externalFreeBytes}")
         st.topConsumers.forEach { c -> sb.appendLine("  ${c.label}: ${c.sizeBytes}") }
+        sb.appendLine("")
+        sb.appendLine("--- STORAGE WEAR (Power Mode) ---")
+        val sw = snapshot.storageWear
+        if (sw.powerMode) {
+            sb.appendLine("512B write latency: ${sw.writeLatencyMs}ms | sustained write: ${sw.recentWriteKbps} kB/s")
+            sb.appendLine("Data free: ${sw.dataFreePercent}% | FBE: ${sw.fileBasedEncryption}")
+            sb.appendLine("App: ${sw.appSizeBytes} | Data: ${sw.appDataSizeBytes} | Cache: ${sw.appCacheSizeBytes}")
+            sb.appendLine("Photos: ${sw.photosSizeBytes} | Videos: ${sw.videosSizeBytes} | Audio: ${sw.audioSizeBytes}")
+        } else {
+            sb.appendLine("  (requires Shizuku Power Mode)")
+        }
         sb.appendLine("")
         sb.appendLine("--- THERMAL ---")
         snapshot.thermal.zones.forEach { z -> sb.appendLine("  ${z.name}: ${z.temperatureCelsius}°C throttling=${z.throttling}") }

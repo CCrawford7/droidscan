@@ -79,6 +79,29 @@ data class StorageConsumer(
     val sizeBytes: Long
 )
 
+/**
+ * Deep storage / wear telemetry from `dumpsys diskstats` (Power Mode, UID 2000).
+ * Standard Mode yields an empty snapshot — the dump is shell-privileged on this
+ * device (even /proc/diskstats is root-gated). The user-space aggregation still
+ * tells the real story: write latency, sustained write speed, and how the
+ * partition is carved up by app/data/cache.
+ */
+@Serializable
+data class StorageWearSnapshot(
+    val writeLatencyMs: Long? = null,        // 512B random write latency
+    val recentWriteKbps: Int? = null,        // recent sustained write speed (kB/s)
+    val dataFreePercent: Int? = null,        // /data free as % of total
+    val fileBasedEncryption: Boolean? = null,
+    val appSizeBytes: Long? = null,
+    val appDataSizeBytes: Long? = null,
+    val appCacheSizeBytes: Long? = null,
+    val photosSizeBytes: Long? = null,
+    val videosSizeBytes: Long? = null,
+    val audioSizeBytes: Long? = null,
+    val powerMode: Boolean = false,          // true when read via Shizuku
+    val timestampMs: Long = currentTimeMs()
+)
+
 @Serializable
 data class PowerSnapshot(
     val batteryLevel: Int? = null,         // 0..100
@@ -242,6 +265,7 @@ data class MetricSnapshot(
     val radio: RadioSnapshot = RadioSnapshot(),
     val thermal: ThermalSnapshot = ThermalSnapshot(),
     val storage: StorageSnapshot = StorageSnapshot(),
+    val storageWear: StorageWearSnapshot = StorageWearSnapshot(),
     val power: PowerSnapshot = PowerSnapshot(),
     val processes: ProcessSnapshot = ProcessSnapshot(),
     val networkConfig: NetworkConfigSnapshot = NetworkConfigSnapshot(),

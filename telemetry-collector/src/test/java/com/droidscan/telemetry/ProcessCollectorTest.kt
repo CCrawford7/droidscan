@@ -2,7 +2,9 @@ package com.droidscan.telemetry
 
 import com.droidscan.telemetry.ProcessCollector.Companion.computeCpuLoads
 import com.droidscan.telemetry.ProcessCollector.Companion.parseProcStat
+import com.droidscan.telemetry.ProcessCollector.Companion.parseWakeLocks
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ProcessCollectorTest {
@@ -70,5 +72,46 @@ class ProcessCollectorTest {
         val prev = listOf(longArrayOf(100, 0, 0, 900))
         val curr = listOf(longArrayOf(5, 0, 0, 10)) // counters went backwards
         assertEquals(0.0f, computeCpuLoads(prev, curr)[0], 0.0001f)
+    }
+
+    @Test
+    fun `parseWakeLocks extracts names from real dumpsys power output`() {
+        // Real CPH2709 output: 2-space indent, single-quoted names, trailing sections.
+        val dump = """
+            Wake Locks: size=2
+              PARTIAL_WAKE_LOCK '*job*r/@androidx.work.systemjobscheduler@com.wizconnected.wiz2/androidx.work.impl.background.systemjob.SystemJobService' ACQ=-2m31s334ms LONG (uid=1000 pid=3201 ws=WorkSource{ chains=WorkChain{(10525), (1000, JobScheduler)}})
+              PARTIAL_WAKE_LOCK 'AudioMix' ACQUIRE_CAUSES_WAKEOFF
+            Proxyed Wake Locks:
+
+            Restored Wake Locks:
+
+            Proxy uid infos:
+            Wake lock history:
+        """.trimIndent()
+        val names = ProcessCollector.parseWakeLocks(dump)
+        assertEquals(2, names.size)
+        assertTrue(names.contains("AudioMix"))
+        assertTrue(names.any { it.startsWith("*job*r/@androidx.work") })
+    }
+
+    @Test
+    fun `parseWakeLocks handles zero wake locks`() {
+        val dump = """
+            Wake Locks: size=0
+            Proxyed Wake Locks:
+
+            Restored Wake Locks:
+        """.trimIndent()
+        assertEquals(0, ProcessCollector.parseWakeLocks(dump).size)
+    }
+
+    @Test
+    fun `parseWakeLocks tolerates 4-space indentation`() {
+        val dump = """
+            Wake Locks: size=1
+                PARTIAL_WAKE_LOCK 'AudioMix' ACQUIRE_CAUSES_WAKEOFF
+            Proxyed Wake Locks:
+        """.trimIndent()
+        assertEquals(listOf("AudioMix"), ProcessCollector.parseWakeLocks(dump))
     }
 }

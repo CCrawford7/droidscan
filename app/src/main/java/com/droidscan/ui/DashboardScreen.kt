@@ -499,6 +499,20 @@ fun SystemTab(
             if (snapshot.storage.externalMounted) MetricRow("External", MetricValue(formatBytes(snapshot.storage.externalFreeBytes ?: 0L) + " free"))
         }
 
+        // Deep storage / wear — dumpsys diskstats via the T2 shell bridge.
+        TierCard("STORAGE WEAR (Power Mode)") {
+            val sw = snapshot.storageWear
+            if (sw.powerMode) {
+                DualMetricRow("512B Write Lat", MetricValue(sw.writeLatencyMs?.let { "$it ms" } ?: "--"), "Write Speed", MetricValue(sw.recentWriteKbps?.let { "$it kB/s" } ?: "--"))
+                DualMetricRow("Data Free", MetricValue(sw.dataFreePercent?.let { "$it%" } ?: "--"), "FBE", MetricValue(sw.fileBasedEncryption?.let { if (it) "ON" else "OFF" } ?: "--"))
+                DualMetricRow("App Size", MetricValue(sw.appSizeBytes?.let(::formatBytes) ?: "--"), "Data Size", MetricValue(sw.appDataSizeBytes?.let(::formatBytes) ?: "--"))
+                DualMetricRow("Cache", MetricValue(sw.appCacheSizeBytes?.let(::formatBytes) ?: "--"), "Media", MetricValue(listOfNotNull(sw.photosSizeBytes, sw.videosSizeBytes, sw.audioSizeBytes).sum().let { if (it > 0) formatBytes(it) else "--" }))
+            } else {
+                MetricRow("Status", MetricValue(if (snapshot.shizukuAvailable) "No data" else "Requires Shizuku"))
+                MetricRow("Hint", MetricValue("Start Shizuku → grant → Power Mode"))
+            }
+        }
+
         TierCard("DEVICE") {
             MetricRow("Model", MetricValue(snapshot.systemInfo.deviceModel ?: "--"))
             MetricRow("Manufacturer", MetricValue(snapshot.systemInfo.manufacturer ?: "--"))
@@ -672,13 +686,13 @@ fun PowerTab(
                     MetricRow("Wakelocks", MetricValue("${it.size} active"))
                 }
             } else {
-                MetricRow("Status", MetricValue("Standard Mode — no kernel data"))
+                MetricRow("Status", MetricValue("Standard Mode — no shell data"))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Shizuku enables:", color = TerminalTextSecondary, fontFamily = FontFamily.SansSerif, fontSize = 11.sp)
                     Spacer(Modifier.width(4.dp))
-                    Chip("Kernel wakelocks", TerminalAccentCyan)
+                    Chip("Wake locks", TerminalAccentCyan)
                     Spacer(Modifier.width(4.dp))
-                    Chip("CPU freq", TerminalAccentCyan)
+                    Chip("Storage wear", TerminalAccentCyan)
                 }
             }
         }
@@ -962,9 +976,29 @@ fun SettingsScreen(snapshot: MetricSnapshot) {
     ) {
         TierCard("SHIZUKU", liveReadout = if (snapshot.shizukuAvailable) "LIVE" else null, liveColor = TerminalAccentCyan) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MetricRow("Status", MetricValue(if (snapshot.shizukuAvailable) "Available — kernel-level data" else "Not available"), modifier = Modifier.weight(1f))
+                MetricRow("Status", MetricValue(if (snapshot.shizukuAvailable) "Available — shell-level data" else "Not available"), modifier = Modifier.weight(1f))
                 Spacer(Modifier.width(6.dp))
                 Chip(if (snapshot.shizukuAvailable) "POWER MODE" else "STANDARD", if (snapshot.shizukuAvailable) TerminalAccentCyan else TerminalTextSecondary)
+            }
+            if (!snapshot.shizukuAvailable) {
+                Spacer(Modifier.height(4.dp))
+                MetricRow("How", MetricValue("Open Shizuku → start server → return"))
+                Spacer(Modifier.height(6.dp))
+                Button(
+                    onClick = {
+                        try {
+                            context.startActivity(
+                                context.packageManager.getLaunchIntentForPackage("moe.shizuku.privileged.api")
+                                    ?: Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:moe.shizuku.privileged.api"))
+                            )
+                        } catch (_: Exception) {
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = TerminalAccentCyan.copy(alpha = 0.18f), contentColor = TerminalAccentCyan)
+                ) {
+                    Text("Open Shizuku", fontFamily = FontFamily.SansSerif, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
 

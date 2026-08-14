@@ -11,11 +11,15 @@ class ProcessCollector {
     // Previous /proc/stat per-core tick sample, for delta-based (instantaneous) CPU load.
     private var prevCpuTicks: List<LongArray>? = null
 
+    // Power-Mode wakelock poll throttle — `dumpsys power` is heavier than a sysfs read.
+    private var lastWakelockReadMs = 0L
+    private var cachedWakelocks: List<String> = emptyList()
+
     fun attach(activityManager: ActivityManager) {
         am = activityManager
     }
 
-    fun read(shizukuAvailable: Boolean): ProcessSnapshot {
+    fun read(shizuku: ShizukuDetector?): ProcessSnapshot {
         val manager = am ?: return ProcessSnapshot()
 
         val memInfo = ActivityManager.MemoryInfo()
@@ -52,8 +56,10 @@ class ProcessCollector {
             else -> MemoryPressure.NORMAL
         }
 
-        // Kernel wakelocks (Power Mode)
-        val wakelocks = if (shizukuAvailable) readKernelWakelocks() else emptyList()
+        // Wake locks (Power Mode): dumpsys power, shell-privileged. The old
+        // /proc/wakelocks path is root-gated (and absent on modern kernels), so
+        // the shell-level dumpsys is the only viable T2 source.
+        val wakelocks = if (shizuku?.isAvailable() == true) readWakeLocks(shizuku) else emptyList()
 
         return ProcessSnapshot(
             perCoreLoad = coreLoads,
@@ -88,31 +94,67 @@ class ProcessCollector {
         }
     }
 
-    private fun readKernelWakelocks(): List<String> {
-        return try {
-            val wakeupSources = File("/d/wakeup_sources")
-            if (wakeupSources.exists()) {
-                wakeupSources.readLines().drop(1).mapNotNull { line ->
-                    val parts = line.trim().split("\\s+".toRegex())
-                    parts.getOrNull(0)?.takeIf { it.isNotEmpty() }
-                }
-            } else {
-                val wakelocks = File("/proc/wakelocks")
-                if (wakelocks.exists()) {
-                    wakelocks.readLines().drop(1).mapNotNull { line ->
-                        val name = line.trim().split("\\s+".toRegex()).firstOrNull()
-                        name?.takeIf { it.isNotEmpty() }
-                    }
-                } else emptyList()
-            }
+    /**
+     * Wake locks via `dumpsys power` (Power Manager), throttled to once per
+     * [WAKELOCK_INTERVAL_MS]. Output looks like:
+     *
+     *     Wake Locks: size=3
+     *       PARTIAL_WAKE_LOCK 'AudioMix' ACQUIRE_CAUSES_WAKEOFF
+     *       PARTIAL_WAKE_LOCK 'droidscan' ...
+     */
+    private fun readWakeLocks(shizuku: ShizukuDetector): List<String> {
+        val now = System.currentTimeMillis()
+        if (now - lastWakelockReadMs < WAKELOCK_INTERVAL_MS) return cachedWakelocks
+        lastWakelockReadMs = now
+
+        cachedWakelocks = try {
+            val dump = shizuku.runCommand("dumpsys power") ?: return emptyList()
+            parseWakeLocks(dump)
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to read kernel wakelocks: ${e.message}", e)
+            Log.w(TAG, "Failed to read wake locks: ${e.message}", e)
             emptyList()
         }
+        return cachedWakelocks
     }
 
     companion object {
         private const val TAG = "ProcessCollector"
+        private const val WAKELOCK_INTERVAL_MS = 5_000L
+
+        /**
+         * Extracts active wake lock names from `dumpsys power`. The section starts
+         * at "Wake Locks: size=N" and entries are indented lines carrying a
+         * single-quoted name, e.g.:
+         *
+         *     Wake Locks: size=2
+         *       PARTIAL_WAKE_LOCK 'AudioMix' ...
+         *       PARTIAL_WAKE_LOCK 'droidscan' ...
+         *     Proxyed Wake Locks:
+         *
+         * Indentation varies by OS (2 vs 4 spaces), so we treat any leading
+         * whitespace as "inside the section" and stop at the next top-level header.
+         */
+        internal fun parseWakeLocks(dump: String): List<String> {
+            val lines = dump.lines()
+            val start = lines.indexOfFirst { it.trim().startsWith("Wake Locks:") }
+            if (start < 0) return emptyList()
+
+            val result = mutableListOf<String>()
+            for (line in lines.drop(start + 1)) {
+                val trimmed = line.trim()
+                if (trimmed.isEmpty()) continue
+                // Top-level line = next section; stop once we've collected names.
+                if (!line.startsWith(" ") && !line.startsWith("\t")) {
+                    if (result.isNotEmpty()) break
+                    continue
+                }
+                val match = Regex("'([^']+)'").find(trimmed)
+                match?.groupValues?.getOrNull(1)?.let { name ->
+                    if (name.isNotBlank()) result.add(name)
+                }
+            }
+            return result.distinct()
+        }
 
         /**
          * Parses /proc/stat content into per-core tick arrays [user, nice, system, idle].

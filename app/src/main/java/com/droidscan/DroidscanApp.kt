@@ -56,8 +56,11 @@ class DroidscanApp : Application() {
             it.attach(this)
         }
 
+        // T2: Shizuku bridge. initialize() binds the UserService lifecycle and
+        // requests permission when the server is running; collectors consult
+        // isAvailable()/runCommand() to fetch shell-privileged telemetry.
         val shizukuDetector = ShizukuDetector().apply {
-            initialize()
+            initialize(this@DroidscanApp)
         }
 
         // File-backed metric history (P1): powers trend charts + the future
