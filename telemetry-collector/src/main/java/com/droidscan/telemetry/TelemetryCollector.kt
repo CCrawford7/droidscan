@@ -101,7 +101,8 @@ class TelemetryCollector(
     /** Most-recent [n] persisted snapshots, oldest-first (empty if no store). */
     fun history(n: Int): List<MetricSnapshot> = historyStore?.recent(n) ?: emptyList()
 
-    fun debugDump(snapshot: MetricSnapshot) {
+    /** Builds the full human-readable diagnostic report for [snapshot]. */
+    fun buildDebugDump(snapshot: MetricSnapshot): String {
         val sb = StringBuilder()
         sb.appendLine("==== DROIDSCAN SNAPSHOT ====")
         sb.appendLine("Device: ${snapshot.systemInfo.deviceModel} (${snapshot.systemInfo.manufacturer})")
@@ -195,9 +196,13 @@ class TelemetryCollector(
         sb.appendLine("")
         sb.appendLine("Shizuku: ${snapshot.shizukuAvailable}")
         sb.appendLine("==== END SNAPSHOT ====")
+        return sb.toString()
+    }
 
+    /** Legacy log-based dump (used by the "tap uptime" debug affordance). */
+    fun debugDump(snapshot: MetricSnapshot) {
         val tag = "DroidscanSnapshot"
-        sb.toString().lines().forEach { line ->
+        buildDebugDump(snapshot).lines().forEach { line ->
             if (line.isNotBlank()) {
                 Log.d(tag, if (line.length > 4000) line.take(4000) + "..." else line)
             }
@@ -206,4 +211,5 @@ class TelemetryCollector(
 
     fun getRingBuffer(): List<MetricSnapshot> = ringBuffer.toList()
     fun isShizukuAvailable(): Boolean = shizukuDetector.isAvailable()
+    fun transport(): String = shizukuDetector.transport()
 }

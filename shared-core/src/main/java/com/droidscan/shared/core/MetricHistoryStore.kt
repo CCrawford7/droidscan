@@ -11,18 +11,34 @@ import java.io.File
  * O(1) (no full rewrite per tick); the file is pruned to [maxEntries] when it
  * overflows so it can never grow unbounded.
  *
+ * At-rest protection: pass a [LineEncryptor] to encrypt each line (AES-GCM via
+ * Android Keystore in [KeystoreAesGcmLineEncryptor]). On first load with an
+ * encryptor, any legacy plaintext file (first line starts with `{`) is migrated
+ * in place so previously captured history survives the upgrade. A null
+ * encryptor keeps the store plaintext — the default and the JVM-testable path.
+ *
  * Thread-safe: all operations are serialized on an internal lock. Callers on
  * Dispatchers.IO are fine; heavy concurrent writers will briefly serialize.
  */
 class MetricHistoryStore(
     private val file: File,
     private val maxEntries: Int = DEFAULT_MAX_ENTRIES,
-    private val json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    private val json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
+    private val encryptor: LineEncryptor? = null
 ) {
     private val lock = Any()
 
     init {
         file.parentFile?.mkdirs()
+        encryptor?.let { migrateLegacyPlaintext(it) }
+    }
+
+    private fun encode(line: String): String = encryptor?.encrypt(line) ?: line
+
+    private fun decode(line: String): String? = try {
+        encryptor?.decrypt(line) ?: line
+    } catch (_: Exception) {
+        null // tampered / corrupt line — never surface garbage
     }
 
     /** Appends [snapshot] to the history, pruning to [maxEntries] if needed. */
@@ -30,7 +46,7 @@ class MetricHistoryStore(
         synchronized(lock) {
             try {
                 val line = json.encodeToString(MetricSnapshot.serializer(), snapshot)
-                file.appendText(line + "\n")
+                file.appendText(encode(line) + "\n")
                 prune()
             } catch (e: Exception) {
                 // Never let a history failure break the telemetry loop.
@@ -44,8 +60,9 @@ class MetricHistoryStore(
         synchronized(lock) {
             return try {
                 file.readLines().takeLast(n).mapNotNull { line ->
+                    val plain = decode(line) ?: return@mapNotNull null
                     try {
-                        json.decodeFromString(MetricSnapshot.serializer(), line)
+                        json.decodeFromString(MetricSnapshot.serializer(), plain)
                     } catch (_: Exception) {
                         null // skip corrupt/partial line
                     }
@@ -71,6 +88,31 @@ class MetricHistoryStore(
             try {
                 file.delete()
             } catch (_: Exception) {
+            }
+        }
+    }
+
+    /** True when the backing file stores ciphertext (best-effort). */
+    fun isEncrypted(): Boolean = synchronized(lock) {
+        try {
+            encryptor != null && file.readLines().firstOrNull()?.let { !it.startsWith("{") } == true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /** Rewrites a legacy plaintext JSONL file to encrypted lines, in place. */
+    private fun migrateLegacyPlaintext(enc: LineEncryptor) {
+        synchronized(lock) {
+            try {
+                if (!file.exists()) return
+                val lines = file.readLines()
+                val isPlaintext = lines.firstOrNull()?.startsWith("{") ?: false
+                if (!isPlaintext) return
+                file.writeText(lines.joinToString("\n") { enc.encrypt(it) } + "\n")
+            } catch (_: Exception) {
+                // Migration is best-effort; if it fails the old file is preserved
+                // untouched and the next append/read still works line-by-line.
             }
         }
     }

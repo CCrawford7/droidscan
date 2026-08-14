@@ -14,6 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.droidscan.DroidscanApp
+import com.droidscan.TelemetryService
 import com.droidscan.shared.core.MetricSnapshot
 import com.droidscan.ui.theme.DroidscanTheme
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +28,9 @@ class MainActivity : ComponentActivity() {
     ) { grantResults ->
         Log.i("DroidscanPerms", "Permission results: $grantResults")
         telemetryFlow = DroidscanApp.instance.telemetryCollector.observeAll()
+        // Slice #3: once the run permission set is settled, kick the foreground
+        // service so collection survives backgrounding.
+        TelemetryService.start(applicationContext)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,11 +94,20 @@ class MainActivity : ComponentActivity() {
                 permissions.add(Manifest.permission.READ_PHONE_STATE)
             }
         }
+        // API 33+: notification permission so the foreground-service card is visible.
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
         if (permissions.isNotEmpty()) {
             Log.i("DroidscanPerms", "Requesting permissions: $permissions")
             requestPermissionsLauncher.launch(permissions.toTypedArray())
         } else {
             Log.i("DroidscanPerms", "All permissions already granted")
+            // Nothing to request, but still spin up the foreground service.
+            TelemetryService.start(applicationContext)
         }
     }
 }

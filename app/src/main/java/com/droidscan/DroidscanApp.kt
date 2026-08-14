@@ -64,9 +64,11 @@ class DroidscanApp : Application() {
         }
 
         // File-backed metric history (P1): powers trend charts + the future
-        // diagnostic engine. Bounded to ~1h of 1s snapshots.
+        // diagnostic engine. Bounded to ~1h of 1s snapshots. Encrypted at rest
+        // (AES-GCM, key in Android Keystore); legacy plaintext auto-migrates.
         val historyStore = com.droidscan.shared.core.MetricHistoryStore(
-            file = java.io.File(filesDir, "metrics_history.jsonl")
+            file = java.io.File(filesDir, "metrics_history.jsonl"),
+            encryptor = com.droidscan.shared.core.KeystoreAesGcmLineEncryptor()
         )
 
         telemetryCollector = TelemetryCollector(

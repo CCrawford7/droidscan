@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.droidscan.DroidscanApp
+import com.droidscan.TelemetryService
 import com.droidscan.shared.core.*
 import com.droidscan.ui.theme.*
 import kotlinx.coroutines.flow.Flow
@@ -975,10 +977,18 @@ fun SettingsScreen(snapshot: MetricSnapshot) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         TierCard("SHIZUKU", liveReadout = if (snapshot.shizukuAvailable) "LIVE" else null, liveColor = TerminalAccentCyan) {
+            val transport = DroidscanApp.instance.telemetryCollector.transport()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 MetricRow("Status", MetricValue(if (snapshot.shizukuAvailable) "Available — shell-level data" else "Not available"), modifier = Modifier.weight(1f))
                 Spacer(Modifier.width(6.dp))
-                Chip(if (snapshot.shizukuAvailable) "POWER MODE" else "STANDARD", if (snapshot.shizukuAvailable) TerminalAccentCyan else TerminalTextSecondary)
+                Chip(
+                    when (transport) {
+                        "ROOT" -> "ROOT"
+                        "SHIZUKU" -> "POWER MODE"
+                        else -> "STANDARD"
+                    },
+                    if (snapshot.shizukuAvailable) TerminalAccentCyan else TerminalTextSecondary
+                )
             }
             if (!snapshot.shizukuAvailable) {
                 Spacer(Modifier.height(4.dp))
@@ -999,6 +1009,86 @@ fun SettingsScreen(snapshot: MetricSnapshot) {
                 ) {
                     Text("Open Shizuku", fontFamily = FontFamily.SansSerif, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                 }
+            }
+        }
+
+        TierCard("BACKGROUND") {
+            val serviceRunning = TelemetryService.isRunning(context)
+            val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+            val batteryExempt = pm?.isIgnoringBatteryOptimizations(context.packageName) == true
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MetricRow("Foreground service", MetricValue(if (serviceRunning) "RUNNING" else "STOPPED"), modifier = Modifier.weight(1f))
+                Spacer(Modifier.width(6.dp))
+                Chip(if (serviceRunning) "ON" else "OFF", if (serviceRunning) TerminalAccentGreen else TerminalTextSecondary)
+            }
+            MetricRow("Battery exemption", MetricValue(if (batteryExempt) "GRANTED" else "NOT SET"))
+            Spacer(Modifier.height(4.dp))
+            MetricRow(
+                "Hint",
+                MetricValue("Keep collection alive in the background; disable battery optimization to survive OEM kills (OnePlus is aggressive).")
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = {
+                        if (TelemetryService.isRunning(context)) TelemetryService.stop(context)
+                        else TelemetryService.start(context)
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (serviceRunning) TerminalAccentRed.copy(alpha = 0.18f) else TerminalAccentGreen.copy(alpha = 0.18f),
+                        contentColor = if (serviceRunning) TerminalAccentRed else TerminalAccentGreen
+                    )
+                ) {
+                    Text(if (serviceRunning) "Stop" else "Start", fontFamily = FontFamily.SansSerif, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                }
+                Button(
+                    onClick = {
+                        try {
+                            context.startActivity(
+                                Intent(
+                                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                                    Uri.parse("package:${context.packageName}")
+                                )
+                            )
+                        } catch (_: Exception) {
+                            context.startActivity(
+                                Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                            )
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = TerminalAccentBlue, contentColor = TerminalBackground)
+                ) {
+                    Text("Battery opt-out", fontFamily = FontFamily.SansSerif, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
+
+        TierCard("EXPORT") {
+            MetricRow("Diagnostic report", MetricValue("Full telemetry snapshot as text"))
+            MetricRow("Includes", MetricValue("radio · power · thermal · storage · GNSS · IMS"))
+            Spacer(Modifier.height(4.dp))
+            MetricRow("Privacy", MetricValue("Report contains location-derived data — review before sharing"))
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = {
+                    try {
+                        val report = DroidscanApp.instance.telemetryCollector.buildDebugDump(snapshot)
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_SUBJECT, "droidscan diagnostic report — ${snapshot.systemInfo.deviceModel} ${snapshot.systemInfo.androidVersion}")
+                            putExtra(Intent.EXTRA_TEXT, report)
+                            clipData = android.content.ClipData.newPlainText("droidscan_report", report)
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Share diagnostic report"))
+                    } catch (_: Exception) {
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = TerminalAccentCyan.copy(alpha = 0.18f), contentColor = TerminalAccentCyan)
+            ) {
+                Text("Share report", fontFamily = FontFamily.SansSerif, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
             }
         }
 
