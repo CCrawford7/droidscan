@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -19,6 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -29,6 +37,7 @@ import com.droidscan.DroidscanApp
 import com.droidscan.TelemetryService
 import com.droidscan.shared.core.*
 import com.droidscan.ui.theme.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import org.json.JSONObject
@@ -48,6 +57,9 @@ data class GlossaryEntry(
     val expansion: String = ""
 )
 
+/** Telemetry emits at 1s cadence — 8 missed ticks means the loop is stuck. */
+private const val STALE_AFTER_SECONDS = 8L
+
 // ─── Main Screen ─────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,9 +72,30 @@ fun DashboardScreen(telemetryFlow: Flow<MetricSnapshot>) {
     val glossary = remember { loadGlossary(context) }
     var tappedMetricId by remember { mutableStateOf<String?>(null) }
 
+    // ── Telemetry liveness ──────────────────────────────
+    // The collection loop lives in DroidscanApp for the process lifetime, so a
+    // silent freeze means the loop died (unhandled collector error). Track the
+    // last arrival and surface a restart affordance when updates stop.
+    var hasReceivedSnapshot by remember { mutableStateOf(false) }
+    var lastSnapshotAtMs by remember { mutableStateOf(System.currentTimeMillis()) }
+
     LaunchedEffect(telemetryFlow) {
-        telemetryFlow.collectLatest { snapshot -> currentSnapshot = snapshot }
+        telemetryFlow.collectLatest { snapshot ->
+            currentSnapshot = snapshot
+            lastSnapshotAtMs = System.currentTimeMillis()
+            hasReceivedSnapshot = true
+        }
     }
+
+    var nowMs by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            nowMs = System.currentTimeMillis()
+            delay(1000L)
+        }
+    }
+    val secondsSinceLast = ((nowMs - lastSnapshotAtMs) / 1000L).coerceAtLeast(0L)
+    val isStale = hasReceivedSnapshot && secondsSinceLast > STALE_AFTER_SECONDS
 
     // Sampled persisted history for the trend charts — shared by every tab so
     // the encrypted file is read+decrypted by exactly one loop.
@@ -86,13 +119,24 @@ fun DashboardScreen(telemetryFlow: Flow<MetricSnapshot>) {
             if (showSettings) {
                 SettingsScreen(currentSnapshot)
             } else {
-                val contentPadding = Modifier.padding(horizontal = 14.dp)
-                when (selectedTab) {
-                    DashboardTab.OVERVIEW -> OverviewTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
-                    DashboardTab.RADIO -> RadioTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
-                    DashboardTab.SYSTEM -> SystemTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
-                    DashboardTab.POWER -> PowerTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
-                    DashboardTab.SIM -> SimTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
+                Column(Modifier.fillMaxSize()) {
+                    // Telemetry liveness strip: "collecting…" until the first
+                    // tick, then a red stall + Restart if updates stop.
+                    TelemetryStatusStrip(
+                        hasReceived = hasReceivedSnapshot,
+                        isStale = isStale,
+                        secondsSinceLast = secondsSinceLast
+                    )
+                    Box(Modifier.weight(1f)) {
+                        val contentPadding = Modifier.padding(horizontal = 14.dp)
+                        when (selectedTab) {
+                            DashboardTab.OVERVIEW -> OverviewTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
+                            DashboardTab.RADIO -> RadioTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
+                            DashboardTab.SYSTEM -> SystemTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
+                            DashboardTab.POWER -> PowerTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
+                            DashboardTab.SIM -> SimTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
+                        }
+                    }
                 }
             }
         }
@@ -144,9 +188,11 @@ fun AppHeader(snapshot: MetricSnapshot, onOpenSettings: () -> Unit) {
             // Gear → Settings (48dp touch target).
             IconButton(
                 onClick = onOpenSettings,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier
+                    .size(48.dp)
+                    .semantics { contentDescription = "Open settings" }
             ) {
-                Text("⚙", color = TerminalAccentBlue, fontSize = 18.sp)
+                Text("⚙", color = TerminalAccentBlue, fontSize = 18.sp, modifier = Modifier.clearAndSetSemantics {})
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -172,8 +218,13 @@ fun SettingsTopBar(onBack: () -> Unit) {
             )
         },
         navigationIcon = {
-            IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
-                Text("←", color = TerminalTextSecondary, fontSize = 18.sp)
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .size(48.dp)
+                    .semantics { contentDescription = "Back" }
+            ) {
+                Text("←", color = TerminalTextSecondary, fontSize = 18.sp, modifier = Modifier.clearAndSetSemantics {})
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -203,7 +254,11 @@ fun TabBar(selectedTab: DashboardTab, onSelect: (DashboardTab) -> Unit) {
                         Modifier
                             .weight(1f)
                             .heightIn(min = 44.dp)
-                            .clickable { onSelect(tab) }
+                            .selectable(
+                                selected = sel,
+                                onClick = { onSelect(tab) },
+                                role = Role.Tab
+                            )
                             .padding(vertical = 4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -215,10 +270,13 @@ fun TabBar(selectedTab: DashboardTab, onSelect: (DashboardTab) -> Unit) {
                                 .background(if (sel) TerminalAccentBlue else Color.Transparent)
                         )
                         Spacer(Modifier.height(3.dp))
+                        // Icon glyph is decorative — suppress so TalkBack reads
+                        // only the label ("Radio, tab, 2 of 5, selected").
                         Text(
                             tab.icon,
                             color = if (sel) TerminalAccentBlue else TerminalTextSecondary,
-                            fontSize = 15.sp
+                            fontSize = 15.sp,
+                            modifier = Modifier.clearAndSetSemantics {}
                         )
                         Text(
                             tab.label,
@@ -558,7 +616,12 @@ fun SystemTab(
                     color = TerminalTextSecondary.copy(alpha = 0.5f),
                     fontFamily = FontFamily.Monospace,
                     fontSize = 9.sp,
-                    modifier = Modifier.clickable { DroidscanApp.instance.telemetryCollector.debugDump(snapshot) }
+                    modifier = Modifier
+                        .clickable { DroidscanApp.instance.telemetryCollector.debugDump(snapshot) }
+                        .semantics {
+                            role = Role.Button
+                            contentDescription = "Dump telemetry snapshot to logcat"
+                        }
                 )
             }
         }
@@ -741,12 +804,17 @@ fun PowerTab(
 
         // TOP PROCESSES — from ActivityManager, available even without Shizuku.
         TierCard("TOP PROCESSES") {
-            snapshot.processes.topMemoryProcesses.take(5).forEach { p ->
-                MetricRow(
-                    "${p.name.take(24)}",
-                    MetricValue("${String.format("%.1f", p.memoryBytes?.div(1_000_000.0) ?: 0.0)} MB"),
-                    indent = true
-                )
+            val top = snapshot.processes.topMemoryProcesses.take(5)
+            if (top.isEmpty()) {
+                MetricRow("Status", MetricValue("No process data"))
+            } else {
+                top.forEach { p ->
+                    MetricRow(
+                        "${p.name.take(24)}",
+                        MetricValue("${String.format("%.1f", p.memoryBytes?.div(1_000_000.0) ?: 0.0)} MB"),
+                        indent = true
+                    )
+                }
             }
         }
     }
@@ -766,7 +834,10 @@ fun CrisisBanner(snapshot: MetricSnapshot) {
             .fillMaxWidth()
             .background(TerminalAccentRed.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
             .background(TerminalAccentRed.copy(alpha = 0.32f), RoundedCornerShape(12.dp))
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .semantics(mergeDescendants = true) {
+                liveRegion = LiveRegionMode.Polite
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text("⚠", color = TerminalAccentRed, fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
@@ -891,6 +962,74 @@ fun SimTab(
 
 // ─── Visual Components ───────────────────────────────────
 
+// ─── Telemetry liveness strip ───────────────────────────
+// Thin strip under the top bar. Renders nothing when healthy; shows a
+// "collecting…" affordance until the first snapshot, and a red stall strip
+// with a Restart action if the collection loop dies.
+
+@Composable
+private fun TelemetryStatusStrip(
+    hasReceived: Boolean,
+    isStale: Boolean,
+    secondsSinceLast: Long
+) {
+    when {
+        !hasReceived -> StatusStrip(
+            text = "Collecting telemetry…",
+            color = TerminalAccentCyan
+        )
+        isStale -> StatusStrip(
+            text = "Telemetry stalled — no update for ${secondsSinceLast}s",
+            color = TerminalAccentRed,
+            actionLabel = "Restart",
+            onAction = { DroidscanApp.instance.restartTelemetry() }
+        )
+    }
+}
+
+@Composable
+private fun StatusStrip(
+    text: String,
+    color: Color,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(color.copy(alpha = 0.10f))
+            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = if (actionLabel != null) "$text, $actionLabel" else text
+                liveRegion = LiveRegionMode.Polite
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(Modifier.size(6.dp).background(color, RoundedCornerShape(3.dp)))
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text,
+            color = color,
+            fontFamily = FontFamily.SansSerif,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.weight(1f)
+        )
+        if (actionLabel != null && onAction != null) {
+            Text(
+                actionLabel,
+                color = color,
+                fontFamily = FontFamily.SansSerif,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clickable(onClick = onAction)
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+            )
+        }
+    }
+}
+
 @Composable
 fun SignalStrengthBar(rsrp: Int?, networkType: String? = null) {
     if (rsrp == null) {
@@ -923,7 +1062,14 @@ fun SignalStrengthBar(rsrp: Int?, networkType: String? = null) {
             else -> "SIG"
         }
     } ?: "SIG"
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    // Merged semantics: the bars are decorative Boxes, so one concise spoken
+    // summary replaces the glyph noise for TalkBack.
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.semantics(mergeDescendants = true) {
+            contentDescription = "$ratLabel, $bars of 5 signal bars, ${rsrp} dBm"
+        }
+    ) {
         Text(ratLabel, color = TerminalTextSecondary, fontFamily = FontFamily.Monospace, fontSize = 9.sp, modifier = Modifier.padding(end = 4.dp))
         repeat(5) { i ->
             val height = (4 + i * 4).dp
@@ -976,7 +1122,13 @@ fun LocationRequiredBanner() {
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(Modifier.weight(1f)) {
+        // Text block announced as one live region; the Button stays an
+        // independent focusable target.
+        Column(
+            Modifier
+                .weight(1f)
+                .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }
+        ) {
             Text("Location required for cell metrics", color = TerminalAccentYellow, fontFamily = FontFamily.SansSerif, fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(3.dp))
             Text("Radio needs location access to read cell identity. Other tiers still render.", color = TerminalTextSecondary, fontFamily = FontFamily.SansSerif, fontSize = 10.5.sp)
@@ -1156,7 +1308,7 @@ fun SettingsScreen(snapshot: MetricSnapshot) {
         }
 
         TierCard("ABOUT") {
-            MetricRow("Version", MetricValue("1.0.0"))
+            MetricRow("Version", MetricValue("1.2.0"))
             MetricRow("Privacy", MetricValue("All data stays on-device"))
         }
     }

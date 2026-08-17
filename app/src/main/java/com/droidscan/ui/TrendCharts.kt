@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -86,7 +88,17 @@ fun TrendChart(
     if (values.count { it != null } < 2) return
     val range = (maxY - minY).coerceAtLeast(0.0001f)
 
-    Canvas(modifier = modifier.fillMaxWidth().height(height)) {
+    // Canvas is invisible to TalkBack — surface a concise summary instead.
+    val chartDesc = run {
+        val pts = values.filterNotNull()
+        if (pts.size >= 2) {
+            fun fmt(v: Float) = if (v % 1f == 0f) "%.0f".format(v) else "%.1f".format(v)
+            "Trend chart, ${pts.size} samples, ${fmt(pts.min())} to ${fmt(pts.max())}"
+        } else {
+            "Trend chart, collecting data"
+        }
+    }
+    Canvas(modifier = modifier.fillMaxWidth().height(height).semantics { contentDescription = chartDesc }) {
         val w = size.width
         val h = size.height
         val stepX = w / (values.size - 1).coerceAtLeast(1)

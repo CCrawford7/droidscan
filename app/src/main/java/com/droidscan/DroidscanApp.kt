@@ -6,6 +6,7 @@ import com.droidscan.shared.core.MetricSnapshot
 import com.droidscan.telemetry.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,8 @@ class DroidscanApp : Application() {
 
     private val _liveSnapshot = MutableStateFlow(MetricSnapshot())
     val liveSnapshot: StateFlow<MetricSnapshot> = _liveSnapshot.asStateFlow()
+
+    private var telemetryJob: Job? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -108,13 +111,7 @@ class DroidscanApp : Application() {
 
         // Kick the single collection loop. It runs for the process lifetime,
         // feeding liveSnapshot (UI + notification) and the encrypted history.
-        appScope.launch {
-            try {
-                telemetryCollector.observeAll().collect { _liveSnapshot.value = it }
-            } catch (t: Throwable) {
-                Log.e(TAG, "telemetry loop stopped: ${t.message}", t)
-            }
-        }
+        restartTelemetry()
 
         // Startup health check for the encrypted history store — the trend
         // charts depend on it, so surface any decrypt/read failure immediately.
@@ -128,6 +125,24 @@ class DroidscanApp : Application() {
                 )
             } catch (t: Throwable) {
                 Log.e(TAG, "history health check failed: ${t.message}")
+            }
+        }
+    }
+
+    /**
+     * Starts (or restarts) the single telemetry loop. Idempotent — called from
+     * onCreate and from the UI "Restart" affordance when the loop dies. observeAll()
+     * is a cold Flow, so each call launches a fresh collection pass; collectors are
+     * stateless between passes (they hold system-service refs only).
+     */
+    @Synchronized
+    fun restartTelemetry() {
+        telemetryJob?.cancel()
+        telemetryJob = appScope.launch {
+            try {
+                telemetryCollector.observeAll().collect { _liveSnapshot.value = it }
+            } catch (t: Throwable) {
+                Log.e(TAG, "telemetry loop stopped: ${t.message}", t)
             }
         }
     }
