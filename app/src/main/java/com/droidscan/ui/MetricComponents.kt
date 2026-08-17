@@ -64,6 +64,7 @@ fun TierCard(
     title: String,
     liveReadout: String? = null,
     liveColor: Color = TerminalAccentCyan,
+    titleFontFamily: FontFamily = FontFamily.SansSerif,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
@@ -81,7 +82,7 @@ fun TierCard(
             Text(
                 title,
                 color = TerminalAccentBlue,
-                fontFamily = LabelText,
+                fontFamily = titleFontFamily,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.09.sp

@@ -44,7 +44,7 @@ import org.json.JSONObject
 
 enum class DashboardTab(val label: String, val icon: String) {
     OVERVIEW("Overview", "⌂"),
-    RADIO("Radio", "◉"),
+    SIGNAL("Signal", "◉"),
     SYSTEM("System", "⚙"),
     POWER("Power", "⚡"),
     SIM("SIM", "○")
@@ -131,7 +131,7 @@ fun DashboardScreen(telemetryFlow: Flow<MetricSnapshot>) {
                         val contentPadding = Modifier.padding(horizontal = 14.dp)
                         when (selectedTab) {
                             DashboardTab.OVERVIEW -> OverviewTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
-                            DashboardTab.RADIO -> RadioTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
+                            DashboardTab.SIGNAL -> SignalTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
                             DashboardTab.SYSTEM -> SystemTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
                             DashboardTab.POWER -> PowerTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
                             DashboardTab.SIM -> SimTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
@@ -294,7 +294,8 @@ fun TabBar(selectedTab: DashboardTab, onSelect: (DashboardTab) -> Unit) {
 }
 
 // ─── Overview ────────────────────────────────────────────
-// SIGNAL · POWER · SYSTEM (three-tier health summary).
+// NETWORK & SIGNAL · POWER · SYSTEM — Activity-Ring rework
+// (see OverviewRework.kt for the card implementations).
 
 @Composable
 fun OverviewTab(
@@ -311,55 +312,18 @@ fun OverviewTab(
             .padding(vertical = 6.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        TierCard("SIGNAL", liveReadout = if (snapshot.radio.cellInfoDenied == true) "denied" else null, liveColor = TerminalAccentYellow) {
-            if (snapshot.radio.cellInfoDenied == true) {
-                LocationRequiredRow()
-            } else {
-                MetricRow("RSRP", MetricValue("${snapshot.radio.rsrp ?: "--"} dBm", snapshot.radio.rsrp?.toDouble(), RadioThresholds.rsrp, inverted = true), "rsrp", onTap)
-                MetricRow("RSRQ", MetricValue("${snapshot.radio.rsrq ?: "--"} dB", snapshot.radio.rsrq?.toDouble(), RadioThresholds.rsrq, inverted = true), "rsrq", onTap)
-                MetricRow("SINR", MetricValue("${snapshot.radio.sinr ?: "--"} dB", snapshot.radio.sinr?.toDouble(), RadioThresholds.sinr, inverted = true), "sinr", onTap)
-                SignalStrengthBar(snapshot.radio.rsrp, snapshot.radio.dataNetworkType)
-                val bandDisplay = radioBandDisplay(snapshot.radio)
-                DualMetricRow("Network", MetricValue(snapshot.radio.dataNetworkType ?: "--"), "Band", MetricValue(bandDisplay), "dataNetworkType", "activeBands", onTap)
-                val overviewIms = snapshot.ims.perSub.firstOrNull()?.registrationState
-                    ?: if (snapshot.radio.imsRegistered == true) "REG" else if (snapshot.radio.imsRegistered == false) "NO" else "--"
-                DualMetricRow("IMS", MetricValue(overviewIms), "Roaming", MetricValue(if (snapshot.radio.isRoaming == true) "YES" else "NO"), "imsRegistered", "isRoaming", onTap)
-            }
-        }
-
-        TierCard("POWER", liveReadout = snapshot.power.batteryLevel?.let { "$it%" }, liveColor = TerminalAccentCyan) {
-            DualMetricRow("Level", MetricValue("${snapshot.power.batteryLevel ?: "--"}%", snapshot.power.batteryLevel?.toDouble(), BatteryThresholds.levelPercent, inverted = true), "Temp", MetricValue("${String.format("%.1f", snapshot.power.batteryTemperature ?: 0f)}°C", snapshot.power.batteryTemperature?.toDouble(), BatteryThresholds.temperatureCelsius), "batteryLevel", null, onTap)
-            val chargeMa = snapshot.power.chargeRateMicroamps?.div(1000) ?: 0
-            val drainMa = snapshot.power.currentDrainMicroamps?.div(1000) ?: 0
-            DualMetricRow("Health", MetricValue(snapshot.power.batteryHealth ?: "--"), "Charge", MetricValue("${chargeMa} mA"), "batteryHealth", "chargeRate", onTap)
-            if (drainMa > 0) MetricRow("Drain", MetricValue("${drainMa} mA"), "chargeRate", onTap)
-            snapshot.thermal.zones.firstOrNull()?.let { zone ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    MetricRow("Thermal", MetricValue("${String.format("%.1f", zone.temperatureCelsius)}°C", zone.temperatureCelsius.toDouble(), ThermalThresholds.zoneTemp), "temperature", onTap, modifier = Modifier.weight(1f))
-                    if (snapshot.thermal.isThrottling == true) {
-                        Spacer(Modifier.width(6.dp))
-                        Chip("THROTTLING", TerminalAccentRed)
-                    }
-                }
-            }
-        }
-
-        TierCard("SYSTEM", liveReadout = snapshot.systemInfo.androidVersion, liveColor = TerminalTextSecondary) {
-            val usedRam = snapshot.processes.usedMemoryBytes ?: 0L
-            val totalRam = snapshot.processes.totalMemoryBytes ?: 1L
-            BarGauge("RAM", usedRam, totalRam)
-            MetricRow("Pressure", MetricValue(snapshot.processes.memoryPressure.name), "memoryPressure", onTap)
-            MetricRow("Model", MetricValue(snapshot.systemInfo.deviceModel ?: "--"))
-            MetricRow("Kernel", MetricValue(snapshot.systemInfo.kernelVersion?.take(30) ?: "--"))
-            DualMetricRow("Uptime", MetricValue(formatUptime(snapshot.systemInfo.uptimeMs)), "Shizuku", MetricValue(if (snapshot.shizukuAvailable) "POWER MODE" else "Standard"))
-        }
+        NetworkSignalCard(snapshot, onTap)
+        PowerRingCard(snapshot, onTap)
+        SystemRingCard(snapshot, onTap)
     }
 }
 
-// ─── Radio ───────────────────────────────────────────────
+// ─── Signal (deep dive) ──────────────────────────────────
+// The hero content is now the Activity-Ring Overview; this tab keeps the
+// deep cellular telemetry (trends, cell identity, IMS, GNSS, network config).
 
 @Composable
-fun RadioTab(
+fun SignalTab(
     snapshot: MetricSnapshot,
     glossary: List<GlossaryEntry>,
     padding: Modifier,
@@ -933,19 +897,23 @@ fun SimTab(
                 MetricRow("Home PLMN", MetricValue(slot.homePlmn ?: "--"))
                 MetricRow("SPN (SIM Name)", MetricValue(slot.simOperatorName ?: "--"))
                 MetricRow("MSISDN", MetricValue(slot.msisdn ?: "N/A (carrier)"))
-                MetricRow("IMSI", MetricValue(slot.imsiPrefix ?: "N/A (priv. API 29+)"))
+                MetricRow("IMSI", MetricValue(slot.imsiPrefix ?: "N/A (privilege-restricted)"))
             }
 
             TierCard("CAPABILITIES") {
                 DualMetricRow("VoLTE", MetricValue(if (slot.volteEnabled == true) "ON" else if (slot.volteEnabled == false) "OFF" else "?"), "WiFi Call", MetricValue(slot.wifiCallingStatus ?: "?"))
                 DualMetricRow("NR-NSA", MetricValue(if (slot.nrNsaAvailable == true) "YES" else if (slot.nrNsaAvailable == false) "NO" else "?"), "IMS Reg", MetricValue(if (slot.imsRegistered == true) "REG" else if (slot.imsRegistered == false) "NO" else "?"))
-                DualMetricRow("Pref NW", MetricValue(slot.preferredNetworkType ?: "--"), "Call State", MetricValue(slot.callState ?: "--"))
+                DualMetricRow("IMS Capable", MetricValue(if (slot.imsCapable == true) "YES" else if (slot.imsCapable == false) "NO" else "?"), "Pref NW", MetricValue(slot.preferredNetworkType ?: "--"))
+                DualMetricRow("Call State", MetricValue(slot.callState ?: "--"), "Roaming", MetricValue(if (slot.isRoaming == true) "YES" else if (slot.isRoaming == false) "NO" else "?"))
             }
 
             TierCard("SIGNAL") {
                 MetricRow("Network", MetricValue(slot.dataNetworkType ?: "--"))
                 MetricRow("RSRP", MetricValue(if (slot.rsrp != null) "${slot.rsrp} dBm" else "--", slot.rsrp?.toDouble(), RadioThresholds.rsrp, inverted = true), "rsrp", onTap)
-                MetricRow("Roaming", MetricValue(if (slot.isRoaming == true) "YES" else if (slot.isRoaming == false) "NO" else "?"))
+                MetricRow("RSRQ", MetricValue(if (slot.rsrq != null) "${slot.rsrq} dB" else "--", slot.rsrq?.toDouble(), RadioThresholds.rsrq, inverted = true), "rsrq", onTap)
+                MetricRow("SINR", MetricValue(if (slot.sinr != null) "${slot.sinr} dB" else "--", slot.sinr?.toDouble(), RadioThresholds.sinr, inverted = true), "sinr", onTap)
+                MetricRow("Band", MetricValue(slot.band ?: "--"), "activeBands", onTap)
+                DualMetricRow("PCI", MetricValue(slot.pci?.toString() ?: "--"), "TAC", MetricValue(slot.tac?.toString() ?: "--"), "pci", null, onTap)
             }
         }
 

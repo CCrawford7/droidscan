@@ -4,6 +4,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import com.droidscan.R
+
+// ── Typeface (Overview rework) ───────────────────────────
+// Quantico (Google Fonts, OFL) — terminal-styled card headings.
+// Mozilla Headline (Google Fonts, OFL) — display body/labels.
+// Values stay monospace per the app's "sans labels + mono values" scan rule.
+val TerminalHeading = FontFamily(
+    Font(R.font.quantico_regular),
+    Font(R.font.quantico_bold, FontWeight.Bold)
+)
+val TerminalBody = FontFamily(Font(R.font.mozilla_headline))
 
 // ── Signal Clarity palette (ux-droidscan-2026-08-04) ──
 // Replaces the GitHub-dark palette. Deep telecom navy canvas, ONE cyan accent,

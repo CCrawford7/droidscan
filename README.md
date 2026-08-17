@@ -39,7 +39,10 @@ The link above always points at the newest release. Older builds are under
   SIM 2's radio, not the default sub's.
 - **Live signal metrics** — RSRP / RSRQ / SINR, active band, cell ID, TAC, RAT, roaming —
   with sentinel (`Int.MAX_VALUE`) and physical-range validation so only real values display.
-- **5-tab dashboard** — Overview · Radio · System · Power · SIM, in a dark terminal theme.
+- **5-tab dashboard** — Overview · Signal · System · Power · SIM, in a dark terminal theme.
+- **Activity-Ring Overview** — glanceable concentric ring gauges for per-SIM signal
+  (RSRP/RSRQ/SINR), a large battery ring, and a RAM bar — each with tap-to-glossary
+  and a cohesive TalkBack label (no live-region spam on 1s updates).
 - **Optional Power Mode** — deeper kernel/process data via [Shizuku](https://shizuku.rikka.app/)
   (service-bound, detected via real reflection — no root required) *or* root shell.
   Unlocks kernel thermal zones, wake locks, and storage-wear metrics.
@@ -78,7 +81,7 @@ export JAVA_HOME=/usr/lib/jvm/java-17-openjdk      # adjust to your install
 # Compile the debug APK → app/build/outputs/apk/debug/app-debug.apk
 ./gradlew :app:assembleDebug
 
-# Run unit tests (60 passing)
+# Run unit tests (71 passing)
 ./gradlew :shared-core:testDebugUnitTest :telemetry-collector:testDebugUnitTest
 ```
 
@@ -126,5 +129,5 @@ identifiers are truncated (ICCID last-4, IMSI MCC-MNC prefix only). See `docs/PR
 - **P2 (UI rework):** charts/trends ✅, stale/error states ✅ (telemetry liveness
   strip + restart affordance, empty-state handling), accessibility ✅ (tab roles,
   content descriptions, spoken signal/chart summaries, live-region banners).
-- **P3 (done):** unit tests (60 passing), this README, privacy doc, architecture spike.
+- **P3 (done):** unit tests (71 passing), this README, privacy doc, architecture spike.
 - **Future:** AI diagnostic engine matching telemetry to a real-world troubleshooting corpus.
