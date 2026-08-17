@@ -13,7 +13,7 @@
 ## 📥 Download & install
 
 **Latest build:** [`droidscan.apk`](https://github.com/CCrawford7/droidscan/releases/latest/download/droidscan.apk)
-(v1.0.0 · 2026-08-04)
+(v1.2.0 · 2026-08-17)
 
 Each tagged release ships a debug-signed APK attached as a **GitHub Release asset**.
 The link above always points at the newest release. Older builds are under
@@ -41,8 +41,14 @@ The link above always points at the newest release. Older builds are under
   with sentinel (`Int.MAX_VALUE`) and physical-range validation so only real values display.
 - **5-tab dashboard** — Overview · Radio · System · Power · SIM, in a dark terminal theme.
 - **Optional Power Mode** — deeper kernel/process data via [Shizuku](https://shizuku.rikka.app/)
-  (service-bound, detected via real reflection — no root required).
-- **Metric history** — file-backed 1-hour history (1 s cadence) for trend analysis.
+  (service-bound, detected via real reflection — no root required) *or* root shell.
+  Unlocks kernel thermal zones, wake locks, and storage-wear metrics.
+- **Trend charts** — 30-minute RSRP/SINR/CPU/RAM/battery/thermal history from the
+  encrypted metric store, rendered as live line charts on the Radio/System/Power tabs.
+- **Background collection** — a foreground service keeps telemetry flowing (and history
+  accumulating) even when the app is backgrounded.
+- **Diagnostic report export** — one tap to share a full telemetry snapshot as text.
+- **GNSS / satellites** — per-constellation visibility, in-fix count, and C/N₀.
 - **Educational glossary** — tap any metric for a plain-English explanation.
 
 ## Screenshots
@@ -72,7 +78,7 @@ export JAVA_HOME=/usr/lib/jvm/java-17-openjdk      # adjust to your install
 # Compile the debug APK → app/build/outputs/apk/debug/app-debug.apk
 ./gradlew :app:assembleDebug
 
-# Run unit tests (28 passing)
+# Run unit tests (60 passing)
 ./gradlew :shared-core:testDebugUnitTest :telemetry-collector:testDebugUnitTest
 ```
 
@@ -117,6 +123,8 @@ identifiers are truncated (ICCID last-4, IMSI MCC-MNC prefix only). See `docs/PR
 - **P1 (done):** NR RSRQ/SINR, WiFi RSSI, latency probe, file-backed history store,
   Shizuku service-bound check, per-SIM capabilities + disabled-SIM detection,
   signal sentinel/range validation, dual-source signal fallback.
-- **P2 (UI rework):** charts/trends, stale/error states, accessibility — being addressed separately.
-- **P3 (in progress):** unit tests (28 passing), this README, privacy doc, architecture spike.
+- **P2 (UI rework):** charts/trends ✅, stale/error states ✅ (telemetry liveness
+  strip + restart affordance, empty-state handling), accessibility ✅ (tab roles,
+  content descriptions, spoken signal/chart summaries, live-region banners).
+- **P3 (done):** unit tests (60 passing), this README, privacy doc, architecture spike.
 - **Future:** AI diagnostic engine matching telemetry to a real-world troubleshooting corpus.
