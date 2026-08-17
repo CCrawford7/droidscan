@@ -1,9 +1,22 @@
 package com.droidscan.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,6 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.droidscan.shared.core.*
 import com.droidscan.ui.theme.*
 
@@ -87,25 +102,59 @@ private fun SignalBlock(
         RingData("RSRQ", ringProgress(rsrq?.toFloat(), RSRQ_MIN_DB.toFloat(), RSRQ_MAX_DB.toFloat()), signalRingColor(rsrq, RadioThresholds.rsrq)),
         RingData("SINR", ringProgress(sinr?.toFloat(), SINR_MIN_DB.toFloat(), SINR_MAX_DB.toFloat()), signalRingColor(sinr, RadioThresholds.sinr))
     )
+    var showRingExplainer by remember { mutableStateOf(false) }
     Row(verticalAlignment = Alignment.CenterVertically) {
         // Left: ring cluster + tiny legend. The rings are decorative graphics;
-        // the whole cluster reads as one spoken sentence for TalkBack.
+        // the whole cluster reads as one spoken sentence for TalkBack. Tapping
+        // the cluster opens a plain-language explainer (what each ring is +
+        // what the current values imply); each metric drills into the full
+        // glossary sheet.
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            ConcentricRings(
-                rings = rings,
-                size = 96.dp,
-                thickness = 8.dp,
-                gap = 3.dp,
-                modifier = Modifier.semantics(mergeDescendants = true) {
-                    contentDescription = signalAccessibilityLabel(simLabel, rsrp, rsrq, sinr)
+            Box {
+                val ringInteraction = remember { MutableInteractionSource() }
+                ConcentricRings(
+                    rings = rings,
+                    size = 96.dp,
+                    thickness = 8.dp,
+                    gap = 3.dp,
+                    modifier = Modifier
+                        .clickable(interactionSource = ringInteraction, indication = null) { showRingExplainer = true }
+                        .semantics(mergeDescendants = true) {
+                            contentDescription = signalAccessibilityLabel(simLabel, rsrp, rsrq, sinr) + " Tap for explanation."
+                        }
+                )
+                if (showRingExplainer) {
+                    Popup(
+                        onDismissRequest = { showRingExplainer = false },
+                        alignment = Alignment.Center,
+                        properties = PopupProperties(focusable = true)
+                    ) {
+                        SignalRingExplainer(
+                            simLabel = simLabel,
+                            rsrp = rsrp,
+                            rsrq = rsrq,
+                            sinr = sinr,
+                            onDismiss = { showRingExplainer = false },
+                            onGlossary = { id ->
+                                showRingExplainer = false
+                                onTap(id)
+                            }
+                        )
+                    }
                 }
-            )
+            }
             Spacer(Modifier.height(4.dp))
             Text(
                 "RSRP · RSRQ · SINR",
                 color = TerminalTextSecondary.copy(alpha = 0.6f),
                 fontFamily = FontFamily.Monospace,
                 fontSize = 8.sp
+            )
+            Text(
+                "tap for explanation",
+                color = TerminalAccentBlue.copy(alpha = 0.75f),
+                fontFamily = TerminalBody,
+                fontSize = 9.sp
             )
         }
         Spacer(Modifier.width(16.dp))
@@ -285,4 +334,187 @@ private fun StatusTier.toRingColor(): Color = when (this) {
     StatusTier.GREEN -> TerminalAccentGreen
     StatusTier.YELLOW -> TerminalAccentYellow
     StatusTier.RED -> TerminalAccentRed
+}
+
+// ── Ring explainer tooltip ─────────────────────────────────
+// Tapping the ring cluster opens this anchored card. Each metric gets the
+// simplest-possible explanation PLUS a live "right now" implication line;
+// tapping a row dismisses the popup and opens the full glossary sheet.
+
+@Composable
+private fun SignalRingExplainer(
+    simLabel: String,
+    rsrp: Int?,
+    rsrq: Int?,
+    sinr: Int?,
+    onDismiss: () -> Unit,
+    onGlossary: (String) -> Unit
+) {
+    val (verdict, verdictColor) = overallVerdict(rsrp, rsrq, sinr)
+    Surface(
+        modifier = Modifier
+            .widthIn(max = 300.dp)
+            .heightIn(max = 480.dp),
+        shape = RoundedCornerShape(14.dp),
+        color = TerminalSurface,
+        border = BorderStroke(1.dp, TerminalBorder),
+        shadowElevation = 12.dp
+    ) {
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(14.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "SIGNAL — $simLabel",
+                    color = TerminalAccentBlue,
+                    fontFamily = TerminalHeading,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    "✕",
+                    color = TerminalTextSecondary,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .clickable { onDismiss() }
+                        .padding(4.dp)
+                        .semantics { contentDescription = "Close" }
+                )
+            }
+            Spacer(Modifier.height(2.dp))
+            Text(
+                "What these rings mean, in plain English.",
+                color = TerminalTextSecondary,
+                fontFamily = TerminalBody,
+                fontSize = 11.sp
+            )
+            Spacer(Modifier.height(12.dp))
+
+            ExplainerRow(
+                name = "RSRP", descriptor = "signal strength",
+                explanation = "How loud the tower's signal is at your phone.",
+                value = rsrp, unit = "dBm", threshold = RadioThresholds.rsrp,
+                glossaryId = "rsrp", onGlossary = onGlossary
+            )
+            Spacer(Modifier.height(10.dp))
+            ExplainerRow(
+                name = "RSRQ", descriptor = "signal quality",
+                explanation = "How much interference and noise is mixed into that signal.",
+                value = rsrq, unit = "dB", threshold = RadioThresholds.rsrq,
+                glossaryId = "rsrq", onGlossary = onGlossary
+            )
+            Spacer(Modifier.height(10.dp))
+            ExplainerRow(
+                name = "SINR", descriptor = "signal-to-noise",
+                explanation = "Useful signal versus noise — the best gauge of real-world speed.",
+                value = sinr, unit = "dB", threshold = RadioThresholds.sinr,
+                glossaryId = "sinr", onGlossary = onGlossary
+            )
+
+            Spacer(Modifier.height(12.dp))
+            TierDivider()
+            Spacer(Modifier.height(10.dp))
+            Text(
+                verdict,
+                color = verdictColor,
+                fontFamily = TerminalBody,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                lineHeight = 17.sp
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                "Tap any metric for the full breakdown.",
+                color = TerminalTextSecondary.copy(alpha = 0.7f),
+                fontFamily = TerminalBody,
+                fontSize = 10.sp
+            )
+        }
+    }
+}
+
+/** One metric's explainer block: name + value row, plain explanation, live implication. */
+@Composable
+private fun ExplainerRow(
+    name: String,
+    descriptor: String,
+    explanation: String,
+    value: Int?,
+    unit: String,
+    threshold: ThresholdRange,
+    glossaryId: String,
+    onGlossary: (String) -> Unit
+) {
+    val (implication, color) = liveImplication(value, unit, threshold)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clickable { onGlossary(glossaryId) }
+            .semantics(mergeDescendants = true) {
+                contentDescription = "$name — $descriptor. $explanation $implication"
+            }
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(8.dp).background(color, CircleShape))
+            Spacer(Modifier.width(8.dp))
+            Text(
+                "$name — $descriptor",
+                color = TerminalTextPrimary,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                value?.let { "$it $unit" } ?: "--",
+                color = color,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        Spacer(Modifier.height(3.dp))
+        Text(
+            explanation,
+            color = TerminalTextSecondary,
+            fontFamily = TerminalBody,
+            fontSize = 12.sp,
+            lineHeight = 17.sp
+        )
+        Text(
+            implication,
+            color = color,
+            fontFamily = TerminalBody,
+            fontSize = 12.sp,
+            lineHeight = 17.sp
+        )
+    }
+}
+
+/** "What the current reading implies" — live value + tier verdict in one line. */
+private fun liveImplication(value: Int?, unit: String, threshold: ThresholdRange): Pair<String, Color> {
+    if (value == null) return "No reading right now — the radio isn't reporting (common when idle)." to TerminalTextSecondary
+    return when (evaluateStatusInverted(value.toDouble(), threshold)) {
+        StatusTier.GREEN -> "$value $unit — strong, no concern." to TerminalAccentGreen
+        StatusTier.YELLOW -> "$value $unit — usable, but watch for slower speeds." to TerminalAccentYellow
+        StatusTier.RED -> "$value $unit — weak; expect slow data or dropped calls." to TerminalAccentRed
+    }
+}
+
+/** Overall takeaway for the cluster — the worst (most critical) live tier. */
+private fun overallVerdict(rsrp: Int?, rsrq: Int?, sinr: Int?): Pair<String, Color> {
+    val tiers = listOfNotNull(
+        rsrp?.let { evaluateStatusInverted(it.toDouble(), RadioThresholds.rsrp) },
+        rsrq?.let { evaluateStatusInverted(it.toDouble(), RadioThresholds.rsrq) },
+        sinr?.let { evaluateStatusInverted(it.toDouble(), RadioThresholds.sinr) }
+    )
+    if (tiers.isEmpty()) return "No signal readings right now — data resumes when the radio reports." to TerminalTextSecondary
+    return when (tiers.maxBy { it.ordinal }) {
+        StatusTier.GREEN -> "Bottom line: your connection is in good shape." to TerminalAccentGreen
+        StatusTier.YELLOW -> "Bottom line: usable, but noise is starting to bite." to TerminalAccentYellow
+        StatusTier.RED -> "Bottom line: weak — expect slow data or dropped calls." to TerminalAccentRed
+    }
 }

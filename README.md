@@ -42,7 +42,9 @@ The link above always points at the newest release. Older builds are under
 - **5-tab dashboard** — Overview · Signal · System · Power · SIM, in a dark terminal theme.
 - **Activity-Ring Overview** — glanceable concentric ring gauges for per-SIM signal
   (RSRP/RSRQ/SINR), a large battery ring, and a RAM bar — each with tap-to-glossary
-  and a cohesive TalkBack label (no live-region spam on 1s updates).
+  and a cohesive TalkBack label (no live-region spam on 1s updates). Tapping the
+  signal rings opens a plain-language explainer ("what it is" + what the current
+  reading implies, live) with drill-down to the full metric glossary.
 - **Optional Power Mode** — deeper kernel/process data via [Shizuku](https://shizuku.rikka.app/)
   (service-bound, detected via real reflection — no root required) *or* root shell.
   Unlocks kernel thermal zones, wake locks, and storage-wear metrics.
