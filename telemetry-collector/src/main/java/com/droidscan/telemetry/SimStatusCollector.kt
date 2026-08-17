@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import android.telephony.CarrierConfigManager
+import android.telephony.CellIdentityLte
+import android.telephony.CellIdentityNr
 import android.telephony.CellInfoLte
 import android.telephony.CellInfoNr
 import android.telephony.CellSignalStrengthLte
@@ -14,6 +16,8 @@ import android.util.Log
 import com.droidscan.shared.core.SimSlot
 import com.droidscan.shared.core.SimStatusSnapshot
 import com.droidscan.shared.core.rsrpOrNull
+import com.droidscan.shared.core.rsrqOrNull
+import com.droidscan.shared.core.sinrOrNull
 
 class SimStatusCollector {
     private var sm: SubscriptionManager? = null
@@ -162,27 +166,7 @@ class SimStatusCollector {
             null
         }
 
-        val rsrp = try {
-            // Primary: registered cell from this sub's allCellInfo.
-            val fromCellInfo = subTm.allCellInfo?.firstOrNull { it.isRegistered }?.let { cell ->
-                when (cell) {
-                    is CellInfoLte -> (cell.cellSignalStrength as? CellSignalStrengthLte)?.rsrp.rsrpOrNull()
-                    is CellInfoNr -> (cell.cellSignalStrength as? CellSignalStrengthNr)?.getCsiRsrp().rsrpOrNull()
-                    else -> null
-                }
-            }
-            // Fallback: the consolidated SignalStrength object for this sub — on
-            // some OEMs (OPPO/OnePlus) it reports RSRP even when allCellInfo has
-            // no registered cell yet or returns the MAX_VALUE sentinel.
-            fromCellInfo ?: subTm.signalStrength?.getCellSignalStrengths()?.let { strengths ->
-                val lte = strengths.filterIsInstance<CellSignalStrengthLte>().firstOrNull()
-                val nr = strengths.filterIsInstance<CellSignalStrengthNr>().firstOrNull()
-                (lte?.rsrp ?: nr?.getCsiRsrp()).rsrpOrNull()
-            }
-        } catch (e: Exception) {
-            logOnce(subId, "allCellInfo", e.message ?: e.javaClass.simpleName)
-            null
-        }
+        val signal = readSignal(subTm, subId)
 
         return PerSimCaps(
             volteEnabled = volteEnabled,
@@ -194,8 +178,72 @@ class SimStatusCollector {
             callState = callState,
             dataNetworkType = dataNetworkType,
             isRoaming = try { subTm.isNetworkRoaming } catch (e: Exception) { null },
-            rsrp = rsrp
+            rsrp = signal.rsrp,
+            rsrq = signal.rsrq,
+            sinr = signal.sinr,
+            band = signal.band,
+            pci = signal.pci,
+            tac = signal.tac
         )
+    }
+
+    // ── Per-subscription registered-cell signal depth ─────────────────────
+    // Mirrors RadioCollector's validation chain but scoped to a SPECIFIC sub via
+    // createForSubscriptionId(subId), so SIM 2's rings reflect SIM 2's serving
+    // cell. All raw values pass through the shared sentinel + physical-range
+    // validators (rsrpOrNull/rsrqOrNull/sinrOrNull) so only real values surface.
+    private fun readSignal(subTm: TelephonyManager?, subId: Int): PerSimSignal {
+        if (subTm == null) return PerSimSignal()
+        return try {
+            // Primary: the registered cell from this sub's allCellInfo.
+            val fromCellInfo = subTm.allCellInfo?.firstOrNull { it.isRegistered }?.let { cell ->
+                when (cell) {
+                    is CellInfoLte -> {
+                        val ss = cell.cellSignalStrength as? CellSignalStrengthLte
+                        val id = cell.cellIdentity
+                        PerSimSignal(
+                            rsrp = ss?.rsrp.rsrpOrNull(),
+                            rsrq = ss?.rsrq.rsrqOrNull(),
+                            sinr = ss?.rssnr.sinrOrNull(),
+                            band = id?.bands?.firstOrNull()?.let { "B$it" },
+                            pci = id?.pci,
+                            tac = id?.tac
+                        )
+                    }
+                    is CellInfoNr -> {
+                        val ss = cell.cellSignalStrength as? CellSignalStrengthNr
+                        val id = cell.cellIdentity as? CellIdentityNr
+                        PerSimSignal(
+                            rsrp = ss?.getCsiRsrp().rsrpOrNull(),
+                            rsrq = ss?.getCsiRsrq().rsrqOrNull(),
+                            sinr = ss?.getCsiSinr().sinrOrNull(),
+                            band = id?.bands?.firstOrNull()?.let { "n$it" },
+                            pci = id?.pci,
+                            tac = id?.tac
+                        )
+                    }
+                    else -> PerSimSignal()
+                }
+            }
+            // Fallback: the consolidated SignalStrength object for this sub — on
+            // some OEMs (OPPO/OnePlus) it reports signal even when allCellInfo has
+            // no registered cell yet or returns the MAX_VALUE sentinel.
+            val fromStrengthObj = subTm.signalStrength?.getCellSignalStrengths()?.let { strengths ->
+                val lte = strengths.filterIsInstance<CellSignalStrengthLte>().firstOrNull()
+                val nr = strengths.filterIsInstance<CellSignalStrengthNr>().firstOrNull()
+                PerSimSignal(
+                    rsrp = (lte?.rsrp ?: nr?.getCsiRsrp()).rsrpOrNull(),
+                    rsrq = (lte?.rsrq ?: nr?.getCsiRsrq()).rsrqOrNull(),
+                    sinr = (lte?.rssnr ?: nr?.getCsiSinr()).sinrOrNull()
+                )
+            }
+            // Prefer cell-info values; backfill any missing metric from the
+            // consolidated object (per-metric, not all-or-nothing).
+            (fromCellInfo ?: PerSimSignal()).merge(fromStrengthObj)
+        } catch (e: Exception) {
+            logOnce(subId, "allCellInfo", e.message ?: e.javaClass.simpleName)
+            PerSimSignal()
+        }
     }
 
     private companion object {
@@ -212,8 +260,36 @@ class SimStatusCollector {
         val callState: String? = null,
         val dataNetworkType: String? = null,
         val isRoaming: Boolean? = null,
-        val rsrp: Int? = null
+        val rsrp: Int? = null,
+        val rsrq: Int? = null,
+        val sinr: Int? = null,
+        val band: String? = null,
+        val pci: Int? = null,
+        val tac: Int? = null
     )
+
+    /** Per-sub registered-cell signal values; each metric nullable independently. */
+    private data class PerSimSignal(
+        val rsrp: Int? = null,
+        val rsrq: Int? = null,
+        val sinr: Int? = null,
+        val band: String? = null,
+        val pci: Int? = null,
+        val tac: Int? = null
+    )
+
+    /** Backfills metrics missing from `this` with those present in [other]. */
+    private fun PerSimSignal.merge(other: PerSimSignal?): PerSimSignal {
+        if (other == null) return this
+        return PerSimSignal(
+            rsrp = rsrp ?: other.rsrp,
+            rsrq = rsrq ?: other.rsrq,
+            sinr = sinr ?: other.sinr,
+            band = band ?: other.band,
+            pci = pci ?: other.pci,
+            tac = tac ?: other.tac
+        )
+    }
 
     fun read(): SimStatusSnapshot {
         val telephonyManager = tm ?: return SimStatusSnapshot()
@@ -292,7 +368,12 @@ class SimStatusCollector {
                         preferredNetworkType = caps.preferredNetworkType,
                         callState = caps.callState,
                         dataNetworkType = caps.dataNetworkType,
-                        rsrp = caps.rsrp
+                        rsrp = caps.rsrp,
+                        rsrq = caps.rsrq,
+                        sinr = caps.sinr,
+                        band = caps.band,
+                        pci = caps.pci,
+                        tac = caps.tac
                     )
                 } else null
             } catch (_: Exception) { null }
@@ -338,7 +419,12 @@ class SimStatusCollector {
                             preferredNetworkType = caps.preferredNetworkType,
                             callState = caps.callState,
                             dataNetworkType = caps.dataNetworkType,
-                            rsrp = caps.rsrp
+                            rsrp = caps.rsrp,
+                            rsrq = caps.rsrq,
+                            sinr = caps.sinr,
+                            band = caps.band,
+                            pci = caps.pci,
+                            tac = caps.tac
                         )
                     } else null
                 } catch (_: Exception) { null }
@@ -406,7 +492,12 @@ class SimStatusCollector {
                         preferredNetworkType = caps.preferredNetworkType,
                         callState = caps.callState,
                         dataNetworkType = caps.dataNetworkType,
-                        rsrp = caps.rsrp
+                        rsrp = caps.rsrp,
+                        rsrq = caps.rsrq,
+                        sinr = caps.sinr,
+                        band = caps.band,
+                        pci = caps.pci,
+                        tac = caps.tac
                     )
                 } else {
                     // No active sub on this slot. Determine whether ANOTHER slot is active

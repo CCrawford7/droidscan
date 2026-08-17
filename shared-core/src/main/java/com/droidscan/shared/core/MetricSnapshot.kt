@@ -191,7 +191,13 @@ data class SimSlot(
     val preferredNetworkType: String? = null,
     val callState: String? = null,         // IDLE | RINGING | OFFHOOK
     val dataNetworkType: String? = null,   // "NR (5G)", "LTE (4G)", ...
-    val rsrp: Int? = null                  // registered-cell RSRP for this sub (dBm)
+    val rsrp: Int? = null,                 // registered-cell RSRP for this sub (dBm)
+    // ── Per-SIM signal depth (registered cell, via createForSubscriptionId) ──
+    val rsrq: Int? = null,                 // registered-cell RSRQ (dB)
+    val sinr: Int? = null,                 // registered-cell SINR (dB) — LTE RSSNR / NR CSI-SINR
+    val band: String? = null,              // serving band label ("B3", "n78") for this sub
+    val pci: Int? = null,                  // physical cell id for this sub
+    val tac: Int? = null                   // tracking area code for this sub
 )
 
 @Serializable
