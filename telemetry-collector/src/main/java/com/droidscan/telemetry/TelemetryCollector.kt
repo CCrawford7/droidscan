@@ -169,7 +169,7 @@ class TelemetryCollector(
         sb.appendLine("--- SIM ---")
         snapshot.simStatus.slots.forEach { s ->
             sb.appendLine("  Slot ${s.slotIndex}: ${s.carrierName} | provisioned=${s.isProvisioned} | eSIM=${s.esimProfileCount} | ICCID=...${s.iccidLast4}")
-            sb.appendLine("    homePLMN=${s.homePlmn} | SPN=${s.simOperatorName} | MSISDN=${s.msisdn} | IMSI=${s.imsiPrefix}")
+            sb.appendLine("    homePLMN=${s.homePlmn} | SPN=${s.simOperatorName} | MSISDN=...${s.msisdn?.takeLast(4)} | IMSI=${s.imsiPrefix}")
         }
         sb.appendLine("")
         sb.appendLine("--- STORAGE ---")

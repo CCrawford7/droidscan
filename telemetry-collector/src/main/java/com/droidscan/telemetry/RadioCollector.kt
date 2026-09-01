@@ -198,7 +198,9 @@ class RadioCollector {
             imsCachedResult
         } else try {
             val method = manager.javaClass.getMethod("isImsRegistered")
-            method.invoke(manager) as? Boolean
+            // Cache the last known value so a later access-denied still has
+            // something to report instead of always null.
+            (method.invoke(manager) as? Boolean).also { imsCachedResult = it }
         } catch (e: Exception) {
             if (e.toString().contains("denied")) {
                 imsAccessDenied = true

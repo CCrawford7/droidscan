@@ -24,6 +24,18 @@ android {
                 "proguard-rules.pro"
             )
         }
+        // Side-by-side test build: installs separately from the main app under
+        // applicationId ".test" with an amber launcher icon + "droidscan test"
+        // label (overrides in src/staging/). Debug-only APIs stay available so
+        // it behaves like a debug build.
+        create("staging") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".test"
+            versionNameSuffix = "-test"
+            // Dependencies (:shared-core, :telemetry-collector) only build
+            // debug/release — consume their debug variants for the staging app.
+            matchingFallbacks += "debug"
+        }
     }
 
     compileOptions {

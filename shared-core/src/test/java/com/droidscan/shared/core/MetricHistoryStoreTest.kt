@@ -50,6 +50,17 @@ class MetricHistoryStoreTest {
     }
 
     @Test
+    fun `reads stay bounded even when disk prune is throttled`() {
+        // Production uses a 60s prune cooldown (PRUNE_INTERVAL_MS) so the file
+        // can briefly exceed maxEntries between prunes — but the in-memory cache
+        // trims on every append, so size()/recent() must never exceed maxEntries.
+        val store = MetricHistoryStore(tempFile(), maxEntries = 3, pruneIntervalMs = 60_000L)
+        repeat(10) { i -> store.append(sampleSnapshot(ts = i.toLong())) }
+        assertEquals(3, store.size())
+        assertEquals(listOf(7L, 8L, 9L), store.recent(10).map { it.timestampMs })
+    }
+
+    @Test
     fun `survives close and reopen`() {
         val file = tempFile()
         MetricHistoryStore(file, maxEntries = 10).append(sampleSnapshot(ts = 42))

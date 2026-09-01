@@ -38,6 +38,11 @@ class GnssCollector {
     private var hasFineLocation = false
     private var context: Context? = null
 
+    // The one-shot wake listener from the current poll. requestSingleUpdate only
+    // self-removes once a fix arrives; on an idle receiver (indoors) we must
+    // remove it ourselves after the poll or one listener leaks every 2s.
+    private var wakeListener: LocationListener? = null
+
     fun attach(context: Context) {
         this.context = context.applicationContext
         val manager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
@@ -86,6 +91,13 @@ class GnssCollector {
         }
         try { manager.unregisterGnssStatusCallback(callback) } catch (_: Exception) {}
 
+        // Always clean up the wake listener — whether or not a fix arrived.
+        try {
+            wakeListener?.let { manager.removeUpdates(it) }
+        } catch (_: Exception) {
+        }
+        wakeListener = null
+
         val status = holder.get()
             ?: return GnssSnapshot(available = gnssAvailable) // idle receiver, no status yet
         return parse(status)
@@ -99,18 +111,21 @@ class GnssCollector {
      */
     private fun requestSingleFix(manager: LocationManager) {
         try {
-            val wakeListener = object : LocationListener {
+            val listener = object : LocationListener {
                 override fun onLocationChanged(location: android.location.Location) {}
                 override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
                 override fun onProviderEnabled(provider: String) {}
                 override fun onProviderDisabled(provider: String) {}
             }
-            manager.requestSingleUpdate(LocationManager.GPS_PROVIDER, wakeListener, Looper.getMainLooper())
+            wakeListener = listener
+            manager.requestSingleUpdate(LocationManager.GPS_PROVIDER, listener, Looper.getMainLooper())
         } catch (e: SecurityException) {
             // Location permission revoked mid-run — the status callback below
             // will report locationDenied properly.
+            wakeListener = null
         } catch (e: Exception) {
             Log.w("GnssCollector", "GNSS wake failed (HAL may be unavailable): ${e.message}")
+            wakeListener = null
         }
     }
 

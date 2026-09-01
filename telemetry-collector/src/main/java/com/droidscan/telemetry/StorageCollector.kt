@@ -9,6 +9,13 @@ import java.io.File
 
 class StorageCollector {
 
+    // The /data/app top-consumer walk stats the whole tree (thousands of files)
+    // and is called from the 1s observeAll loop — cache the result and only
+    // re-walk on the poll interval. The StatFs used/free reads are cheap, so
+    // those always refresh; only the expensive consumer enumeration is cached.
+    private var lastWalkMs = 0L
+    private var cachedConsumers: List<StorageConsumer> = emptyList()
+
     fun read(): StorageSnapshot {
         val internal = StatFs(Environment.getDataDirectory().absolutePath)
         val internalBlockSize = internal.blockSizeLong
@@ -30,7 +37,27 @@ class StorageCollector {
             externalFree = null
         }
 
-        // Top consumers — approximate by querying /data/app and common dirs
+        // Top consumers — approximate by querying /data/app, throttled: walking
+        // the tree is O(files) and must not run every second.
+        val now = System.currentTimeMillis()
+        if (now - lastWalkMs >= POLL_INTERVAL_MS) {
+            lastWalkMs = now
+            cachedConsumers = walkTopConsumers()
+        }
+
+        return StorageSnapshot(
+            internalUsedBytes = internalTotal - internalFree,
+            internalFreeBytes = internalFree,
+            systemBytes = null, // requires StorageStatsManager on API 26+
+            userBytes = internalTotal,
+            externalMounted = externalMounted,
+            externalUsedBytes = externalUsed,
+            externalFreeBytes = externalFree,
+            topConsumers = cachedConsumers
+        )
+    }
+
+    private fun walkTopConsumers(): List<StorageConsumer> {
         val consumers = mutableListOf<StorageConsumer>()
         try {
             val dataApp = File("/data/app")
@@ -49,16 +76,10 @@ class StorageCollector {
         } catch (e: Exception) {
             Log.w("StorageCollector", "Failed to enumerate /data/app consumers: ${e.message}", e)
         }
+        return consumers.sortedByDescending { it.sizeBytes }.take(3)
+    }
 
-        return StorageSnapshot(
-            internalUsedBytes = internalTotal - internalFree,
-            internalFreeBytes = internalFree,
-            systemBytes = null, // requires StorageStatsManager on API 26+
-            userBytes = internalTotal,
-            externalMounted = externalMounted,
-            externalUsedBytes = externalUsed,
-            externalFreeBytes = externalFree,
-            topConsumers = consumers.sortedByDescending { it.sizeBytes }.take(3)
-        )
+    companion object {
+        private const val POLL_INTERVAL_MS = 30_000L
     }
 }

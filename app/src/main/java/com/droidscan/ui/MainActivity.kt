@@ -53,21 +53,23 @@ class MainActivity : ComponentActivity() {
     private fun requestRequiredPermissions() {
         val permissions = mutableListOf<String>()
 
+        // allCellInfo has required location-level access since API 28 — so request
+        // FINE+COARSE on EVERY supported API level (29+), not just 33+. Android 16
+        // in practice requires FINE, not just coarse, or cell info stays empty.
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+            // request coarse alongside so the "while in use" dialog offers both
+            permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+
         if (Build.VERSION.SDK_INT >= 33) {
             // API 33+: allCellInfo needs NEARBY_WIFI_DEVICES
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES)
                 != PackageManager.PERMISSION_GRANTED
             ) {
                 permissions.add(Manifest.permission.NEARBY_WIFI_DEVICES)
-            }
-            // API 33+: allCellInfo needs location-level access — Android 16 in
-            // practice requires FINE, not just coarse, or cell info stays empty.
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-                // request coarse alongside so the "while in use" dialog offers both
-                permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
             }
             // API 34+: need READ_SIM_STATE for subscription info (not a compile constant in SDK 35)
             if (Build.VERSION.SDK_INT >= 34) {

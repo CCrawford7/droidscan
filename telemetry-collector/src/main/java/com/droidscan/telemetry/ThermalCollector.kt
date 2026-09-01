@@ -34,13 +34,20 @@ class ThermalCollector {
             readKernelThermalZones()
         } else emptyList()
 
+        return aggregate(standardZones, powerZones)
+    }
+
+    /**
+     * Pure aggregation, extracted for testability: kernel zones (Power Mode)
+     * REPLACE the single estimated Standard-Mode skin zone when present.
+     */
+    internal fun aggregate(standardZones: List<ThermalZone>, powerZones: List<ThermalZone>): ThermalSnapshot {
         val allZones = if (powerZones.isNotEmpty()) powerZones else standardZones
         val maxTemp = allZones.maxOfOrNull { it.temperatureCelsius }
         val isThrottling = allZones.any { it.throttling }
         // Name of the zone that hit maxTemp — used by the CrisisBanner subtitle
         // ("CPU cores hottest" / "Peak 52.1°C").
         val peakZoneName = allZones.firstOrNull { it.temperatureCelsius == maxTemp }?.name
-
         return ThermalSnapshot(
             zones = allZones,
             isThrottling = isThrottling,
@@ -76,7 +83,7 @@ class ThermalCollector {
         return zones
     }
 
-    private fun mapThermalStatusToTemp(status: Int): Float = when (status) {
+    internal fun mapThermalStatusToTemp(status: Int): Float = when (status) {
         PowerManager.THERMAL_STATUS_NONE -> 30.0f
         PowerManager.THERMAL_STATUS_LIGHT -> 38.0f
         PowerManager.THERMAL_STATUS_MODERATE -> 45.0f

@@ -102,7 +102,10 @@ class DroidscanApp : Application() {
         // (AES-GCM, key in Android Keystore); legacy plaintext auto-migrates.
         val historyStore = com.droidscan.shared.core.MetricHistoryStore(
             file = java.io.File(filesDir, "metrics_history.jsonl"),
-            encryptor = com.droidscan.shared.core.KeystoreAesGcmLineEncryptor()
+            encryptor = com.droidscan.shared.core.KeystoreAesGcmLineEncryptor(),
+            // Once the store exceeds its 1h cap, prune at most once per minute
+            // instead of rewriting the whole file on every 1s append.
+            pruneIntervalMs = PRUNE_INTERVAL_MS
         )
 
         telemetryCollector = TelemetryCollector(
@@ -160,6 +163,7 @@ class DroidscanApp : Application() {
 
     companion object {
         private const val TAG = "DroidscanApp"
+        private const val PRUNE_INTERVAL_MS = 60_000L
         lateinit var instance: DroidscanApp
             private set
     }

@@ -24,9 +24,21 @@ class MetricHistoryStore(
     private val file: File,
     private val maxEntries: Int = DEFAULT_MAX_ENTRIES,
     private val json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
-    private val encryptor: LineEncryptor? = null
+    private val encryptor: LineEncryptor? = null,
+    /**
+     * Minimum gap between full-file prune rewrites. Once the store exceeds
+     * [maxEntries], every append would otherwise read+rewrite the whole file —
+     * after ~1h of 1s appends that's a multi-MB rewrite EVERY second. A cooldown
+     * bounds the cost to at most one rewrite per interval (the raw file may
+     * briefly exceed [maxEntries] between prunes; the in-memory cache and every
+     * read path stay hard-bounded to [maxEntries]). 0 = prune on every overflow
+     * (exact boundedness — the test path).
+     */
+    private val pruneIntervalMs: Long = 0L
 ) {
     private val lock = Any()
+
+    private var lastPruneMs = 0L
 
     // In-memory view of the decrypted JSON lines, loaded once from the file and
     // kept in sync by append(). This is what makes chart refreshes cheap: the
@@ -175,6 +187,9 @@ class MetricHistoryStore(
     }
 
     private fun prune() {
+        val now = System.currentTimeMillis()
+        if (now - lastPruneMs < pruneIntervalMs) return
+        lastPruneMs = now
         val lines = file.readLines()
         if (lines.size > maxEntries) {
             file.writeText(lines.takeLast(maxEntries).joinToString("\n") + "\n")
