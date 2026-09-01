@@ -13,7 +13,13 @@
 ## 📥 Download & install
 
 **Latest build:** [`droidscan.apk`](https://github.com/CCrawford7/droidscan/releases/latest/download/droidscan.apk)
-(v1.2.0 · 2026-08-17)
+(v0.9.0 · re-based)
+
+> **Versioning note:** releases `v1.0.0`–`v1.2.0` were pre-MVP snapshots — they tracked
+> release cadence, not the MVP contract. The current state is honestly labelled
+> **v0.9.0**: feature-complete in scope, still in its hardening window (Standard-Mode
+> contract, Pro-feature gating, real-device testing). Work toward the first
+> MVP-complete "1.0" continues on the `0.9.1` line.
 
 Each tagged release ships a debug-signed APK attached as a **GitHub Release asset**.
 The link above always points at the newest release. Older builds are under
