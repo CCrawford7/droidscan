@@ -160,6 +160,7 @@ fun DashboardScreen(telemetryFlow: Flow<MetricSnapshot>) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppHeader(snapshot: MetricSnapshot, onOpenSettings: () -> Unit) {
+    val proFeatures by DroidscanApp.instance.proFeaturesEnabled.collectAsState()
     CenterAlignedTopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -173,7 +174,7 @@ fun AppHeader(snapshot: MetricSnapshot, onOpenSettings: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.width(8.dp))
-                if (snapshot.shizukuAvailable) Chip("POWER MODE", TerminalAccentCyan)
+                if (proFeatures && snapshot.shizukuAvailable) Chip("POWER MODE", TerminalAccentCyan)
             }
         },
         actions = {
@@ -487,6 +488,7 @@ fun SystemTab(
     trendHistory: List<MetricSnapshot>,
     onTap: (String) -> Unit
 ) {
+    val proFeatures by DroidscanApp.instance.proFeaturesEnabled.collectAsState()
     Column(
         Modifier
             .fillMaxSize()
@@ -495,20 +497,25 @@ fun SystemTab(
             .padding(vertical = 6.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        TierCard("CPU", liveReadout = snapshot.processes.perCoreLoad.maxOrNull()?.let { "${(it * 100).toInt()}%" }, liveColor = TerminalAccentCyan) {
-            // Non-empty means the bridge read /proc/stat successfully; an idle
-            // device legitimately reads all-zero loads and must not be mistaken
-            // for a privilege failure.
-            val hasCpuData = snapshot.processes.perCoreLoad.isNotEmpty()
-            if (!hasCpuData) {
-                // Android 16: /proc/stat is EACCES for non-privileged apps.
-                MetricRow("Status", MetricValue("CPU data requires privilege"))
-            } else {
-                snapshot.processes.perCoreLoad.forEachIndexed { i, load ->
-                    MetricRow("Core $i", MetricValue("${(load * 100).toInt()}%", load.toDouble(), MemoryThresholds.pressure), "cpuLoad", onTap)
-                }
-                snapshot.processes.topCpuProcesses.take(3).forEach { p ->
-                    MetricRow("${p.name.take(24)}", MetricValue("${p.pid}"), indent = true)
+        // Per-core CPU is privilege-gated (/proc/stat). In Standard Mode (Pro
+        // features OFF) the card only renders when data is actually available —
+        // no "requires privilege" nag. Enable Pro features to see the diagnostic.
+        if (proFeatures || snapshot.processes.perCoreLoad.isNotEmpty()) {
+            TierCard("CPU", liveReadout = snapshot.processes.perCoreLoad.maxOrNull()?.let { "${(it * 100).toInt()}%" }, liveColor = TerminalAccentCyan) {
+                // Non-empty means the bridge read /proc/stat successfully; an idle
+                // device legitimately reads all-zero loads and must not be mistaken
+                // for a privilege failure.
+                val hasCpuData = snapshot.processes.perCoreLoad.isNotEmpty()
+                if (!hasCpuData) {
+                    // Android 16: /proc/stat is EACCES for non-privileged apps.
+                    MetricRow("Status", MetricValue("CPU data requires privilege"))
+                } else {
+                    snapshot.processes.perCoreLoad.forEachIndexed { i, load ->
+                        MetricRow("Core $i", MetricValue("${(load * 100).toInt()}%", load.toDouble(), MemoryThresholds.pressure), "cpuLoad", onTap)
+                    }
+                    snapshot.processes.topCpuProcesses.take(3).forEach { p ->
+                        MetricRow("${p.name.take(24)}", MetricValue("${p.pid}"), indent = true)
+                    }
                 }
             }
         }
@@ -533,7 +540,7 @@ fun SystemTab(
             windowLabel = "30 min", minY = 0f
         )
 
-        if (snapshot.processes.kernelWakelocks.isNotEmpty()) {
+        if (proFeatures && snapshot.processes.kernelWakelocks.isNotEmpty()) {
             TierCard("WAKELOCKS (Power Mode)") {
                 snapshot.processes.kernelWakelocks.take(5).forEach {
                     MetricRow("${it.take(24)}", MetricValue("active"), indent = true)
@@ -552,16 +559,20 @@ fun SystemTab(
         }
 
         // Deep storage / wear — dumpsys diskstats via the T2 shell bridge.
-        TierCard("STORAGE WEAR (Power Mode)") {
-            val sw = snapshot.storageWear
-            if (sw.powerMode) {
-                DualMetricRow("512B Write Lat", MetricValue(sw.writeLatencyMs?.let { "$it ms" } ?: "--"), "Write Speed", MetricValue(sw.recentWriteKbps?.let { "$it kB/s" } ?: "--"))
-                DualMetricRow("Data Free", MetricValue(sw.dataFreePercent?.let { "$it%" } ?: "--"), "FBE", MetricValue(sw.fileBasedEncryption?.let { if (it) "ON" else "OFF" } ?: "--"))
-                DualMetricRow("App Size", MetricValue(sw.appSizeBytes?.let(::formatBytes) ?: "--"), "Data Size", MetricValue(sw.appDataSizeBytes?.let(::formatBytes) ?: "--"))
-                DualMetricRow("Cache", MetricValue(sw.appCacheSizeBytes?.let(::formatBytes) ?: "--"), "Media", MetricValue(listOfNotNull(sw.photosSizeBytes, sw.videosSizeBytes, sw.audioSizeBytes).sum().let { if (it > 0) formatBytes(it) else "--" }))
-            } else {
-                MetricRow("Status", MetricValue(if (snapshot.shizukuAvailable) "No data" else "Requires Shizuku"))
-                MetricRow("Hint", MetricValue("Start Shizuku → grant → Power Mode"))
+        // Hidden in Standard Mode (Pro features OFF); reveals with its existing
+        // degraded state so we can still test it.
+        if (proFeatures) {
+            TierCard("STORAGE WEAR (Power Mode)") {
+                val sw = snapshot.storageWear
+                if (sw.powerMode) {
+                    DualMetricRow("512B Write Lat", MetricValue(sw.writeLatencyMs?.let { "$it ms" } ?: "--"), "Write Speed", MetricValue(sw.recentWriteKbps?.let { "$it kB/s" } ?: "--"))
+                    DualMetricRow("Data Free", MetricValue(sw.dataFreePercent?.let { "$it%" } ?: "--"), "FBE", MetricValue(sw.fileBasedEncryption?.let { if (it) "ON" else "OFF" } ?: "--"))
+                    DualMetricRow("App Size", MetricValue(sw.appSizeBytes?.let(::formatBytes) ?: "--"), "Data Size", MetricValue(sw.appDataSizeBytes?.let(::formatBytes) ?: "--"))
+                    DualMetricRow("Cache", MetricValue(sw.appCacheSizeBytes?.let(::formatBytes) ?: "--"), "Media", MetricValue(listOfNotNull(sw.photosSizeBytes, sw.videosSizeBytes, sw.audioSizeBytes).sum().let { if (it > 0) formatBytes(it) else "--" }))
+                } else {
+                    MetricRow("Status", MetricValue(if (snapshot.shizukuAvailable) "No data" else "Requires Shizuku"))
+                    MetricRow("Hint", MetricValue("Start Shizuku → grant → Power Mode"))
+                }
             }
         }
 
@@ -602,6 +613,7 @@ fun PowerTab(
     trendHistory: List<MetricSnapshot>,
     onTap: (String) -> Unit
 ) {
+    val proFeatures by DroidscanApp.instance.proFeaturesEnabled.collectAsState()
     val isThrottling = snapshot.thermal.isThrottling == true
     var showRawSensors by remember { mutableStateOf(false) }
 
@@ -711,7 +723,7 @@ fun PowerTab(
                 }
 
                 // Raw kernel sensors — only meaningful with Shizuku (Power Mode).
-                if (snapshot.shizukuAvailable) {
+                if (proFeatures && snapshot.shizukuAvailable) {
                     Spacer(Modifier.height(2.dp))
                     TextButton(
                         onClick = { showRawSensors = !showRawSensors },
@@ -747,21 +759,24 @@ fun PowerTab(
             windowLabel = "30 min"
         )
 
-        // MODE tier — Shizuku guidance lives in Settings, no nag banner here.
-        TierCard(if (snapshot.shizukuAvailable) "POWER MODE (Shizuku)" else "MODE") {
-            if (snapshot.shizukuAvailable) {
-                MetricRow("Status", MetricValue("Available — kernel-level data"))
-                snapshot.processes.kernelWakelocks.takeIf { it.isNotEmpty() }?.let {
-                    MetricRow("Wakelocks", MetricValue("${it.size} active"))
-                }
-            } else {
-                MetricRow("Status", MetricValue("Standard Mode — no shell data"))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Shizuku enables:", color = TerminalTextSecondary, fontFamily = FontFamily.SansSerif, fontSize = 11.sp)
-                    Spacer(Modifier.width(4.dp))
-                    Chip("Wake locks", TerminalAccentCyan)
-                    Spacer(Modifier.width(4.dp))
-                    Chip("Storage wear", TerminalAccentCyan)
+        // MODE tier — hidden in Standard Mode (Pro features OFF); reveals with
+        // its existing behaviour so we can still test availability states.
+        if (proFeatures) {
+            TierCard(if (snapshot.shizukuAvailable) "POWER MODE (Shizuku)" else "MODE") {
+                if (snapshot.shizukuAvailable) {
+                    MetricRow("Status", MetricValue("Available — kernel-level data"))
+                    snapshot.processes.kernelWakelocks.takeIf { it.isNotEmpty() }?.let {
+                        MetricRow("Wakelocks", MetricValue("${it.size} active"))
+                    }
+                } else {
+                    MetricRow("Status", MetricValue("Standard Mode — no shell data"))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Shizuku enables:", color = TerminalTextSecondary, fontFamily = FontFamily.SansSerif, fontSize = 11.sp)
+                        Spacer(Modifier.width(4.dp))
+                        Chip("Wake locks", TerminalAccentCyan)
+                        Spacer(Modifier.width(4.dp))
+                        Chip("Storage wear", TerminalAccentCyan)
+                    }
                 }
             }
         }
@@ -1120,6 +1135,7 @@ fun LocationRequiredBanner() {
 @Composable
 fun SettingsScreen(snapshot: MetricSnapshot) {
     val context = LocalContext.current
+    val proFeatures by DroidscanApp.instance.proFeaturesEnabled.collectAsState()
     val runtimePermissions = listOf(
         Manifest.permission.ACCESS_FINE_LOCATION to "Location (cell metrics)",
         Manifest.permission.ACCESS_COARSE_LOCATION to "Approximate location",
@@ -1136,10 +1152,29 @@ fun SettingsScreen(snapshot: MetricSnapshot) {
             .padding(horizontal = 14.dp, vertical = 6.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        TierCard("SHIZUKU", liveReadout = if (snapshot.shizukuAvailable) "LIVE" else null, liveColor = TerminalAccentCyan) {
+        // Minimal "Pro features" gate (0.9.1): OFF by default → clean Standard
+        // Mode dashboard. ON → the existing Shizuku-gated sections reappear so
+        // we can still test their functionality alongside the rest of the app.
+        TierCard("PRO FEATURES", liveReadout = if (proFeatures) "ON" else "OFF", liveColor = if (proFeatures) TerminalAccentCyan else TerminalTextSecondary) {
             val transport = DroidscanApp.instance.telemetryCollector.transport()
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MetricRow("Status", MetricValue(if (snapshot.shizukuAvailable) "Available — shell-level data" else "Not available"), modifier = Modifier.weight(1f))
+                MetricRow(
+                    "Shizuku-gated telemetry",
+                    MetricValue(if (proFeatures) "ENABLED" else "DISABLED"),
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(Modifier.width(6.dp))
+                Switch(
+                    checked = proFeatures,
+                    onCheckedChange = { DroidscanApp.instance.setProFeaturesEnabled(it) }
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MetricRow("Transport", MetricValue(when (transport) {
+                    "ROOT" -> "ROOT shell"
+                    "SHIZUKU" -> "SHIZUKU"
+                    else -> "NONE"
+                }), modifier = Modifier.weight(1f))
                 Spacer(Modifier.width(6.dp))
                 Chip(
                     when (transport) {
@@ -1150,25 +1185,32 @@ fun SettingsScreen(snapshot: MetricSnapshot) {
                     if (snapshot.shizukuAvailable) TerminalAccentCyan else TerminalTextSecondary
                 )
             }
-            if (!snapshot.shizukuAvailable) {
-                Spacer(Modifier.height(4.dp))
-                MetricRow("How", MetricValue("Open Shizuku → start server → return"))
-                Spacer(Modifier.height(6.dp))
-                Button(
-                    onClick = {
-                        try {
-                            context.startActivity(
-                                context.packageManager.getLaunchIntentForPackage("moe.shizuku.privileged.api")
-                                    ?: Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:moe.shizuku.privileged.api"))
-                            )
-                        } catch (_: Exception) {
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = TerminalAccentCyan.copy(alpha = 0.18f), contentColor = TerminalAccentCyan)
-                ) {
-                    Text("Open Shizuku", fontFamily = FontFamily.SansSerif, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            if (proFeatures) {
+                if (snapshot.shizukuAvailable) {
+                    MetricRow("Status", MetricValue("Available — shell-level data"))
+                } else {
+                    Spacer(Modifier.height(4.dp))
+                    MetricRow("Hint", MetricValue("Start Shizuku server (wireless debugging or root) → grant → return"))
+                    Spacer(Modifier.height(6.dp))
+                    Button(
+                        onClick = {
+                            try {
+                                context.startActivity(
+                                    context.packageManager.getLaunchIntentForPackage("moe.shizuku.privileged.api")
+                                        ?: Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:moe.shizuku.privileged.api"))
+                                )
+                            } catch (_: Exception) {
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = TerminalAccentCyan.copy(alpha = 0.18f), contentColor = TerminalAccentCyan)
+                    ) {
+                        Text("Open Shizuku", fontFamily = FontFamily.SansSerif, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    }
                 }
+            } else {
+                Spacer(Modifier.height(4.dp))
+                MetricRow("Note", MetricValue("Default dashboard is Standard Mode. Enable to reveal Shizuku sections for testing."))
             }
         }
 

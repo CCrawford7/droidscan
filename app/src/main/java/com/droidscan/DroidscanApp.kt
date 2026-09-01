@@ -29,6 +29,17 @@ class DroidscanApp : Application() {
     private val _liveSnapshot = MutableStateFlow(MetricSnapshot())
     val liveSnapshot: StateFlow<MetricSnapshot> = _liveSnapshot.asStateFlow()
 
+    // "Pro features" gate (0.9.1): OFF by default so the dashboard renders a
+    // clean Standard Mode (FR12). When ON, the existing Shizuku-gated sections
+    // reappear so we can still test them. In-memory only — a dev/test switch,
+    // not a user-facing setting.
+    private val _proFeaturesEnabled = MutableStateFlow(false)
+    val proFeaturesEnabled: StateFlow<Boolean> = _proFeaturesEnabled.asStateFlow()
+
+    fun setProFeaturesEnabled(enabled: Boolean) {
+        _proFeaturesEnabled.value = enabled
+    }
+
     private var telemetryJob: Job? = null
 
     override fun onCreate() {
