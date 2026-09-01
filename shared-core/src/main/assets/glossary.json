@@ -34,10 +34,10 @@
       "id": "activeBands",
       "label": "Active Band",
       "section": "radio",
-      "whatItMeasures": "The specific frequency band your phone is currently connected to for cellular service.",
-      "currentValueContext": "Bands are numbered — n71 is low-band 5G (better range), n78 is mid-band 5G (faster speeds), B41 is mid-band 4G LTE.",
-      "healthyRange": "Any connected band is normal. Some bands are faster but shorter range.",
-      "commonCauses": "Your carrier determines which bands are available in your area. Phone switches bands automatically based on signal and congestion.",
+      "whatItMeasures": "A band is a licensed slice of the radio spectrum a carrier uses for cellular service — a reserved \"lane\" on the airwaves. 3GPP numbers each one (B3, n78…): B = 4G LTE, n = 5G NR. This shows the band your phone is actively camped on.",
+      "currentValueContext": "The core trade-off is physics: lower frequencies travel further and penetrate walls better but carry less data; higher frequencies are faster but shorter-range and easily blocked. Low-band (<1 GHz — B12/B20/B71, n28/n71): the coverage “safety net” — long range and solid indoors, modest speeds. Mid-band (1–6 GHz — B1/B3/B7/B41, n41/n77/n78): the everyday workhorse — wide-area coverage with genuinely fast speeds; n78 (~3.5 GHz) is the global mid-band 5G standard. High-band mmWave (24–71 GHz — n257/n258/n260): multi-Gbps bursts, but line-of-sight only — expect it at malls, stadiums and dense urban streets, not at home.",
+      "healthyRange": "Any connected band is normal. Expect low-band to feel slower, mid-band to be the typical fast experience, and mmWave to be very fast but rare. Switching between bands is the phone adapting to coverage and congestion — not a fault.",
+      "commonCauses": "Your carrier decides which bands are deployed in your area and which your phone may camp on. The phone selects bands automatically from signal strength, network load and carrier-aggregation state, and re-selects as you move.",
       "expansion": ""
     },
     {
