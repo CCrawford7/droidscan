@@ -1,8 +1,6 @@
 package com.droidscan.ui
 
-import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -11,6 +9,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.droidscan.DroidscanApp
@@ -23,93 +24,93 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var telemetryFlow: Flow<MetricSnapshot>
 
+    private val specs = droidscanPermissionSpecs()
+
+    /** Permissions currently held, as Compose state so the gate recomposes. */
+    private var granted by mutableStateOf<Set<String>>(emptySet())
+    private var rationaleDismissed by mutableStateOf(false)
+    private var telemetryStarted = false
+
     private val requestPermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grantResults ->
         Log.i("DroidscanPerms", "Permission results: $grantResults")
-        // Slice #3: once the run permission set is settled, kick the foreground
-        // service so collection survives backgrounding.
-        TelemetryService.start(applicationContext)
+        refreshGranted()
+        // Once the run permission set is settled, kick the foreground service so
+        // collection survives backgrounding.
+        startTelemetryIfSettled()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        Log.i("DroidscanPerms", "onCreate called, requesting permissions")
-        requestRequiredPermissions()
         // Single shared telemetry flow (owned by DroidscanApp) — the service and
         // every activity consume the same liveSnapshot, so there's one collector.
         telemetryFlow = DroidscanApp.instance.liveSnapshot
+        refreshGranted()
+        startTelemetryIfSettled()
 
         setContent {
             DroidscanTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    DashboardScreen(telemetryFlow = telemetryFlow)
+                    // Nothing is requested until the user has seen why. The old
+                    // flow fired bare system dialogs from onCreate, before any
+                    // UI existed to explain them.
+                    if (!allGranted() && !rationaleDismissed) {
+                        PermissionsScreen(
+                            specs = specs,
+                            granted = granted,
+                            onGrant = {
+                                val missing = specs.missingPermissions(granted)
+                                if (missing.isEmpty()) {
+                                    rationaleDismissed = true
+                                } else {
+                                    Log.i("DroidscanPerms", "Requesting: $missing")
+                                    requestPermissionsLauncher.launch(missing.toTypedArray())
+                                }
+                            },
+                            onSkip = {
+                                Log.i("DroidscanPerms", "Rationale skipped by user")
+                                rationaleDismissed = true
+                                startTelemetryIfSettled()
+                            }
+                        )
+                    } else {
+                        DashboardScreen(telemetryFlow = telemetryFlow)
+                    }
                 }
             }
         }
     }
 
-    private fun requestRequiredPermissions() {
-        val permissions = mutableListOf<String>()
+    override fun onResume() {
+        super.onResume()
+        // The user may have toggled a permission in system settings and come back.
+        refreshGranted()
+        startTelemetryIfSettled()
+    }
 
-        // allCellInfo has required location-level access since API 28 — so request
-        // FINE+COARSE on EVERY supported API level (29+), not just 33+. Android 16
-        // in practice requires FINE, not just coarse, or cell info stays empty.
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-            // request coarse alongside so the "while in use" dialog offers both
-            permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
-        }
+    private fun allGranted(): Boolean =
+        specs.all { spec -> spec.permissions.all { it in granted } }
 
-        if (Build.VERSION.SDK_INT >= 33) {
-            // API 33+: allCellInfo needs NEARBY_WIFI_DEVICES
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                permissions.add(Manifest.permission.NEARBY_WIFI_DEVICES)
+    private fun refreshGranted() {
+        granted = specs
+            .flatMap { it.permissions }
+            .filter {
+                ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
             }
-            // API 34+: need READ_SIM_STATE for subscription info (not a compile constant in SDK 35)
-            if (Build.VERSION.SDK_INT >= 34) {
-                val readSimState = "android.permission.READ_SIM_STATE"
-                if (ContextCompat.checkSelfPermission(this, readSimState)
-                    != PackageManager.PERMISSION_GRANTED
-                ) {
-                    permissions.add(readSimState)
-                } else {
-                    Log.i("DroidscanPerms", "READ_SIM_STATE already granted")
-                }
-                // API 34+: READ_PRECISE_PHONE_STATE unlocks precise cell identity
-                // (PCI/TAC) + IMS registration via ImsMmTelManager.
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PRECISE_PHONE_STATE)
-                    != PackageManager.PERMISSION_GRANTED
-                ) {
-                    permissions.add(Manifest.permission.READ_PRECISE_PHONE_STATE)
-                }
-            }
-        } else {
-            // API 32 and below: request READ_PHONE_STATE
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                permissions.add(Manifest.permission.READ_PHONE_STATE)
-            }
-        }
-        // API 33+: notification permission so the foreground-service card is visible.
-        if (Build.VERSION.SDK_INT >= 33 &&
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
-        if (permissions.isNotEmpty()) {
-            Log.i("DroidscanPerms", "Requesting permissions: $permissions")
-            requestPermissionsLauncher.launch(permissions.toTypedArray())
-        } else {
-            Log.i("DroidscanPerms", "All permissions already granted")
-            // Nothing to request, but still spin up the foreground service.
+            .toSet()
+    }
+
+    /**
+     * Start collection once the permission gate is resolved — granted outright,
+     * or explicitly skipped. Best-effort either way: the collector degrades
+     * gracefully when a source is unavailable.
+     */
+    private fun startTelemetryIfSettled() {
+        if (telemetryStarted) return
+        if (allGranted() || rationaleDismissed) {
+            telemetryStarted = true
             TelemetryService.start(applicationContext)
         }
     }
