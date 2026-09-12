@@ -34,14 +34,18 @@ data class PermissionSpec(
     val reassurance: String? = null
 )
 
-/** API-34 permissions that aren't compile-time constants in the SDK. */
-private const val READ_SIM_STATE = "android.permission.READ_SIM_STATE"
-private const val READ_PRECISE_PHONE_STATE = "android.permission.READ_PRECISE_PHONE_STATE"
-
 /**
  * The runtime set droidscan needs, ordered by how much the user will balk at it.
  * Rationale copy follows the rule: name the capability that sounds alarming,
  * then immediately say what the app actually does with it.
+ *
+ * Only genuinely requestable (dangerous) permissions belong here.
+ * `READ_SIM_STATE` and `READ_PRECISE_PHONE_STATE` are declared in the manifest
+ * but are privileged: they appear in neither the install nor the runtime
+ * permission set, so the platform never shows a dialog for them and
+ * `checkSelfPermission` returns DENIED permanently. Listing them would make
+ * "grant everything" unreachable and trap the user on the rationale screen.
+ * The collectors already degrade gracefully when they're absent.
  */
 fun droidscanPermissionSpecs(): List<PermissionSpec> {
     val specs = mutableListOf(
@@ -68,24 +72,10 @@ fun droidscanPermissionSpecs(): List<PermissionSpec> {
         )
     }
 
-    if (Build.VERSION.SDK_INT >= 34) {
-        specs += PermissionSpec(
-            permissions = listOf(READ_SIM_STATE),
-            label = "SIM details",
-            glyph = "▣",
-            rationale = "To read your SIM and subscription state for the SIM tab."
-        )
-        specs += PermissionSpec(
-            permissions = listOf(READ_PRECISE_PHONE_STATE),
-            label = "Phone state",
-            // U+FE0E forces text presentation — bare U+260E renders as a
-            // full-colour emoji telephone, which clashes with the palette.
-            glyph = "☎︎",
-            rationale = "To unlock precise cell identity (PCI / TAC) and IMS " +
-                "registration status.",
-            reassurance = "droidscan never places, answers or records calls."
-        )
-    } else {
+    // READ_PHONE_STATE is only declared up to API 32 (see AndroidManifest) and
+    // only there is it a dangerous permission worth asking the user for. On
+    // 33+ the install-granted READ_BASIC_PHONE_STATE covers what's available.
+    if (Build.VERSION.SDK_INT <= 32) {
         specs += PermissionSpec(
             permissions = listOf(Manifest.permission.READ_PHONE_STATE),
             label = "Phone state",

@@ -179,29 +179,49 @@ private fun SignalBlock(
 
 @Composable
 fun PowerRingCard(snapshot: MetricSnapshot, onTap: (String) -> Unit) {
-    val level = snapshot.power.batteryLevel ?: 0
-    val temp = snapshot.power.batteryTemperature
-    val chargeMa = snapshot.power.chargeRateMicroamps?.div(1000) ?: 0
-    val drainMa = snapshot.power.currentDrainMicroamps?.div(1000) ?: 0
-    val tier = evaluateStatusInverted(level.toDouble(), BatteryThresholds.levelPercent)
-    val ringColor = tier.toRingColor()
+    // No reading is not the same as 0%. Coercing null to 0 rendered a crit-red
+    // ring and announced "Battery level 0 percent, critical" on a device that
+    // simply hadn't reported yet.
+    val level = snapshot.power.batteryLevel
+    val drainMa = snapshot.power.currentDrainMicroamps?.div(1000)
+    val tier = level?.let { evaluateStatusInverted(it.toDouble(), BatteryThresholds.levelPercent) }
+    val ringColor = tier?.toRingColor() ?: TerminalTextSecondary
 
-    TierCard("POWER", titleFontFamily = TerminalHeading, liveReadout = "$level%", liveColor = ringColor) {
+    TierCard(
+        "POWER",
+        titleFontFamily = TerminalHeading,
+        liveReadout = level?.let { "$it%" } ?: UNKNOWN_VALUE,
+        liveColor = ringColor
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             ActivityRing(
-                progress = ringProgress(level.toFloat(), 0f, 100f),
+                progress = ringProgress((level ?: 0).toFloat(), 0f, 100f),
                 color = ringColor,
                 size = 92.dp,
                 thickness = 10.dp,
                 modifier = Modifier.semantics(mergeDescendants = true) {
-                    contentDescription = "Battery level $level percent, ${tier.signalWord()}"
+                    contentDescription = if (tier != null) {
+                        "Battery level $level percent, ${tier.signalWord()}"
+                    } else {
+                        "Battery level not reported yet"
+                    }
                 }
             )
             Spacer(Modifier.width(18.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                RingReadout("Temp", String.format("%.1f", temp ?: 0f) + "°C", "temperature", onTap)
-                RingReadout("Charge", "$chargeMa mA", "chargeRate", onTap)
-                if (drainMa > 0) RingReadout("Drain", "$drainMa mA")
+                RingReadout(
+                    "Temp",
+                    formatCelsius(snapshot.power.batteryTemperature),
+                    "temperature",
+                    onTap
+                )
+                RingReadout(
+                    "Charge",
+                    formatMilliamps(snapshot.power.chargeRateMicroamps),
+                    "chargeRate",
+                    onTap
+                )
+                if (drainMa != null && drainMa > 0) RingReadout("Drain", "$drainMa mA")
             }
         }
     }
@@ -211,13 +231,13 @@ fun PowerRingCard(snapshot: MetricSnapshot, onTap: (String) -> Unit) {
 
 @Composable
 fun SystemRingCard(snapshot: MetricSnapshot, onTap: (String) -> Unit) {
-    val usedRam = snapshot.processes.usedMemoryBytes ?: 0L
-    val totalRam = snapshot.processes.totalMemoryBytes ?: 1L
+    val usedRam = snapshot.processes.usedMemoryBytes
+    val totalRam = snapshot.processes.totalMemoryBytes
     TierCard("SYSTEM", titleFontFamily = TerminalHeading, liveReadout = snapshot.systemInfo.androidVersion, liveColor = TerminalTextSecondary) {
         BarGauge("RAM", usedRam, totalRam)
         Spacer(Modifier.height(2.dp))
-        RingReadout("Pressure", snapshot.processes.memoryPressure.name, "memoryPressure", onTap)
-        RingReadout("Uptime", formatUptime(snapshot.systemInfo.uptimeMs), "uptime", onTap)
+        RingReadout("Pressure", memoryPressureLabel(snapshot.processes.memoryPressure), "memoryPressure", onTap)
+        RingReadout("Uptime", formatUptimeOrUnknown(snapshot.systemInfo.uptimeMs), "uptime", onTap)
         RingReadout("Model", snapshot.systemInfo.deviceModel ?: "--")
         RingReadout("Kernel", snapshot.systemInfo.kernelVersion?.take(30) ?: "--")
     }

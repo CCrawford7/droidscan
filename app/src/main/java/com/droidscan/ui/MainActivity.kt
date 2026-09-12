@@ -24,7 +24,35 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var telemetryFlow: Flow<MetricSnapshot>
 
-    private val specs = droidscanPermissionSpecs()
+    /**
+     * Specs narrowed to permissions the platform will actually present a dialog
+     * for. A declared-but-privileged permission (READ_SIM_STATE,
+     * READ_PRECISE_PHONE_STATE) is DENIED permanently and ignored by
+     * `requestPermissions`, so gating on one makes "all granted" unreachable
+     * and strands the user on the rationale screen. Dropping is logged loudly:
+     * a silently dropped permission is how that bug hides.
+     */
+    private val specs: List<PermissionSpec> by lazy {
+        val declared = droidscanPermissionSpecs()
+        val requestable = declared
+            .map { spec -> spec.copy(permissions = spec.permissions.filter(::isRuntimeRequestable)) }
+            .filter { it.permissions.isNotEmpty() }
+        val excluded = declared.flatMap { it.permissions }.toSet() -
+            requestable.flatMap { it.permissions }.toSet()
+        if (excluded.isNotEmpty()) {
+            Log.w("DroidscanPerms", "Excluded from gate, not runtime-requestable: $excluded")
+        }
+        requestable
+    }
+
+    /** True when the platform will show a runtime dialog for [permission]. */
+    private fun isRuntimeRequestable(permission: String): Boolean = try {
+        val info = packageManager.getPermissionInfo(permission, 0)
+        // Base protection level is the low nibble; 0x01 == PROTECTION_DANGEROUS.
+        (info.protectionLevel and 0x0f) == 0x01
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
+    }
 
     /** Permissions currently held, as Compose state so the gate recomposes. */
     private var granted by mutableStateOf<Set<String>>(emptySet())

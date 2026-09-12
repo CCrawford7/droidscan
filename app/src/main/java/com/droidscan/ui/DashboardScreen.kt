@@ -526,12 +526,10 @@ fun SystemTab(
         }
 
         TierCard("MEMORY") {
-            val usedRam = snapshot.processes.usedMemoryBytes ?: 0L
-            val totalRam = snapshot.processes.totalMemoryBytes ?: 1L
-            BarGauge("RAM", usedRam, totalRam)
-            MetricRow("Pressure", MetricValue(snapshot.processes.memoryPressure.name, snapshot.processes.usedMemoryBytes?.toDouble()?.div(snapshot.processes.totalMemoryBytes?.toDouble() ?: 1.0), MemoryThresholds.pressure), "memoryPressure", onTap)
+            BarGauge("RAM", snapshot.processes.usedMemoryBytes, snapshot.processes.totalMemoryBytes)
+            MetricRow("Pressure", MetricValue(memoryPressureLabel(snapshot.processes.memoryPressure), snapshot.processes.usedMemoryBytes?.toDouble()?.div(snapshot.processes.totalMemoryBytes?.toDouble() ?: 1.0), MemoryThresholds.pressure), "memoryPressure", onTap)
             snapshot.processes.topMemoryProcesses.take(4).forEach { p ->
-                MetricRow("${p.name.take(22)}", MetricValue(formatBytes(p.memoryBytes ?: 0L)), indent = true)
+                MetricRow("${p.name.take(22)}", MetricValue(p.memoryBytes?.let { formatBytes(it) } ?: UNKNOWN_VALUE), indent = true)
             }
         }
 
@@ -554,13 +552,13 @@ fun SystemTab(
         }
 
         TierCard("STORAGE") {
-            val used = snapshot.storage.internalUsedBytes ?: 0L
-            val free = snapshot.storage.internalFreeBytes ?: 0L
-            BarGauge("Internal", used, used + free)
+            val used = snapshot.storage.internalUsedBytes
+            val free = snapshot.storage.internalFreeBytes
+            BarGauge("Internal", used, if (used != null && free != null) used + free else null)
             snapshot.storage.topConsumers.take(4).forEach { c ->
                 MetricRow("${c.label.take(22)}", MetricValue(formatBytes(c.sizeBytes)), indent = true)
             }
-            if (snapshot.storage.externalMounted) MetricRow("External", MetricValue(formatBytes(snapshot.storage.externalFreeBytes ?: 0L) + " free"))
+            if (snapshot.storage.externalMounted) MetricRow("External", MetricValue(snapshot.storage.externalFreeBytes?.let { formatBytes(it) + " free" } ?: UNKNOWN_VALUE))
         }
 
         // Deep storage / wear — dumpsys diskstats via the T2 shell bridge.
@@ -589,7 +587,7 @@ fun SystemTab(
             MetricRow("Security Patch", MetricValue(snapshot.systemInfo.securityPatch ?: "--"), null, onTap)
             MetricRow("Kernel", MetricValue(snapshot.systemInfo.kernelVersion?.take(40) ?: "--"), "kernelVersion", onTap)
             DualMetricRow("SELinux", MetricValue(if (snapshot.systemInfo.selinuxEnforced == true) "Enforced" else "Permissive"), "Resolution", MetricValue(snapshot.systemInfo.resolution ?: "--"), "selinuxStatus", null, onTap)
-            DualMetricRow("Density", MetricValue(snapshot.systemInfo.densityDpi ?: "--"), "Uptime", MetricValue(formatUptime(snapshot.systemInfo.uptimeMs)))
+            DualMetricRow("Density", MetricValue(snapshot.systemInfo.densityDpi ?: "--"), "Uptime", MetricValue(formatUptimeOrUnknown(snapshot.systemInfo.uptimeMs)))
             Row(Modifier.fillMaxWidth()) {
                 Text(
                     "(tap uptime to dump snapshot)",
@@ -636,15 +634,15 @@ fun PowerTab(
         }
 
         TierCard("BATTERY", liveReadout = snapshot.power.batteryLevel?.let { "$it%" }, liveColor = TerminalAccentCyan) {
-            val level = snapshot.power.batteryLevel ?: 0
-            MetricRow("Level", MetricValue("$level%", level.toDouble(), BatteryThresholds.levelPercent, inverted = true), "batteryLevel", onTap)
-            BarGauge("Charge", level.toLong(), 100L, warnThreshold = 0.2, critThreshold = 0.05)
-            DualMetricRow("Health", MetricValue(snapshot.power.batteryHealth ?: "--"), "Temp", MetricValue("${String.format("%.1f", snapshot.power.batteryTemperature ?: 0f)}°C", snapshot.power.batteryTemperature?.toDouble(), BatteryThresholds.temperatureCelsius), "batteryHealth", null, onTap)
-            val chargeMa = snapshot.power.chargeRateMicroamps?.div(1000) ?: 0
-            val drainMa = snapshot.power.currentDrainMicroamps?.div(1000) ?: 0
+            val level = snapshot.power.batteryLevel
+            MetricRow("Level", MetricValue(level?.let { "$it%" } ?: UNKNOWN_VALUE, level?.toDouble(), BatteryThresholds.levelPercent, inverted = true), "batteryLevel", onTap)
+            BarGauge("Charge", level?.toLong(), 100L, warnThreshold = 0.2, critThreshold = 0.05)
+            DualMetricRow("Health", MetricValue(snapshot.power.batteryHealth ?: UNKNOWN_VALUE), "Temp", MetricValue(formatCelsius(snapshot.power.batteryTemperature), snapshot.power.batteryTemperature?.toDouble(), BatteryThresholds.temperatureCelsius), "batteryHealth", null, onTap)
+            val chargeMa = snapshot.power.chargeRateMicroamps?.div(1000)
+            val drainMa = snapshot.power.currentDrainMicroamps?.div(1000)
             val avgMa = snapshot.power.batteryCurrentAverageMicroamps?.div(1000)
-            if (chargeMa > 0) MetricRow("Charge Rate", MetricValue("${chargeMa} mA"), "chargeRate", onTap)
-            if (drainMa > 0) MetricRow("Discharge Rate", MetricValue("${drainMa} mA"))
+            if (chargeMa != null && chargeMa > 0) MetricRow("Charge Rate", MetricValue("${chargeMa} mA"), "chargeRate", onTap)
+            if (drainMa != null && drainMa > 0) MetricRow("Discharge Rate", MetricValue("${drainMa} mA"))
             if (avgMa != null && avgMa != 0) MetricRow("Avg Current", MetricValue("${avgMa} mA"))
             snapshot.power.batteryChargeCounterMicroAh?.let { MetricRow("Charge Counter", MetricValue("${it / 1000} mAh")) }
             snapshot.power.estimatedTimeRemainingMs?.let { MetricRow("Est. Remaining", MetricValue(formatUptime(it))) }
@@ -795,7 +793,7 @@ fun PowerTab(
                 top.forEach { p ->
                     MetricRow(
                         "${p.name.take(24)}",
-                        MetricValue("${String.format("%.1f", p.memoryBytes?.div(1_000_000.0) ?: 0.0)} MB"),
+                        MetricValue(p.memoryBytes?.let { String.format("%.1f", it / 1_000_000.0) + " MB" } ?: UNKNOWN_VALUE),
                         indent = true
                     )
                 }
@@ -1460,14 +1458,14 @@ fun resolveLiveValue(id: String, s: MetricSnapshot): Pair<MetricValue, Color?>? 
     "ssRsrp" -> MetricValue("${s.radio.ssRsrp ?: "--"} dBm", s.radio.ssRsrp?.toDouble(), RadioThresholds.rsrp, inverted = true).let { it to statusColorOf(it) }
     "cn0" -> MetricValue(s.gnss.satellites.maxOfOrNull { it.cn0DbHz }?.let { "%.1f dB-Hz".format(it) } ?: "--") to null
     "gnss" -> MetricValue("${s.gnss.satellites.size} vis · ${s.gnss.satellites.count { it.usedInFix }} fix") to null
-    "batteryLevel" -> MetricValue("${s.power.batteryLevel ?: "--"}%", s.power.batteryLevel?.toDouble(), BatteryThresholds.levelPercent, inverted = true).let { it to statusColorOf(it) }
-    "chargeRate" -> MetricValue("${s.power.chargeRateMicroamps?.div(1000) ?: 0} mA") to null
+    "batteryLevel" -> MetricValue(s.power.batteryLevel?.let { "$it%" } ?: UNKNOWN_VALUE, s.power.batteryLevel?.toDouble(), BatteryThresholds.levelPercent, inverted = true).let { it to statusColorOf(it) }
+    "chargeRate" -> MetricValue(formatMilliamps(s.power.chargeRateMicroamps)) to null
     "cpuLoad" -> MetricValue(s.processes.perCoreLoad.maxOrNull()?.let { "${(it * 100).toInt()}%" } ?: "--") to null
-    "memoryPressure" -> MetricValue(s.processes.memoryPressure.name) to null
-    "temperature" -> MetricValue("${String.format("%.1f", s.thermal.maxTemperature ?: 0f)}°C", s.thermal.maxTemperature?.toDouble(), ThermalThresholds.zoneTemp).let { it to statusColorOf(it) }
+    "memoryPressure" -> MetricValue(memoryPressureLabel(s.processes.memoryPressure)) to null
+    "temperature" -> MetricValue(formatCelsius(s.thermal.maxTemperature), s.thermal.maxTemperature?.toDouble(), ThermalThresholds.zoneTemp).let { it to statusColorOf(it) }
     "kernelVersion" -> MetricValue(s.systemInfo.kernelVersion?.take(30) ?: "--") to null
     "selinuxStatus" -> MetricValue(if (s.systemInfo.selinuxEnforced == true) "Enforced" else "Permissive") to null
-    "uptime" -> MetricValue(formatUptime(s.systemInfo.uptimeMs)) to null
+    "uptime" -> MetricValue(formatUptimeOrUnknown(s.systemInfo.uptimeMs)) to null
     "activeNetwork" -> MetricValue(s.networkConfig.activeNetworkType ?: "--") to null
     "ipAddress" -> MetricValue(s.networkConfig.ipv4Addresses.firstOrNull() ?: "--") to null
     "simProvisioning" -> MetricValue(s.simStatus.slots.filter { it.isProvisioned }.size.toString()) to null

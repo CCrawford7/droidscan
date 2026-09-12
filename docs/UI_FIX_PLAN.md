@@ -58,3 +58,30 @@ accent doubles as brand and as "active". No single documented scale.
 ## Order
 1 → 2 → 3 → 4 → 5 → 6. Fixes 1–3 are small and independently shippable;
 4 is a redesign and should land behind review.
+
+## Status
+
+| # | State | Commit |
+|---|---|---|
+| 1 | done, verified on device | `7fd514a` |
+| 2 | done, verified on device | `227aa3a`, `aa3450b` |
+| 3 | done, verified on device | this commit |
+| 4 | not started | — |
+| 5 | not started | — |
+| 6 | not started | — |
+
+### Incident found while implementing fix 2
+
+The first cut of the permission gate required *every* spec in
+`droidscanPermissionSpecs()` to be granted before the dashboard would render.
+`READ_SIM_STATE` and `READ_PRECISE_PHONE_STATE` are declared in the manifest
+but are **privileged**, not runtime, permissions — they appear in neither the
+install nor the runtime permission set, so `checkSelfPermission` returns DENIED
+permanently and `requestPermissions` ignores them. That made "all granted"
+unreachable and would have trapped every user on the rationale screen forever.
+
+These two are now excluded from the request list, and `MainActivity` filters
+specs through `isRuntimeRequestable()` (dangerous protection level) as a
+guard — logging loudly if anything is ever dropped, so the failure can't hide
+again. The manifest declarations stay: they're correct, and become usable if
+the app is ever installed privileged.

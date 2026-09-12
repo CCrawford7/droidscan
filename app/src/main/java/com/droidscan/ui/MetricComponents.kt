@@ -255,14 +255,20 @@ private fun DualCell(
 @Composable
 fun BarGauge(
     label: String,
-    current: Long,
-    total: Long,
+    current: Long?,
+    total: Long?,
     color: Color = TerminalAccentGreen,
     warnThreshold: Double = 0.8,
     critThreshold: Double = 0.95
 ) {
-    val fraction = if (total > 0) current.toFloat() / total else 0f
+    // `known` guards against a missing reading rendering as a confident 0% in
+    // crit red — see UNKNOWN_VALUE below.
+    val known = current != null && total != null && total > 0L
+    val fraction =
+        if (current != null && total != null && total > 0L) current.toFloat() / total.toFloat()
+        else 0f
     val barColor = when {
+        !known -> TerminalBorder
         fraction >= critThreshold -> TerminalAccentRed
         fraction >= warnThreshold -> TerminalAccentYellow
         else -> color
@@ -274,7 +280,12 @@ fun BarGauge(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(label, color = TerminalTextSecondary, fontFamily = LabelText, fontSize = 11.sp)
-            Text(formatBytes(current), color = TerminalTextPrimary, fontFamily = ValueText, fontSize = 11.sp)
+            Text(
+                current?.let { formatBytes(it) } ?: UNKNOWN_VALUE,
+                color = if (known) TerminalTextPrimary else TerminalTextSecondary,
+                fontFamily = ValueText,
+                fontSize = 11.sp
+            )
         }
         Spacer(Modifier.height(3.dp))
         // 6dp tall track, 3dp radius, `border` track.
@@ -287,7 +298,7 @@ fun BarGauge(
         Spacer(Modifier.height(3.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             Text(
-                "${(fraction * 100).toInt()}%",
+                if (known) "${(fraction * 100).toInt()}%" else UNKNOWN_VALUE,
                 color = barColor,
                 fontFamily = ValueText,
                 fontSize = 10.sp
@@ -363,3 +374,36 @@ fun formatUptime(ms: Long): String {
     val m = (sec % 3600) / 60
     return if (d > 0) "${d}d ${h}h ${m}m" else "${h}h ${m}m"
 }
+
+// ─── Unknown values ─────────────────────────────────────
+// A sensor that hasn't reported is NOT a sensor reporting zero. Coercing null
+// to 0 produced a red "0%" battery ring that announced "Battery level 0
+// percent, critical" on a device that simply had no telemetry yet — a false
+// alarm. Anything unknown renders as UNKNOWN_VALUE.
+
+/** Canonical placeholder for telemetry that hasn't arrived. */
+const val UNKNOWN_VALUE = "--"
+
+/** Celsius to one decimal, or [UNKNOWN_VALUE] when no sensor reported. */
+fun formatCelsius(celsius: Float?): String =
+    celsius?.let { String.format("%.1f", it) + "°C" } ?: UNKNOWN_VALUE
+
+/** Microamps as whole milliamps, or [UNKNOWN_VALUE]. */
+fun formatMilliamps(microamps: Int?): String =
+    microamps?.let { "${it / 1000} mA" } ?: UNKNOWN_VALUE
+
+/**
+ * Uptime, or [UNKNOWN_VALUE] before the first snapshot lands. `uptimeMs`
+ * defaults to 0 in [SystemInfoSnapshot] and is only ever set from
+ * `SystemClock.elapsedRealtime()`, so 0 means "not collected yet" rather than
+ * a device that just booted.
+ */
+fun formatUptimeOrUnknown(ms: Long): String =
+    if (ms > 0L) formatUptime(ms) else UNKNOWN_VALUE
+
+/**
+ * Memory-pressure label, or [UNKNOWN_VALUE] before the first read. UNKNOWN is
+ * the enum's default, so it means "not measured yet" rather than a real state.
+ */
+fun memoryPressureLabel(pressure: MemoryPressure): String =
+    if (pressure == MemoryPressure.UNKNOWN) UNKNOWN_VALUE else pressure.name
