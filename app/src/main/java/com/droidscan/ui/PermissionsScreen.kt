@@ -78,7 +78,9 @@ fun droidscanPermissionSpecs(): List<PermissionSpec> {
         specs += PermissionSpec(
             permissions = listOf(READ_PRECISE_PHONE_STATE),
             label = "Phone state",
-            glyph = "☎",
+            // U+FE0E forces text presentation — bare U+260E renders as a
+            // full-colour emoji telephone, which clashes with the palette.
+            glyph = "☎︎",
             rationale = "To unlock precise cell identity (PCI / TAC) and IMS " +
                 "registration status.",
             reassurance = "droidscan never places, answers or records calls."
@@ -87,7 +89,9 @@ fun droidscanPermissionSpecs(): List<PermissionSpec> {
         specs += PermissionSpec(
             permissions = listOf(Manifest.permission.READ_PHONE_STATE),
             label = "Phone state",
-            glyph = "☎",
+            // U+FE0E forces text presentation — bare U+260E renders as a
+            // full-colour emoji telephone, which clashes with the palette.
+            glyph = "☎︎",
             rationale = "To read your SIM state and network registration.",
             reassurance = "droidscan never places, answers or records calls."
         )
