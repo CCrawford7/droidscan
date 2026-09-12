@@ -245,8 +245,13 @@ fun TabBar(selectedTab: DashboardTab, onSelect: (DashboardTab) -> Unit) {
     Column {
         Box(Modifier.fillMaxWidth().height(1.dp).background(TerminalBorder))
         Surface(color = TerminalSurfaceVariant, tonalElevation = 0.dp) {
+            // The Surface paints edge-to-edge behind the gesture handle, but the
+            // tappable content must clear it. Without this the labels rendered
+            // under the system gesture pill (verified on CPH2709, 42px inset).
             Row(
-                Modifier.fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 DashboardTab.entries.forEach { tab ->
