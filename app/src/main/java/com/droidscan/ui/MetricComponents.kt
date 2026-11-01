@@ -324,6 +324,71 @@ fun BarGauge(
     }
 }
 
+// ─── Signal Meter (number + colour + bar) ───────────────
+// Horizontal range meter for signal metrics (RSRQ/SINR). Fill length = the
+// value's normalized position in [min..max]; fill color = tier. Right-aligned
+// value gives the redundant triple-encoding (colour + bar + number) from the
+// Network Survey scan. Optional tap-to-glossary like MetricRow.
+
+@Composable
+fun SignalMeter(
+    label: String,
+    value: Int?,
+    min: Float,
+    max: Float,
+    unit: String,
+    threshold: ThresholdRange,
+    glossaryId: String? = null,
+    onTap: ((String) -> Unit)? = null
+) {
+    val known = value != null
+    val progress = if (known) (((value!! - min) / (max - min))).coerceIn(0f, 1f) else 0f
+    val tier = value?.let { evaluateStatusInverted(it.toDouble(), threshold) }
+    val color = when (tier) {
+        StatusTier.GREEN -> TerminalAccentGreen
+        StatusTier.YELLOW -> TerminalAccentYellow
+        StatusTier.RED -> TerminalAccentRed
+        null -> TerminalTextSecondary
+    }
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .then(
+                if (onTap != null && glossaryId != null)
+                    Modifier.pointerInput(glossaryId) { detectTapGestures { onTap(glossaryId) } }
+                else Modifier
+            )
+            .semantics(mergeDescendants = true) {
+                contentDescription = if (known) "$label, $value $unit" else "$label, not reported"
+            }
+    ) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(label, color = TerminalTextSecondary, fontFamily = LabelText, fontSize = 12.sp)
+            Text(
+                if (known) "$value $unit" else UNKNOWN_VALUE,
+                color = if (known) color else TerminalTextSecondary,
+                fontFamily = ValueText,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        Spacer(Modifier.height(3.dp))
+        Canvas(Modifier.fillMaxWidth().height(5.dp)) {
+            val w = size.width
+            val h = size.height
+            drawRoundRect(TerminalBorder, size = Size(w, h), cornerRadius = CornerRadius(3f))
+            if (known && progress > 0f) {
+                drawRoundRect(color, size = Size(w * progress, h), cornerRadius = CornerRadius(3f))
+            }
+        }
+    }
+}
+
 // ─── Chip (status / capability) ─────────────────────────
 // 9sp semibold, status-color text on status@~12% tint, 5dp radius.
 // Variants: THROTTLING (crit), POWER MODE / SHIZUKU (live), PROVISIONED (ok).

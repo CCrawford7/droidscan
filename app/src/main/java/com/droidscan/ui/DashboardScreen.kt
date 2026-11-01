@@ -371,15 +371,35 @@ fun SignalTab(
         }
 
         TierCard("CELLULAR SIGNAL") {
+            // Meta strip: serving-cell summary + live dot (scannable header).
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(7.dp).background(TerminalAccentGreen, RoundedCornerShape(4.dp)))
+                Spacer(Modifier.width(7.dp))
+                Text(
+                    listOfNotNull(
+                        snapshot.radio.operatorName,
+                        snapshot.radio.dataNetworkType,
+                        radioBandDisplay(snapshot.radio).takeIf { it != "--" }
+                    ).joinToString(" · ").ifEmpty { "No serving cell" },
+                    color = TerminalTextSecondary,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 10.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            TierDivider()
+            Spacer(Modifier.height(4.dp))
             if (snapshot.radio.cellInfoDenied == true) {
                 MetricRow("RSRP", MetricValue("-- dBm"))
                 MetricRow("RSRQ", MetricValue("-- dB"))
                 MetricRow("SINR", MetricValue("-- dB"))
             } else {
-                MetricRow("RSRP", MetricValue("${snapshot.radio.rsrp ?: "--"} dBm", snapshot.radio.rsrp?.toDouble(), RadioThresholds.rsrp, inverted = true), "rsrp", onTap)
-                MetricRow("RSRQ", MetricValue("${snapshot.radio.rsrq ?: "--"} dB", snapshot.radio.rsrq?.toDouble(), RadioThresholds.rsrq, inverted = true), "rsrq", onTap)
-                MetricRow("SINR", MetricValue("${snapshot.radio.sinr ?: "--"} dB", snapshot.radio.sinr?.toDouble(), RadioThresholds.sinr, inverted = true), "sinr", onTap)
                 SignalStrengthBar(snapshot.radio.rsrp, snapshot.radio.dataNetworkType)
+                Spacer(Modifier.height(2.dp))
+                SignalMeter("RSRQ", snapshot.radio.rsrq, RSRQ_MIN_DB.toFloat(), RSRQ_MAX_DB.toFloat(), "dB", RadioThresholds.rsrq, "rsrq", onTap)
+                SignalMeter("SINR", snapshot.radio.sinr, SINR_MIN_DB.toFloat(), SINR_MAX_DB.toFloat(), "dB", RadioThresholds.sinr, "sinr", onTap)
                 // NR: sync-signal RSRP/RSRQ/SINR (SS-*) — the canonical 5G field metric.
                 if (snapshot.radio.nrarfcn != null || snapshot.radio.dataNetworkType?.startsWith("NR") == true) {
                     MetricRow("SS-RSRP", MetricValue("${snapshot.radio.ssRsrp ?: "--"} dBm", snapshot.radio.ssRsrp?.toDouble(), RadioThresholds.rsrp, inverted = true), "ssRsrp", onTap)
