@@ -105,6 +105,20 @@ fun TrendChart(
 
         fun yOf(v: Float): Float = h - ((v - minY) / range) * (h * 0.86f) - (h * 0.07f)
 
+        // Faint gridlines at min / mid / max so the trace has a numeric scale.
+        val gridColor = TerminalBorder.copy(alpha = 0.55f)
+        listOf(minY, (minY + maxY) / 2f, maxY).forEach { gy ->
+            val gyPx = yOf(gy)
+            if (gyPx in 0f..h) {
+                drawLine(
+                    gridColor,
+                    start = androidx.compose.ui.geometry.Offset(0f, gyPx),
+                    end = androidx.compose.ui.geometry.Offset(w, gyPx),
+                    strokeWidth = 1f
+                )
+            }
+        }
+
         val line = Path()
         val fill = Path()
         var firstX = -1f

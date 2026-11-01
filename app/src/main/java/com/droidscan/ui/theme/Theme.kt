@@ -3,6 +3,7 @@ package com.droidscan.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -48,6 +49,12 @@ val TerminalAccentRed = Color(0xFFF87171)        // crit
 val TerminalAccentCyan = Color(0xFF60A5FA)       // live
 /** Peak-temp color ramping (thermal only). */
 val TerminalAccentOrange = Color(0xFFFF8800)     // peak
+/** Card top-edge "lit" hairline — subtle raised affordance. */
+val TerminalSurfaceHi = Color(0xFF27406A)
+/** Screen canvas — subtle vertical depth so cards read as floating tiers. */
+val TerminalBackgroundGradient = Brush.verticalGradient(
+    listOf(Color(0xFF0D1730), TerminalBackground, Color(0xFF09101D))
+)
 
 private val DroidscanDarkColorScheme = darkColorScheme(
     primary = TerminalAccentBlue,

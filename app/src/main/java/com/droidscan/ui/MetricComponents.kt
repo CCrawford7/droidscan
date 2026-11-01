@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
@@ -56,36 +57,52 @@ private fun StatusTier?.spoken(): String = when (this) {
 }
 
 // ── TierCard (replaces MetricCard) ──────────────────────
-// Load-bearing container. Fill `surface`, 1dp `border` hairline, 14dp radius.
-// Header: uppercase cyan sans label + optional right-aligned live readout.
+// Load-bearing container. Subtle vertical-gradient fill, 1dp `border` hairline,
+// 14dp radius, and a 3dp colored accent bar anchoring the header. Header:
+// uppercase cyan sans label + optional right-aligned live readout.
 
 @Composable
 fun TierCard(
     title: String,
     liveReadout: String? = null,
     liveColor: Color = TerminalAccentCyan,
+    accent: Color = TerminalAccentBlue,
     titleFontFamily: FontFamily = FontFamily.SansSerif,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val shape = RoundedCornerShape(14.dp)
     Column(
         Modifier
             .fillMaxWidth()
-            .background(TerminalSurface, RoundedCornerShape(14.dp))
-            .border(1.dp, TerminalBorder, RoundedCornerShape(14.dp))
-            .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 14.dp)
+            .background(
+                Brush.verticalGradient(listOf(TerminalSurface, Color(0xFF0D1728))),
+                shape
+            )
+            .border(1.dp, TerminalBorder, shape)
+            .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp)
     ) {
         Row(
             Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Section accent — a 3dp colored bar that anchors the card's tier.
+            Box(
+                Modifier
+                    .width(3.dp)
+                    .height(14.dp)
+                    .background(accent, RoundedCornerShape(2.dp))
+            )
+            Spacer(Modifier.width(8.dp))
             Text(
                 title,
                 color = TerminalAccentBlue,
                 fontFamily = titleFontFamily,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.09.sp
+                letterSpacing = 0.09.sp,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             liveReadout?.let {
                 Text(
@@ -99,8 +116,8 @@ fun TierCard(
                 )
             }
         }
-        Spacer(Modifier.height(10.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(9.dp)) { content() }
+        Spacer(Modifier.height(8.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
     }
 }
 

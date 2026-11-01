@@ -103,7 +103,7 @@ fun DashboardScreen(telemetryFlow: Flow<MetricSnapshot>) {
     val trendHistory = rememberTrendHistory()
 
     Scaffold(
-        containerColor = TerminalBackground,
+        containerColor = Color.Transparent,
         topBar = {
             if (showSettings) SettingsTopBar { showSettings = false }
             else AppHeader(currentSnapshot) { showSettings = true }
@@ -115,6 +115,7 @@ fun DashboardScreen(telemetryFlow: Flow<MetricSnapshot>) {
         Box(
             Modifier
                 .fillMaxSize()
+                .background(TerminalBackgroundGradient)
                 .padding(padding)
         ) {
             if (showSettings) {
@@ -180,14 +181,32 @@ fun AppHeader(snapshot: MetricSnapshot, onOpenSettings: () -> Unit) {
             }
         },
         actions = {
+            // Live status readout — signal tier + battery, glanceable at a look.
+            val rsrp = snapshot.radio.rsrp
+            val signalColor = when (rsrp?.let { evaluateStatusInverted(it.toDouble(), RadioThresholds.rsrp) }) {
+                StatusTier.GREEN -> TerminalAccentGreen
+                StatusTier.YELLOW -> TerminalAccentYellow
+                StatusTier.RED -> TerminalAccentRed
+                null -> TerminalTextSecondary
+            }
             Text(
-                snapshot.systemInfo.deviceModel?.take(12) ?: "",
-                color = TerminalTextSecondary,
+                "${snapshot.radio.dataNetworkType ?: "—"} · ${rsrp ?: "—"} dBm",
+                color = signalColor,
                 fontFamily = FontFamily.Monospace,
                 fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                "${snapshot.power.batteryLevel ?: "—"}%",
+                color = TerminalTextSecondary,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 11.sp,
+                maxLines = 1
+            )
+            Spacer(Modifier.width(2.dp))
             // Gear → Settings (48dp touch target).
             IconButton(
                 onClick = onOpenSettings,
