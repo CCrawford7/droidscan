@@ -4,6 +4,9 @@ import android.app.Application
 import android.util.Log
 import com.droidscan.shared.core.MetricSnapshot
 import com.droidscan.telemetry.*
+import com.droidscan.widget.TelemetryWidget
+import com.droidscan.widget.WidgetMetricsStore
+import androidx.glance.appwidget.updateAll
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -154,7 +157,18 @@ class DroidscanApp : Application() {
         telemetryJob?.cancel()
         telemetryJob = appScope.launch {
             try {
-                telemetryCollector.observeAll().collect { _liveSnapshot.value = it }
+                telemetryCollector.observeAll().collect {
+                    _liveSnapshot.value = it
+                    // Persist widget-visible metrics (throttled) and refresh the
+                    // home widget on the same cadence.
+                    if (WidgetMetricsStore.write(this@DroidscanApp, it)) {
+                        try {
+                            TelemetryWidget().updateAll(this@DroidscanApp)
+                        } catch (t: Throwable) {
+                            Log.w(TAG, "widget update failed: ${t.message}")
+                        }
+                    }
+                }
             } catch (t: Throwable) {
                 Log.e(TAG, "telemetry loop stopped: ${t.message}", t)
             }

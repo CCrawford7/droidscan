@@ -60,6 +60,19 @@
             android:multiprocess="false"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
+        <!-- Home-screen widget: live signal / battery / RAM at a glance. -->
+        <receiver
+            android:name=".widget.TelemetryWidgetReceiver"
+            android:exported="true"
+            android:label="droidscan">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/telemetry_widget_info" />
+        </receiver>
+
     </application>
 
 </manifest>

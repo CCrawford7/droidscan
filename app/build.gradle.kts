@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.shizuku.provider)
+    implementation(libs.androidx.glance.appwidget)
 
     debugImplementation(libs.androidx.ui.tooling)
 }
