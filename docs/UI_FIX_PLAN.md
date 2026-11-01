@@ -83,5 +83,48 @@ unreachable and would have trapped every user on the rationale screen forever.
 These two are now excluded from the request list, and `MainActivity` filters
 specs through `isRuntimeRequestable()` (dangerous protection level) as a
 guard — logging loudly if anything is ever dropped, so the failure can't hide
-again. The manifest declarations stay: they're correct, and become usable if
-the app is ever installed privileged.
+again.
+
+A follow-up probe (2026-09-12) showed the two are **not the same kind of
+thing**, and the original note above was wrong to treat them alike:
+
+* `READ_PRECISE_PHONE_STATE` is real. `pm list permissions -f` reports it as
+  `package:android`, i.e. declared by the framework itself. It is not
+  user-grantable, but the **shell** package holds it by default —
+  `dumpsys package com.android.shell` reports `granted=true`. That is the
+  entire reason a Shizuku-routed call succeeds: Shizuku executes as uid 2000
+  (`com.android.shell`), which legitimately owns the permission. It is not a
+  bypass, it is borrowed identity.
+* `READ_SIM_STATE` is a **ghost**. It appears nowhere in `pm list permissions`,
+  is absent from `/system/etc/permissions`, and is not in the shell package's
+  grant list either. No such permission exists on this platform, so the
+  manifest line is a no-op. A declaration for a permission that does not exist
+  cannot ever help, and it misleads anyone reading the manifest into thinking
+  the app can ask for SIM state. Deleted.
+
+**Consequence for the design.** Protection levels are AOSP-defined and
+therefore identical on every OEM — this is not a OnePlus quirk. But the
+practical reach of that ceiling is far narrower than it first looks, and an
+earlier draft of this note overstated it:
+
+* `READ_PRECISE_PHONE_STATE` is `prot=signature|privileged`
+  (`dumpsys package permissions`), so it is unreachable in Standard Mode — but
+  it only gates the **IMS** path: `ImsMmTelManager` registration
+  state/transport/settings, and the `isImsRegistered` reflection.
+* It does **not** gate cell identity. RSRP/RSRQ/SINR, band, PCI, TAC, CI,
+  EARFCN, bandwidth and derived DL frequency all come from
+  `TelephonyManager.getAllCellInfo()`, which requires **location** — a
+  one-tap runtime permission.
+* `READ_BASIC_PHONE_STATE` is `prot=normal` and install-granted (verified
+  `granted=true` on `com.droidscan.app`), so network type and call state need
+  no prompt at all.
+
+The gap Shizuku actually closes is therefore **IMS registration detail plus
+the kernel-level reads already gated as Pro** (thermal zones, wakelocks,
+storage wear, per-UID CPU) — not "accurate readings" in general, and
+specifically not cell identity. `RadioCollector`, `SimStatusCollector` and
+`ImsCollector` currently return null for the privileged IMS fields on API 34+
+and lean on CarrierConfig fallbacks; routing them through Shizuku would turn
+those `--` into real values. Until then the UI must keep labelling that
+section as requiring Shizuku (it does — `DashboardScreen` lines 576, 768),
+and no Standard-Mode copy should promise IMS registration state.

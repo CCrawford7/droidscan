@@ -4,7 +4,10 @@
     <!-- Phone state for cellular/signal data (deprecated from API 33, still needed for allCellInfo) -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" android:maxSdkVersion="32"/>
     <uses-permission android:name="android.permission.READ_BASIC_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_SIM_STATE" />
+    <!-- No READ_SIM_STATE: the permission does not exist on this platform.
+         Probed 2026-09-12 — absent from `pm list permissions`, absent from
+         /system/etc/permissions, and not granted to com.android.shell. SIM
+         state is reached through Shizuku instead. -->
     <!-- API 34+: precise cell identity (PCI/TAC) + IMS registration state -->
     <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
     <!-- allCellInfo on API 33+ needs location-level access; Android 16 requires FINE for cell info -->
