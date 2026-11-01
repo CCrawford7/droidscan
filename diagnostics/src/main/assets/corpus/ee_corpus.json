@@ -1,0 +1,1390 @@
+{
+ "threads": [
+  {
+   "title": "Can't send text message - Error 0",
+   "category": "Mobile Services",
+   "url": "https://community.ee.co.uk/t5/Mobile-Services/Can-t-send-text-message-Error-0/td-p/1059179",
+   "isSolved": true,
+   "views": 237245,
+   "replies": 65,
+   "scope": "phone"
+  },
+  {
+   "title": "want to access my hub manager login",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/want-to-access-my-hub-manager-login/td-p/769566",
+   "isSolved": true,
+   "views": 232600,
+   "replies": 15,
+   "scope": "broadband"
+  },
+  {
+   "title": "Transfer e-sim to new phone",
+   "category": "Apple Devices",
+   "url": "https://community.ee.co.uk/t5/Apple-Devices/Transfer-e-sim-to-new-phone/td-p/978918",
+   "isSolved": true,
+   "views": 210599,
+   "replies": 24,
+   "scope": "phone"
+  },
+  {
+   "title": "EE APN Settings: Where to find them",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/EE-APN-Settings-Where-to-find-them/td-p/1145404",
+   "isSolved": false,
+   "views": 208833,
+   "replies": 50,
+   "scope": "phone"
+  },
+  {
+   "title": "Unable to connect to 192.168.1.254",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Unable-to-connect-to-192-168-1-254/td-p/1138349",
+   "isSolved": false,
+   "views": 205599,
+   "replies": 7,
+   "scope": "broadband"
+  },
+  {
+   "title": "Number porting with EE - How to keep your number when switching mobile networks",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Number-porting-with-EE-How-to-keep-your-number-when-switching/td-p/780430",
+   "isSolved": false,
+   "views": 115505,
+   "replies": 57,
+   "scope": "phone"
+  },
+  {
+   "title": "SIM to eSIM conversion",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/SIM-to-eSIM-conversion/td-p/1158235",
+   "isSolved": false,
+   "views": 108001,
+   "replies": 14,
+   "scope": "phone"
+  },
+  {
+   "title": "Test broadband speed",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Test-broadband-speed/td-p/1466650",
+   "isSolved": true,
+   "views": 99199,
+   "replies": 19,
+   "scope": "broadband"
+  },
+  {
+   "title": "Roaming refresh",
+   "category": "Roaming",
+   "url": "https://community.ee.co.uk/t5/Roaming/Roaming-refresh/td-p/1480939",
+   "isSolved": false,
+   "views": 81816,
+   "replies": 290,
+   "scope": "phone"
+  },
+  {
+   "title": "I can’t connect phone hotspot to smart TV",
+   "category": "Apple Devices",
+   "url": "https://community.ee.co.uk/t5/Apple-Devices/I-can-t-connect-phone-hotspot-to-smart-TV/td-p/1063915",
+   "isSolved": true,
+   "views": 81099,
+   "replies": 11,
+   "scope": "phone"
+  },
+  {
+   "title": "5gee router  which antenna",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/5gee-router-which-antenna/td-p/1124775",
+   "isSolved": false,
+   "views": 76299,
+   "replies": 178,
+   "scope": "phone"
+  },
+  {
+   "title": "Coverage in Westgate-on-Sea",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Westgate-on-Sea/td-p/1162128",
+   "isSolved": false,
+   "views": 75874,
+   "replies": 44,
+   "scope": "phone"
+  },
+  {
+   "title": "URGENT! How do I get through to speak with someone at EE - RE: Broadband",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/URGENT-How-do-I-get-through-to-speak-with-someone-at-EE-RE/td-p/1384522",
+   "isSolved": false,
+   "views": 73322,
+   "replies": 22,
+   "scope": "broadband"
+  },
+  {
+   "title": "Text offering me double data",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Text-offering-me-double-data/td-p/1237425",
+   "isSolved": true,
+   "views": 71410,
+   "replies": 51,
+   "scope": "phone"
+  },
+  {
+   "title": "eSIM on two devices but active only one at a time",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/eSIM-on-two-devices-but-active-only-one-at-a-time/td-p/1283963",
+   "isSolved": true,
+   "views": 71099,
+   "replies": 3,
+   "scope": "phone"
+  },
+  {
+   "title": "Roaming EU or Roaming ROW",
+   "category": "Roaming",
+   "url": "https://community.ee.co.uk/t5/Roaming/Roaming-EU-or-Roaming-ROW/td-p/1505207",
+   "isSolved": true,
+   "views": 66007,
+   "replies": 26,
+   "scope": "phone"
+  },
+  {
+   "title": "Mobile phone data does not work",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Mobile-phone-data-does-not-work/td-p/1176586",
+   "isSolved": true,
+   "views": 64925,
+   "replies": 21,
+   "scope": "phone"
+  },
+  {
+   "title": "BT broadband full WiFi transfer to EE 1.6gbps",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/BT-broadband-full-WiFi-transfer-to-EE-1-6gbps/td-p/1321089",
+   "isSolved": true,
+   "views": 63726,
+   "replies": 355,
+   "scope": "broadband"
+  },
+  {
+   "title": "Wifi Calling Stopped Working (31st)",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Wifi-Calling-Stopped-Working-31st/td-p/1414821",
+   "isSolved": false,
+   "views": 63459,
+   "replies": 521,
+   "scope": "phone"
+  },
+  {
+   "title": "Turkey roaming",
+   "category": "Roaming",
+   "url": "https://community.ee.co.uk/t5/Roaming/Turkey-roaming/td-p/1110722",
+   "isSolved": true,
+   "views": 60547,
+   "replies": 14,
+   "scope": "phone"
+  },
+  {
+   "title": "Mobile signal booster",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Mobile-signal-booster/td-p/1358554",
+   "isSolved": false,
+   "views": 57299,
+   "replies": 18,
+   "scope": "phone"
+  },
+  {
+   "title": "SIM card activation",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/SIM-card-activation/td-p/1319714",
+   "isSolved": true,
+   "views": 55900,
+   "replies": 18,
+   "scope": "phone"
+  },
+  {
+   "title": "Not registered on network",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Not-registered-on-network/td-p/963473",
+   "isSolved": true,
+   "views": 55219,
+   "replies": 8,
+   "scope": "phone"
+  },
+  {
+   "title": "Having 2 SIM cards for the same phone number, sharing the same data allowance",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Having-2-SIM-cards-for-the-same-phone-number-sharing-the-same/td-p/1221358",
+   "isSolved": false,
+   "views": 53609,
+   "replies": 6,
+   "scope": "phone"
+  },
+  {
+   "title": "Can't activate eSim",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Can-t-activate-eSim/td-p/1153622",
+   "isSolved": true,
+   "views": 53308,
+   "replies": 35,
+   "scope": "phone"
+  },
+  {
+   "title": "Hotspot not working while roaming abroad",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Hotspot-not-working-while-roaming-abroad/td-p/1382245",
+   "isSolved": true,
+   "views": 52199,
+   "replies": 18,
+   "scope": "phone"
+  },
+  {
+   "title": "How do I change ee smart hub from 5GHz to 2.4GHz",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/How-do-I-change-ee-smart-hub-from-5GHz-to-2-4GHz/td-p/973329",
+   "isSolved": true,
+   "views": 51599,
+   "replies": 17,
+   "scope": "broadband"
+  },
+  {
+   "title": "Migrating from BT Broadband to EE Broadband - login arrangements",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Migrating-from-BT-Broadband-to-EE-Broadband-login-arrangements/td-p/1460841",
+   "isSolved": true,
+   "views": 48688,
+   "replies": 4,
+   "scope": "broadband"
+  },
+  {
+   "title": "Need Help with Your Home Broadband Speed or Connection?",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Need-Help-with-Your-Home-Broadband-Speed-or-Connection/td-p/547909",
+   "isSolved": false,
+   "views": 48418,
+   "replies": 2,
+   "scope": "broadband"
+  },
+  {
+   "title": "EE Broadband APP WifI Controls not working",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/EE-Broadband-APP-WifI-Controls-not-working/td-p/1330946",
+   "isSolved": false,
+   "views": 48050,
+   "replies": 351,
+   "scope": "broadband"
+  },
+  {
+   "title": "Will a 5G SIM work with my 4G Phone",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Will-a-5G-SIM-work-with-my-4G-Phone/td-p/1009106",
+   "isSolved": true,
+   "views": 47498,
+   "replies": 5,
+   "scope": "phone"
+  },
+  {
+   "title": "Ireland Roaming Charges Confusion",
+   "category": "Mobile Services",
+   "url": "https://community.ee.co.uk/t5/Mobile-Services/Ireland-Roaming-Charges-Confusion/td-p/1177959",
+   "isSolved": true,
+   "views": 46432,
+   "replies": 5,
+   "scope": "phone"
+  },
+  {
+   "title": "Firewall Ip addresses and Ports for Wifi Calling",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Firewall-Ip-addresses-and-Ports-for-Wifi-Calling/td-p/1017090",
+   "isSolved": false,
+   "views": 46420,
+   "replies": 9,
+   "scope": "phone"
+  },
+  {
+   "title": "How to get network unlock code?",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/How-to-get-network-unlock-code/td-p/1329001",
+   "isSolved": true,
+   "views": 43699,
+   "replies": 10,
+   "scope": "phone"
+  },
+  {
+   "title": "Double Data",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Double-Data/td-p/1237405",
+   "isSolved": true,
+   "views": 41195,
+   "replies": 60,
+   "scope": "phone"
+  },
+  {
+   "title": "4GEE WIFI MINI NOT CONNECTING",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/4GEE-WIFI-MINI-NOT-CONNECTING/td-p/1073082",
+   "isSolved": false,
+   "views": 40808,
+   "replies": 29,
+   "scope": "broadband"
+  },
+  {
+   "title": "Roaming in Morocco",
+   "category": "Roaming",
+   "url": "https://community.ee.co.uk/t5/Roaming/Roaming-in-Morocco/td-p/1404426",
+   "isSolved": true,
+   "views": 40500,
+   "replies": 6,
+   "scope": "phone"
+  },
+  {
+   "title": "Phone won't make or receive calls",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Phone-won-t-make-or-receive-calls/td-p/1256930",
+   "isSolved": true,
+   "views": 39946,
+   "replies": 6,
+   "scope": "phone"
+  },
+  {
+   "title": "Mobile Data not working!",
+   "category": "Android Devices",
+   "url": "https://community.ee.co.uk/t5/Android-Devices/Mobile-Data-not-working/td-p/1053745",
+   "isSolved": true,
+   "views": 38977,
+   "replies": 34,
+   "scope": "phone"
+  },
+  {
+   "title": "Old number ported across, but iPhone has retained new sim number",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Old-number-ported-across-but-iPhone-has-retained-new-sim-number/td-p/1408718",
+   "isSolved": true,
+   "views": 37898,
+   "replies": 15,
+   "scope": "phone"
+  },
+  {
+   "title": "Order replacement sim",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Order-replacement-sim/td-p/1182553",
+   "isSolved": true,
+   "views": 37718,
+   "replies": 22,
+   "scope": "phone"
+  },
+  {
+   "title": "Unlocking a 2nd hand 4g Mini Wifi device",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/Unlocking-a-2nd-hand-4g-Mini-Wifi-device/td-p/1047445",
+   "isSolved": true,
+   "views": 37081,
+   "replies": 17,
+   "scope": "broadband"
+  },
+  {
+   "title": "EE broadband smart hub plus 2.4GHz 5.0GHz",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/EE-broadband-smart-hub-plus-2-4GHz-5-0GHz/td-p/1375228",
+   "isSolved": false,
+   "views": 36900,
+   "replies": 29,
+   "scope": "broadband"
+  },
+  {
+   "title": "Re: Tethering on unlimited data plan",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Re-Tethering-on-unlimited-data-plan/td-p/1034731",
+   "isSolved": false,
+   "views": 36599,
+   "replies": 35,
+   "scope": "phone"
+  },
+  {
+   "title": "National Lottery issue",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/National-Lottery-issue/td-p/1515557",
+   "isSolved": false,
+   "views": 36500,
+   "replies": 81,
+   "scope": "phone"
+  },
+  {
+   "title": "EE wi-fi hotspot",
+   "category": "Mobile Services",
+   "url": "https://community.ee.co.uk/t5/Mobile-Services/EE-wi-fi-hotspot/td-p/1334339",
+   "isSolved": true,
+   "views": 36416,
+   "replies": 9,
+   "scope": "phone"
+  },
+  {
+   "title": "Roaming Charges for Turkey Extortionate",
+   "category": "Mobile Services",
+   "url": "https://community.ee.co.uk/t5/Mobile-Services/Roaming-Charges-for-Turkey-Extortionate/td-p/1250848",
+   "isSolved": false,
+   "views": 36200,
+   "replies": 21,
+   "scope": "phone"
+  },
+  {
+   "title": "Can’t load Ann Summers",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Can-t-load-Ann-Summers/td-p/1138111",
+   "isSolved": false,
+   "views": 36198,
+   "replies": 15,
+   "scope": "phone"
+  },
+  {
+   "title": "Mini WiFi has a red signal indicator",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/Mini-WiFi-has-a-red-signal-indicator/td-p/916398",
+   "isSolved": false,
+   "views": 35899,
+   "replies": 8,
+   "scope": "broadband"
+  },
+  {
+   "title": "Login password for 4gee router 192.168.1.1 page",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/Login-password-for-4gee-router-192-168-1-1-page/td-p/1369630",
+   "isSolved": true,
+   "views": 35406,
+   "replies": 4,
+   "scope": "broadband"
+  },
+  {
+   "title": "Roaming not working in spain",
+   "category": "Mobile Services",
+   "url": "https://community.ee.co.uk/t5/Mobile-Services/Roaming-not-working-in-spain/td-p/1144408",
+   "isSolved": true,
+   "views": 34800,
+   "replies": 5,
+   "scope": "phone"
+  },
+  {
+   "title": "Mast Locations (within the coverage map)",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Mast-Locations-within-the-coverage-map/td-p/1223328",
+   "isSolved": false,
+   "views": 34717,
+   "replies": 12,
+   "scope": "phone"
+  },
+  {
+   "title": "How can I speak to someone from EE",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/How-can-I-speak-to-someone-from-EE/td-p/1267771",
+   "isSolved": true,
+   "views": 34699,
+   "replies": 19,
+   "scope": "broadband"
+  },
+  {
+   "title": "Coverage in Kingswood, Bristol",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Kingswood-Bristol/td-p/941270",
+   "isSolved": false,
+   "views": 34055,
+   "replies": 89,
+   "scope": "phone"
+  },
+  {
+   "title": "EEMMS",
+   "category": "Mobile Services",
+   "url": "https://community.ee.co.uk/t5/Mobile-Services/EEMMS/td-p/1301400",
+   "isSolved": true,
+   "views": 33400,
+   "replies": 7,
+   "scope": "phone"
+  },
+  {
+   "title": "Network Settings Text",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Network-Settings-Text/td-p/1142161",
+   "isSolved": true,
+   "views": 32815,
+   "replies": 60,
+   "scope": "phone"
+  },
+  {
+   "title": "Unable to connect to VPN (Global Protect) via mobile hotspot - it used to work",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Unable-to-connect-to-VPN-Global-Protect-via-mobile-hotspot-it/td-p/1295014",
+   "isSolved": true,
+   "views": 32524,
+   "replies": 22,
+   "scope": "phone"
+  },
+  {
+   "title": "Coverage in Oxford",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Oxford/td-p/1356531",
+   "isSolved": false,
+   "views": 30600,
+   "replies": 105,
+   "scope": "phone"
+  },
+  {
+   "title": "I lost my sim card",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/I-lost-my-sim-card/td-p/1197161",
+   "isSolved": true,
+   "views": 30406,
+   "replies": 32,
+   "scope": "phone"
+  },
+  {
+   "title": "Re: No internet despite full 5G",
+   "category": "Mobile Services",
+   "url": "https://community.ee.co.uk/t5/Mobile-Services/Re-No-internet-despite-full-5G/td-p/1227398",
+   "isSolved": false,
+   "views": 30033,
+   "replies": 8,
+   "scope": "phone"
+  },
+  {
+   "title": "Personal Hotspot lets me play games but not connect to Xbox party chat?",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Personal-Hotspot-lets-me-play-games-but-not-connect-to-Xbox/td-p/1043308",
+   "isSolved": false,
+   "views": 29737,
+   "replies": 15,
+   "scope": "phone"
+  },
+  {
+   "title": "Could Not Activate Mobile Data Network - PDP Authentication Failure.",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Could-Not-Activate-Mobile-Data-Network-PDP-Authentication/td-p/1137772",
+   "isSolved": false,
+   "views": 29559,
+   "replies": 26,
+   "scope": "phone"
+  },
+  {
+   "title": "Roaming in the USA",
+   "category": "Roaming",
+   "url": "https://community.ee.co.uk/t5/Roaming/Roaming-in-the-USA/td-p/1438558",
+   "isSolved": true,
+   "views": 29399,
+   "replies": 3,
+   "scope": "phone"
+  },
+  {
+   "title": "Turkey Roaming",
+   "category": "Roaming",
+   "url": "https://community.ee.co.uk/t5/Roaming/Turkey-Roaming/td-p/1300923",
+   "isSolved": true,
+   "views": 29199,
+   "replies": 7,
+   "scope": "phone"
+  },
+  {
+   "title": "How do I order a replacement sim card without making a phone call?",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/How-do-I-order-a-replacement-sim-card-without-making-a-phone/td-p/1363394",
+   "isSolved": true,
+   "views": 28499,
+   "replies": 10,
+   "scope": "phone"
+  },
+  {
+   "title": "Activating new sim",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Activating-new-sim/td-p/1217344",
+   "isSolved": false,
+   "views": 28216,
+   "replies": 32,
+   "scope": "phone"
+  },
+  {
+   "title": "How do I convert my SIM to eSIM",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/How-do-I-convert-my-SIM-to-eSIM/td-p/1247947",
+   "isSolved": false,
+   "views": 27333,
+   "replies": 8,
+   "scope": "phone"
+  },
+  {
+   "title": "Galaxy Watch 7 / Ultra (LTE)",
+   "category": "Android Devices",
+   "url": "https://community.ee.co.uk/t5/Android-Devices/Galaxy-Watch-7-Ultra-LTE/td-p/1416182",
+   "isSolved": true,
+   "views": 27300,
+   "replies": 110,
+   "scope": "phone"
+  },
+  {
+   "title": "How do I order a new sim card but keep the same number?",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/How-do-I-order-a-new-sim-card-but-keep-the-same-number/td-p/1312254",
+   "isSolved": true,
+   "views": 27201,
+   "replies": 6,
+   "scope": "phone"
+  },
+  {
+   "title": "Roaming not working despite everything being enabled",
+   "category": "Mobile Services",
+   "url": "https://community.ee.co.uk/t5/Mobile-Services/Roaming-not-working-despite-everything-being-enabled/td-p/1403344",
+   "isSolved": false,
+   "views": 27199,
+   "replies": 10,
+   "scope": "phone"
+  },
+  {
+   "title": "eSIM QR Code not working",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/eSIM-QR-Code-not-working/td-p/1093647",
+   "isSolved": true,
+   "views": 27025,
+   "replies": 65,
+   "scope": "phone"
+  },
+  {
+   "title": "4GEE Mini WIFI Not Connecting to internet",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/4GEE-Mini-WIFI-Not-Connecting-to-internet/td-p/1065855",
+   "isSolved": false,
+   "views": 26999,
+   "replies": 29,
+   "scope": "broadband"
+  },
+  {
+   "title": "Unlock Mini WiFi Device",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/Unlock-Mini-WiFi-Device/td-p/1258203",
+   "isSolved": true,
+   "views": 26938,
+   "replies": 25,
+   "scope": "broadband"
+  },
+  {
+   "title": "How can I get my eSim",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/How-can-I-get-my-eSim/td-p/1376869",
+   "isSolved": false,
+   "views": 26899,
+   "replies": 8,
+   "scope": "phone"
+  },
+  {
+   "title": "Sim 1 not provisioned",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Sim-1-not-provisioned/td-p/1035697",
+   "isSolved": true,
+   "views": 26699,
+   "replies": 3,
+   "scope": "phone"
+  },
+  {
+   "title": "Our best speeds, no max. Mbps vs 100Mbps",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Our-best-speeds-no-max-Mbps-vs-100Mbps/td-p/1267272",
+   "isSolved": true,
+   "views": 26499,
+   "replies": 5,
+   "scope": "phone"
+  },
+  {
+   "title": "Roaming charges and add on options in Morocco",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Roaming-charges-and-add-on-options-in-Morocco/td-p/1187125",
+   "isSolved": true,
+   "views": 26030,
+   "replies": 10,
+   "scope": "phone"
+  },
+  {
+   "title": "Roaming on even when mobile data turned off",
+   "category": "Mobile Services",
+   "url": "https://community.ee.co.uk/t5/Mobile-Services/Roaming-on-even-when-mobile-data-turned-off/td-p/1402814",
+   "isSolved": false,
+   "views": 25999,
+   "replies": 10,
+   "scope": "phone"
+  },
+  {
+   "title": "5G standalone (SA)",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/5G-standalone-SA/td-p/1425731",
+   "isSolved": false,
+   "views": 25800,
+   "replies": 112,
+   "scope": "phone"
+  },
+  {
+   "title": "How can I speak to a real person?",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/How-can-I-speak-to-a-real-person/td-p/1237556",
+   "isSolved": false,
+   "views": 25673,
+   "replies": 16,
+   "scope": "broadband"
+  },
+  {
+   "title": "What is happening with EE EU roaming?",
+   "category": "Roaming",
+   "url": "https://community.ee.co.uk/t5/Roaming/What-is-happening-with-EE-EU-roaming/td-p/1485284",
+   "isSolved": true,
+   "views": 25436,
+   "replies": 18,
+   "scope": "phone"
+  },
+  {
+   "title": "Connected however no internet.",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Connected-however-no-internet/td-p/1126786",
+   "isSolved": false,
+   "views": 25290,
+   "replies": 185,
+   "scope": "phone"
+  },
+  {
+   "title": "Huawei CPE Pro from the 5GEE Home Router",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/Huawei-CPE-Pro-from-the-5GEE-Home-Router/td-p/876757",
+   "isSolved": false,
+   "views": 25211,
+   "replies": 74,
+   "scope": "broadband"
+  },
+  {
+   "title": "Ordering an E-sim (get QR code)",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Ordering-an-E-sim-get-QR-code/td-p/1268212",
+   "isSolved": true,
+   "views": 25147,
+   "replies": 13,
+   "scope": "phone"
+  },
+  {
+   "title": "Do I need to switch roaming on in order to receive text messages?",
+   "category": "Roaming",
+   "url": "https://community.ee.co.uk/t5/Roaming/Do-I-need-to-switch-roaming-on-in-order-to-receive-text-messages/td-p/1404681",
+   "isSolved": true,
+   "views": 25113,
+   "replies": 15,
+   "scope": "phone"
+  },
+  {
+   "title": "Change plan",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Change-plan/td-p/1183063",
+   "isSolved": true,
+   "views": 25036,
+   "replies": 2,
+   "scope": "phone"
+  },
+  {
+   "title": "Re: Can't make are receive calls ,phone says emergency calls only",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Re-Can-t-make-are-receive-calls-phone-says-emergency-calls-only/td-p/1376270",
+   "isSolved": false,
+   "views": 24999,
+   "replies": 10,
+   "scope": "phone"
+  },
+  {
+   "title": "BT WiFi hotspots are becoming EE WiFi hotspots, EE BB customers can log in now",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/BT-WiFi-hotspots-are-becoming-EE-WiFi-hotspots-EE-BB-customers/td-p/1309490",
+   "isSolved": false,
+   "views": 24872,
+   "replies": 31,
+   "scope": "broadband"
+  },
+  {
+   "title": "TRAVEL DATA PASS - BEWARE",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/TRAVEL-DATA-PASS-BEWARE/td-p/1136978",
+   "isSolved": false,
+   "views": 24685,
+   "replies": 42,
+   "scope": "phone"
+  },
+  {
+   "title": "Broadband installation - Openreach Master socket 5c",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Broadband-installation-Openreach-Master-socket-5c/td-p/1361441",
+   "isSolved": false,
+   "views": 24609,
+   "replies": 6,
+   "scope": "broadband"
+  },
+  {
+   "title": "Find out my average data usage’s",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Find-out-my-average-data-usage-s/td-p/1245156",
+   "isSolved": true,
+   "views": 24586,
+   "replies": 2,
+   "scope": "phone"
+  },
+  {
+   "title": "Coverage in Brentford",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Brentford/td-p/975701",
+   "isSolved": false,
+   "views": 24551,
+   "replies": 60,
+   "scope": "phone"
+  },
+  {
+   "title": "How to separate 2.4 from 5ghz on router",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/How-to-separate-2-4-from-5ghz-on-router/td-p/1034265",
+   "isSolved": false,
+   "views": 24499,
+   "replies": 9,
+   "scope": "broadband"
+  },
+  {
+   "title": "Strict Nat type",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/Strict-Nat-type/td-p/1218641",
+   "isSolved": true,
+   "views": 24302,
+   "replies": 28,
+   "scope": "broadband"
+  },
+  {
+   "title": "Re: Is it just me or is ee phone signal poor",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Re-Is-it-just-me-or-is-ee-phone-signal-poor/td-p/1344998",
+   "isSolved": true,
+   "views": 24214,
+   "replies": 42,
+   "scope": "phone"
+  },
+  {
+   "title": "Blue aqua flashing light broadband",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Blue-aqua-flashing-light-broadband/td-p/1145477",
+   "isSolved": false,
+   "views": 24095,
+   "replies": 6,
+   "scope": "broadband"
+  },
+  {
+   "title": "Hi can I use data from my mobile to use my fire stick on my television down my c",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Hi-can-I-use-data-from-my-mobile-to-use-my-fire-stick-on-my/td-p/1279731",
+   "isSolved": true,
+   "views": 24002,
+   "replies": 4,
+   "scope": "phone"
+  },
+  {
+   "title": "Ongoing WiFi problems after switch from BT Broadband",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Ongoing-WiFi-problems-after-switch-from-BT-Broadband/td-p/1384536",
+   "isSolved": false,
+   "views": 23776,
+   "replies": 66,
+   "scope": "broadband"
+  },
+  {
+   "title": "EE hotspot wifi keeps disconnecting from my devices",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/EE-hotspot-wifi-keeps-disconnecting-from-my-devices/td-p/1369795",
+   "isSolved": false,
+   "views": 23599,
+   "replies": 28,
+   "scope": "broadband"
+  },
+  {
+   "title": "Which phones are supported on standalone 5G?",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Which-phones-are-supported-on-standalone-5G/td-p/1443380",
+   "isSolved": true,
+   "views": 23453,
+   "replies": 82,
+   "scope": "phone"
+  },
+  {
+   "title": "Coverage in Rainham",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Rainham/td-p/835010",
+   "isSolved": false,
+   "views": 23419,
+   "replies": 58,
+   "scope": "phone"
+  },
+  {
+   "title": "Unlimited Plans are not truly unlimited",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Unlimited-Plans-are-not-truly-unlimited/td-p/1105037",
+   "isSolved": false,
+   "views": 22617,
+   "replies": 17,
+   "scope": "phone"
+  },
+  {
+   "title": "5g is so slow its unusable but I cant turn it off",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/5g-is-so-slow-its-unusable-but-I-cant-turn-it-off/td-p/1223633",
+   "isSolved": false,
+   "views": 22100,
+   "replies": 20,
+   "scope": "phone"
+  },
+  {
+   "title": "Mobile data not working and i've tried everything!",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Mobile-data-not-working-and-i-ve-tried-everything/td-p/1266381",
+   "isSolved": false,
+   "views": 21806,
+   "replies": 12,
+   "scope": "phone"
+  },
+  {
+   "title": "Ps5 hotspot Android",
+   "category": "Android Devices",
+   "url": "https://community.ee.co.uk/t5/Android-Devices/Ps5-hotspot-Android/td-p/1226885",
+   "isSolved": false,
+   "views": 21699,
+   "replies": 2,
+   "scope": "phone"
+  },
+  {
+   "title": "EE Mobile Coverage and Service Status Checker",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/EE-Mobile-Coverage-and-Service-Status-Checker/td-p/1519943",
+   "isSolved": false,
+   "views": 20448,
+   "replies": 0,
+   "scope": "phone"
+  },
+  {
+   "title": "Phone shows strong 4G connection but doesn't have internet connection",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Phone-shows-strong-4G-connection-but-doesn-t-have-internet/td-p/1155671",
+   "isSolved": false,
+   "views": 19834,
+   "replies": 16,
+   "scope": "phone"
+  },
+  {
+   "title": "Why can't I have a duplicate sim card",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Why-can-t-I-have-a-duplicate-sim-card/td-p/1056085",
+   "isSolved": false,
+   "views": 19792,
+   "replies": 26,
+   "scope": "phone"
+  },
+  {
+   "title": "EE Full Fibre install - Getting ready / cable length to ONT",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/EE-Full-Fibre-install-Getting-ready-cable-length-to-ONT/td-p/1182987",
+   "isSolved": false,
+   "views": 19639,
+   "replies": 20,
+   "scope": "broadband"
+  },
+  {
+   "title": "Wi-Fi Calling won’t work",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Wi-Fi-Calling-won-t-work/td-p/1327495",
+   "isSolved": false,
+   "views": 19600,
+   "replies": 12,
+   "scope": "phone"
+  },
+  {
+   "title": "Fair usage policy",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/Fair-usage-policy/td-p/1347865",
+   "isSolved": false,
+   "views": 19401,
+   "replies": 15,
+   "scope": "broadband"
+  },
+  {
+   "title": "Gift data",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Gift-data/td-p/1161260",
+   "isSolved": false,
+   "views": 19395,
+   "replies": 30,
+   "scope": "phone"
+  },
+  {
+   "title": "New Full Fibre - Not even close to “1.6gb”",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/New-Full-Fibre-Not-even-close-to-1-6gb/td-p/1398640",
+   "isSolved": false,
+   "views": 19300,
+   "replies": 23,
+   "scope": "broadband"
+  },
+  {
+   "title": "Phone not connecting to network",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Phone-not-connecting-to-network/td-p/1089023",
+   "isSolved": false,
+   "views": 19212,
+   "replies": 13,
+   "scope": "phone"
+  },
+  {
+   "title": "Re: EE APN Settings: Where to find them",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Re-EE-APN-Settings-Where-to-find-them/td-p/1359276",
+   "isSolved": false,
+   "views": 18911,
+   "replies": 17,
+   "scope": "phone"
+  },
+  {
+   "title": "Coverage in Craven Arms",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Craven-Arms/td-p/854496",
+   "isSolved": false,
+   "views": 18804,
+   "replies": 67,
+   "scope": "phone"
+  },
+  {
+   "title": "Unable to make calls or contact 150",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Unable-to-make-calls-or-contact-150/td-p/1550426",
+   "isSolved": false,
+   "views": 18604,
+   "replies": 217,
+   "scope": "phone"
+  },
+  {
+   "title": "Coverage in Woburn Sands",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Woburn-Sands/td-p/1268695",
+   "isSolved": false,
+   "views": 18567,
+   "replies": 88,
+   "scope": "phone"
+  },
+  {
+   "title": "Coverage in Wednesbury",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Wednesbury/td-p/1481784",
+   "isSolved": false,
+   "views": 18399,
+   "replies": 88,
+   "scope": "phone"
+  },
+  {
+   "title": "Apply to have a mobile phone mast installed",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Apply-to-have-a-mobile-phone-mast-installed/td-p/1136381",
+   "isSolved": false,
+   "views": 18259,
+   "replies": 116,
+   "scope": "phone"
+  },
+  {
+   "title": "Hotspot not working with ps portal",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Hotspot-not-working-with-ps-portal/td-p/1413395",
+   "isSolved": false,
+   "views": 18256,
+   "replies": 29,
+   "scope": "phone"
+  },
+  {
+   "title": "Roaming data fair use policy - March 2024",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Roaming-data-fair-use-policy-March-2024/td-p/1371697",
+   "isSolved": false,
+   "views": 18241,
+   "replies": 5,
+   "scope": "phone"
+  },
+  {
+   "title": "switching to three",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/switching-to-three/td-p/1331850",
+   "isSolved": false,
+   "views": 18216,
+   "replies": 7,
+   "scope": "broadband"
+  },
+  {
+   "title": "Extending wifi signal from EE Smart Hub Plus (SH31B)",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Extending-wifi-signal-from-EE-Smart-Hub-Plus-SH31B/td-p/1329145",
+   "isSolved": false,
+   "views": 18133,
+   "replies": 11,
+   "scope": "broadband"
+  },
+  {
+   "title": "4GEE Wifi Mini Hub not connecting",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/4GEE-Wifi-Mini-Hub-not-connecting/td-p/1367947",
+   "isSolved": false,
+   "views": 17899,
+   "replies": 9,
+   "scope": "broadband"
+  },
+  {
+   "title": "eSim download",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/eSim-download/td-p/1112874",
+   "isSolved": false,
+   "views": 17803,
+   "replies": 1,
+   "scope": "phone"
+  },
+  {
+   "title": "iPad Sim Card",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/iPad-Sim-Card/td-p/1368285",
+   "isSolved": false,
+   "views": 17729,
+   "replies": 3,
+   "scope": "phone"
+  },
+  {
+   "title": "Phone stating no sim no service",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Phone-stating-no-sim-no-service/td-p/1270161",
+   "isSolved": false,
+   "views": 17721,
+   "replies": 5,
+   "scope": "phone"
+  },
+  {
+   "title": "Continuous broadband drop-outs",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Continuous-broadband-drop-outs/td-p/1359331",
+   "isSolved": false,
+   "views": 17602,
+   "replies": 28,
+   "scope": "broadband"
+  },
+  {
+   "title": "Appaling service since being encouraged to migrate from BT to EE Broadband",
+   "category": "Broadband & Landline",
+   "url": "https://community.ee.co.uk/t5/Broadband-Landline/Appaling-service-since-being-encouraged-to-migrate-from-BT-to-EE/td-p/1338494",
+   "isSolved": false,
+   "views": 17482,
+   "replies": 51,
+   "scope": "broadband"
+  },
+  {
+   "title": "Data only top up.",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Data-only-top-up/td-p/1155045",
+   "isSolved": false,
+   "views": 17311,
+   "replies": 2,
+   "scope": "phone"
+  },
+  {
+   "title": "Huawei CPE Pro will not connect to 5G",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Huawei-CPE-Pro-will-not-connect-to-5G/td-p/1020361",
+   "isSolved": false,
+   "views": 17296,
+   "replies": 45,
+   "scope": "phone"
+  },
+  {
+   "title": "Coverage in Bayswater",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Bayswater/td-p/1066222",
+   "isSolved": false,
+   "views": 17051,
+   "replies": 48,
+   "scope": "phone"
+  },
+  {
+   "title": "EE 4G Router awful",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/EE-4G-Router-awful/td-p/1263093",
+   "isSolved": false,
+   "views": 16990,
+   "replies": 22,
+   "scope": "broadband"
+  },
+  {
+   "title": "Mobile data and messaging not working",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Mobile-data-and-messaging-not-working/td-p/1344035",
+   "isSolved": false,
+   "views": 16981,
+   "replies": 6,
+   "scope": "phone"
+  },
+  {
+   "title": "Very poor signal at home",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Very-poor-signal-at-home/td-p/1258150",
+   "isSolved": false,
+   "views": 16828,
+   "replies": 14,
+   "scope": "phone"
+  },
+  {
+   "title": "Order eSim",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/Order-eSim/td-p/1242912",
+   "isSolved": false,
+   "views": 16816,
+   "replies": 28,
+   "scope": "phone"
+  },
+  {
+   "title": "Using Data in Tunisia",
+   "category": "Roaming",
+   "url": "https://community.ee.co.uk/t5/Roaming/Using-Data-in-Tunisia/td-p/1349346",
+   "isSolved": false,
+   "views": 16693,
+   "replies": 7,
+   "scope": "phone"
+  },
+  {
+   "title": "How do I check the data balance on my Wifi Mini?",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/How-do-I-check-the-data-balance-on-my-Wifi-Mini/td-p/1161645",
+   "isSolved": false,
+   "views": 16623,
+   "replies": 3,
+   "scope": "broadband"
+  },
+  {
+   "title": "Coverage in Malton",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Malton/td-p/769435",
+   "isSolved": false,
+   "views": 16622,
+   "replies": 53,
+   "scope": "phone"
+  },
+  {
+   "title": "Coverage in North Shields",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-North-Shields/td-p/1123355",
+   "isSolved": false,
+   "views": 16598,
+   "replies": 50,
+   "scope": "phone"
+  },
+  {
+   "title": "ZTE 5G MC888",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/ZTE-5G-MC888/td-p/1358320",
+   "isSolved": false,
+   "views": 16500,
+   "replies": 23,
+   "scope": "broadband"
+  },
+  {
+   "title": "Network Provider Voicemail - Can not call",
+   "category": "Apple Devices",
+   "url": "https://community.ee.co.uk/t5/Apple-Devices/Network-Provider-Voicemail-Can-not-call/td-p/1304523",
+   "isSolved": false,
+   "views": 16400,
+   "replies": 11,
+   "scope": "phone"
+  },
+  {
+   "title": "Re: Use my phone in Australia",
+   "category": "Roaming",
+   "url": "https://community.ee.co.uk/t5/Roaming/Re-Use-my-phone-in-Australia/td-p/1322642",
+   "isSolved": false,
+   "views": 16213,
+   "replies": 1,
+   "scope": "phone"
+  },
+  {
+   "title": "Using mobile data in Morocco",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Using-mobile-data-in-Morocco/td-p/1187606",
+   "isSolved": false,
+   "views": 16173,
+   "replies": 2,
+   "scope": "phone"
+  },
+  {
+   "title": "Coverage in Barnet",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/Coverage-in-Barnet/td-p/1607566",
+   "isSolved": false,
+   "views": 15935,
+   "replies": 104,
+   "scope": "phone"
+  },
+  {
+   "title": "5G still not available to PAYG customers !!!",
+   "category": "Mobile Network discussions",
+   "url": "https://community.ee.co.uk/t5/Mobile-Network-discussions/5G-still-not-available-to-PAYG-customers/td-p/1161714",
+   "isSolved": false,
+   "views": 15765,
+   "replies": 47,
+   "scope": "phone"
+  },
+  {
+   "title": "help needed to activate simcard",
+   "category": "SIM cards & Porting",
+   "url": "https://community.ee.co.uk/t5/SIM-cards-Porting/help-needed-to-activate-simcard/td-p/1176590",
+   "isSolved": false,
+   "views": 15699,
+   "replies": 77,
+   "scope": "phone"
+  },
+  {
+   "title": "Apple Watch Series 8 International Roaming.",
+   "category": "Apple Devices",
+   "url": "https://community.ee.co.uk/t5/Apple-Devices/Apple-Watch-Series-8-International-Roaming/td-p/1168991",
+   "isSolved": false,
+   "views": 15638,
+   "replies": 86,
+   "scope": "phone"
+  },
+  {
+   "title": "Mobile hotspot not working",
+   "category": "Apple Devices",
+   "url": "https://community.ee.co.uk/t5/Apple-Devices/Mobile-hotspot-not-working/td-p/1111914",
+   "isSolved": false,
+   "views": 15543,
+   "replies": 6,
+   "scope": "phone"
+  },
+  {
+   "title": "VPN Issues with Possible Solution????",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/VPN-Issues-with-Possible-Solution/td-p/1115105",
+   "isSolved": false,
+   "views": 15541,
+   "replies": 19,
+   "scope": "broadband"
+  },
+  {
+   "title": "Can’t receive pictures on WhatsApp? Check this setting!",
+   "category": "Mobile Data",
+   "url": "https://community.ee.co.uk/t5/Mobile-Data/Can-t-receive-pictures-on-WhatsApp-Check-this-setting/td-p/1284165",
+   "isSolved": false,
+   "views": 15487,
+   "replies": 13,
+   "scope": "phone"
+  },
+  {
+   "title": "4g EE mini box keeps turning off",
+   "category": "Mobile Broadband",
+   "url": "https://community.ee.co.uk/t5/Mobile-Broadband/4g-EE-mini-box-keeps-turning-off/td-p/1153722",
+   "isSolved": false,
+   "views": 15312,
+   "replies": 15,
+   "scope": "broadband"
+  },
+  {
+   "title": "Pixel watch esim process is extremely poor",
+   "category": "Android Devices",
+   "url": "https://community.ee.co.uk/t5/Android-Devices/Pixel-watch-esim-process-is-extremely-poor/td-p/1185429",
+   "isSolved": false,
+   "views": 15226,
+   "replies": 56,
+   "scope": "phone"
+  }
+ ]
+}
