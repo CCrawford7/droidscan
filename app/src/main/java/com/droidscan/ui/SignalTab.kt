@@ -67,6 +67,8 @@ fun SignalTab(
             LocationRequiredBanner()
         }
 
+        SpeedTestCard()
+
         TierCard("CELLULAR SIGNAL") {
             // Meta strip: serving-cell summary + live dot (scannable header).
             Row(verticalAlignment = Alignment.CenterVertically) {

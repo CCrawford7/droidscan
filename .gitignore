@@ -12,3 +12,4 @@ local.properties
 /telemetry-collector/build
 /shared-core/build
 /diagnostics/build
+/speedtest/build

@@ -19,4 +19,5 @@ rootProject.name = "droidscan"
 include(":shared-core")
 include(":telemetry-collector")
 include(":diagnostics")
+include(":speedtest")
 include(":app")

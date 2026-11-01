@@ -5,8 +5,9 @@
 ## What this app collects
 
 droidscan reads device telemetry to help diagnose mobile-network problems. All data is
-collected **on the device only** and **is never transmitted** to any server. There is no
-account, no analytics SDK, and no network upload of telemetry.
+collected **on the device only** and **is never transmitted** to any server — with one
+explicit exception, the opt-in speed test described below. There is no account, no
+analytics SDK, and no background upload of telemetry.
 
 | Data | Examples | Purpose |
 |---|---|---|
@@ -35,6 +36,10 @@ account, no analytics SDK, and no network upload of telemetry.
 - **Background collection via a foreground service.** Telemetry is collected while the app
   is in the foreground *and* while backgrounded, via a `dataSync` foreground service (visible
   in the notification shade). All collection remains on-device; nothing is transmitted.
+- **Speed test is opt-in and disclosed.** The on-demand speed test (Signal tab) downloads
+  ~10 MB and uploads ~1 MB to public test endpoints (Cloudflare for download; a VitalPing
+  upload worker for upload) when you tap "Run test". It transmits nothing else, and runs
+  only on your explicit tap — never automatically.
 
 ## Google Play Data Safety (for the declaration)
 

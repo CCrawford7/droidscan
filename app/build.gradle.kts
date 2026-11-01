@@ -56,6 +56,7 @@ dependencies {
     implementation(project(":shared-core"))
     implementation(project(":telemetry-collector"))
     implementation(project(":diagnostics"))
+    implementation(project(":speedtest"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
