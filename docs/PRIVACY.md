@@ -29,14 +29,16 @@ account, no analytics SDK, and no network upload of telemetry.
 
 - **Truncated identifiers only:** ICCID shows the last 4 digits; IMSI shows only the
   MCC-MNC prefix (e.g. `[310-XXXX-XXXX]`); MSISDN is only displayed if the platform exposes it.
-- **No location permission used for positioning.** Coarse location is requested solely
-  because Android requires location-level access for `allCellInfo` on API 33+; the app does
-  not use GPS or record precise location.
-- **No background collection.** Telemetry is collected only while the app is foregrounded.
+- **No location used for positioning.** Location access (fine in practice on Android 16)
+  is requested solely because Android requires location-level access for `allCellInfo` on
+  API 33+; the app does not use GPS or record the device's position.
+- **Background collection via a foreground service.** Telemetry is collected while the app
+  is in the foreground *and* while backgrounded, via a `dataSync` foreground service (visible
+  in the notification shade). All collection remains on-device; nothing is transmitted.
 
 ## Google Play Data Safety (for the declaration)
 
-Expected data types to declare: *Approximate location* (for `allCellInfo`),
+Expected data types to declare: *Fine location* (for `allCellInfo`),
 *Network connections*, *Device or other IDs* (carrier/IMEI-adjacent fields are
 *not* read; only SIM identifiers). All are collected on-device, not shared,
 and not used for advertising.

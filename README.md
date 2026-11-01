@@ -89,7 +89,7 @@ export JAVA_HOME=/usr/lib/jvm/java-17-openjdk      # adjust to your install
 # Compile the debug APK → app/build/outputs/apk/debug/app-debug.apk
 ./gradlew :app:assembleDebug
 
-# Run unit tests (71 passing)
+# Run unit tests (80 passing)
 ./gradlew :shared-core:testDebugUnitTest :telemetry-collector:testDebugUnitTest
 ```
 
@@ -101,11 +101,12 @@ release, so the published APK is always a clean CI build.
 | Permission | Why | Notes |
 |---|---|---|
 | `READ_PHONE_STATE` | cellular/signal data | `maxSdkVersion=32` — replaced by newer perms on 33+ |
-| `READ_BASIC_PHONE_STATE` | non-sensitive phone state (API 33+) | |
-| `READ_SIM_STATE` | subscription/SIM info | requested on API 34+ |
-| `NEARBY_WIFI_DEVICES` | `allCellInfo` (API 33+) | runtime-requested |
+| `READ_BASIC_PHONE_STATE` | non-sensitive phone state (API 33+) | install-granted |
+| `READ_PRECISE_PHONE_STATE` | IMS registration state/transport | `signature` / `privileged` — not user-grantable; reachable only via Shizuku's shell UID |
+| `NEARBY_WIFI_DEVICES` | WiFi SSID/scanning (API 33+) | runtime-requested |
 | `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | `allCellInfo` requires location-level access on API 33+; Android 16 needs **FINE** in practice | runtime-requested; without it radio data is silently empty |
 | `ACCESS_NETWORK_STATE` / `ACCESS_WIFI_STATE` | network config, WiFi SSID/RSSI | normal |
+| `POST_NOTIFICATIONS` / `FOREGROUND_SERVICE*` | background collection via `dataSync` foreground service | API 33+ / manifest |
 | `BATTERY_STATS` | battery properties | declared; no special path used |
 | `moe.shizuku.manager.permission.API_V23` | optional Power Mode | unused if Shizuku not present |
 

@@ -71,17 +71,17 @@ droidscan is **btop/htop for Android phones** — a high-density, real-time syst
 
 **NFR2:** App cold start to first metric display ≤3 seconds.
 
-**NFR3:** No persistent telemetry storage — in-memory ring buffer only (last 60s of snapshots for sparkline rendering).
+**NFR3 (amended v0.9):** No persistent telemetry storage → superseded. An encrypted, file-backed history store persists ~1 h of 1s snapshots (`metrics_history.jsonl`) to power trend charts and the diagnostic engine; the 60 s in-memory ring buffer remains for live sparklines.
 
-**NFR4:** No analytics, no crash reporting, no network calls in v1.0. Pure local tool.
+**NFR4 (amended v0.9):** No analytics, no crash reporting, no telemetry *transmission* — still held. The one exception is a single on-device latency probe (a TCP connect to a well-known host) surfaced as a metric; no telemetry ever leaves the device.
 
-**NFR5:** APK must not exceed 15MB (excluding Shizuku which is a separate install).
+**NFR5 (amended v0.9):** APK must not exceed 15MB → superseded. The debug build ships at ~26 MB; the R8 `release` build is ~2.3 MB. Size is a distribution concern, not a v1.0 gate.
 
 **NFR6:** No ML/embedding/vector DB runtime dependencies.
 
 **NFR7:** Carrier-agnostic — works on any Android device with any carrier, in any country, without modification.
 
-**NFR8:** Min SDK 29 (Android 10), target API 31+ (Android 12).
+**NFR8:** Min SDK 29 (Android 10), target API 35 (Android 15) — raised for the Android 16 `allCellInfo`/FINE-location behaviour.
 
 **NFR9:** Shizuku integration is optional — app must be fully functional without it.
 
