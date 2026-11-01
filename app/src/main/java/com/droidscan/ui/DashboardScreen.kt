@@ -47,7 +47,8 @@ enum class DashboardTab(val label: String, val icon: String) {
     SIGNAL("Signal", "◉"),
     SYSTEM("System", "⚙"),
     POWER("Power", "⚡"),
-    SIM("SIM", "○")
+    SIM("SIM", "○"),
+    DIAGNOSIS("Diagnosis", "✚︎")
 }
 
 data class GlossaryEntry(
@@ -135,6 +136,7 @@ fun DashboardScreen(telemetryFlow: Flow<MetricSnapshot>) {
                             DashboardTab.SYSTEM -> SystemTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
                             DashboardTab.POWER -> PowerTab(currentSnapshot, glossary, contentPadding, trendHistory) { tappedMetricId = it }
                             DashboardTab.SIM -> SimTab(currentSnapshot, glossary, contentPadding) { tappedMetricId = it }
+                            DashboardTab.DIAGNOSIS -> DiagnosisTab(currentSnapshot, contentPadding)
                         }
                     }
                 }

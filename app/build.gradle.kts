@@ -55,6 +55,7 @@ android {
 dependencies {
     implementation(project(":shared-core"))
     implementation(project(":telemetry-collector"))
+    implementation(project(":diagnostics"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
