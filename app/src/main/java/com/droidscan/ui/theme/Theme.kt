@@ -24,6 +24,13 @@ val TerminalBody = FontFamily(Font(R.font.mozilla_headline))
 // Replaces the GitHub-dark palette. Deep telecom navy canvas, ONE cyan accent,
 // sans labels + mono values. Status colors (ok/warn/crit) hold AA contrast
 // against both bg and surface (verified: crit 6.77:1 is the floor).
+//
+// Semantic scale (single source of truth for value coloring):
+//   GREEN = ok · YELLOW = warn · RED = crit · ink2/neutral = unknown/absent.
+//   Brand/accent = TerminalAccentBlue (cyan) — tiers, active tab, affordances.
+//   "Live"        = TerminalAccentCyan — streaming/live + Power Mode badge ONLY.
+//   Orange        = thermal peak ramping ONLY.
+// Never map a value to the brand cyan; that's reserved for chrome, not data.
 
 /** Screen canvas. */
 val TerminalBackground = Color(0xFF0B1220)       // bg
